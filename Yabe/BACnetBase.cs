@@ -1373,14 +1373,15 @@ namespace System.IO.BACnet
         }
         public int CompareTo(BacnetObjectId other)
         {
-            if (this.type == BacnetObjectTypes.OBJECT_DEVICE) return -1;
-            if (other.type == BacnetObjectTypes.OBJECT_DEVICE) return 1;
-
             if (this.type == other.type)
                 return this.instance.CompareTo(other.instance);
             else
+            {
+                if (this.type == BacnetObjectTypes.OBJECT_DEVICE) return -1;
+                if (other.type == BacnetObjectTypes.OBJECT_DEVICE) return 1;
                 // cast to int for comparison otherwise unpredictable behaviour with outbound enum (proprietary type)
                 return ((int)(this.type)).CompareTo((int)other.type);
+            }
         }
         public static BacnetObjectId Parse(string value)
         {
