@@ -90,6 +90,33 @@ namespace System.IO.BACnet
         SUSPENDED = 7
     }
 
+    public enum BacnetProgramChange
+    {
+        READY = 0,
+        LOAD = 1,
+        RUN = 2,
+        HALT = 3,
+        RESTART = 4,
+        UNLOAD = 5
+    }
+    public enum BacnetProgramState
+    {
+        IDLE = 0,
+        LOADING = 1,
+        RUNNING = 2,
+        WAITING = 3,
+        HALTED = 4,
+        UNLOADING = 5
+    }
+    public enum BacnetReasonForHalt
+    {
+        NORMAL = 0,
+        LOAD_FAILED = 1,
+        INTERNAL = 2,
+        PROGRAM = 3,
+        OTHER = 4
+    }
+
     [Flags]
     public enum BacnetResultFlags
     {
