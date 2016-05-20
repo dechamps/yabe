@@ -1,0 +1,6 @@
+Windows Registry Editor Version 5.00
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Wow6432Node\Wheather2_to_Bacnet]
+"UserAccessKey"="xxxxxxxxxxx"
+"Latitude"="48.658766"
+"Longitude"="6.151107"

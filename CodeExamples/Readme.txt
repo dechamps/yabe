@@ -107,3 +107,11 @@ Enocean/Bacnet Gateway
 BacnetToDatabase
 	A sample application that will transfer all 'present values' from a given 
 	device, to a SQL database. (SQL CE Local DB.)
+
+Wheather2_to_Bacnet
+	A windows service application (or console for test) able to get back
+	Wheather2 data (http://www.myweather2.com/), and provides it on Bacnet.
+	See comments in Program.cs file and look at Wheather2config.reg file
+	for configuration.
+	Available data are : Temperature, Windspeed, Humidity, Pressure, Windsdir 
+	and Wheather Description.
