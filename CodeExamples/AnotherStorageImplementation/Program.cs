@@ -212,8 +212,7 @@ namespace AnotherStorageImplementation
             (
                 0, 
                 "An alarm sender",
-                "Alarm description",
-                device.PROP_OBJECT_IDENTIFIER
+                "Alarm description"
             );
 
             device.AddBacnetObject(nc); 

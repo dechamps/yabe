@@ -85,12 +85,9 @@ namespace BaCSharp
             get { return m_PROP_ACK_REQUIRED; }
         }
 
-        public BacnetObjectId Device;
-
-        public NotificationClass(int ObjId, String ObjName, String Description, BacnetObjectId Device)
+        public NotificationClass(int ObjId, String ObjName, String Description)
             : base(new BacnetObjectId(BacnetObjectTypes.OBJECT_NOTIFICATION_CLASS, (uint)ObjId), ObjName, Description)
         {
-            this.Device = Device;
 
             for (int i = 0; i < 3; i++)
                 m_PROP_PRIORITY[i]=new BacnetValue(BacnetApplicationTags.BACNET_APPLICATION_TAG_UNSIGNED_INT, (uint)127);
@@ -130,7 +127,7 @@ namespace BaCSharp
 
             // The struct is the same of all recipients, except one attribut
             bacnetEvent.notificationClass = m_PROP_OBJECT_IDENTIFIER.instance;
-            bacnetEvent.initiatingObjectIdentifier = Device;
+            bacnetEvent.initiatingObjectIdentifier = Mydevice.PROP_OBJECT_IDENTIFIER;
             bacnetEvent.eventObjectIdentifier = SenderObject;
             bacnetEvent.toState = tostate;
             bacnetEvent.fromState = fromstate;

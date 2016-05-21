@@ -62,6 +62,7 @@ namespace Wheather2_to_Bacnet
         const uint deviceId = 12345;
         DeviceObject device;
         AnalogInput<int> Temp, Windspeed, Humidity, Pressure;
+        TrendLog TrendTemp;
         CharacterString Windsdir, WheatherDescr;
 
         string UserAccessKey = (string)Registry.GetValue(@"HKEY_LOCAL_MACHINE\SOFTWARE\Wow6432Node\Wheather2_to_Bacnet", "UserAccessKey", null);
@@ -105,6 +106,7 @@ namespace Wheather2_to_Bacnet
 
                 XmlNode node = doc.SelectSingleNode("/weather/curren_weather/temp");
                 Temp.internal_PROP_PRESENT_VALUE= Convert.ToInt32(node.InnerText);
+                TrendTemp.AddValue(Temp.internal_PROP_PRESENT_VALUE, 0);
 
                 node = doc.SelectSingleNode("/weather/curren_weather/wind/speed");
                 Windspeed.internal_PROP_PRESENT_VALUE = Convert.ToInt32(node.InnerText);
@@ -138,11 +140,13 @@ namespace Wheather2_to_Bacnet
                     BacnetUnitsId.UNITS_DEGREES_CELSIUS
                 );
 
+                TrendTemp = new TrendLog(0, "Temperature Trend", "Temperature Trend", 6 * 24, BacnetTrendLogValueType.TL_TYPE_SIGN);
+
                 Windspeed = new AnalogInput<int>
                 (
                     1,
                     "Windspeed",
-                    "Windspeed",
+                    "Wind speed",
                     0,
                     BacnetUnitsId.UNITS_KILOMETERS_PER_HOUR
                 );
@@ -164,19 +168,20 @@ namespace Wheather2_to_Bacnet
                 );
 
                 Windsdir = new CharacterString
-                (0, "Windir", "Wind Direction", "Unknow", false);
+                (0, "Windir", "Wind Direction", "Not available", false);
 
                 WheatherDescr = new CharacterString
-                (1, "WheatherDescr", "Wheather Description", "Unknow", false);
+                (1, "WheatherDescr", "Wheather Description", "Not available", false);
 
                 device.AddBacnetObject(Temp);
+                device.AddBacnetObject(TrendTemp);
                 device.AddBacnetObject(Windspeed);
                 device.AddBacnetObject(Humidity);
                 device.AddBacnetObject(Pressure);
                 device.AddBacnetObject(Windsdir);
                 device.AddBacnetObject(WheatherDescr);
 
-                device.AddBacnetObject(new NotificationClass());
+                device.AddBacnetObject(new NotificationClass(0, "Notification", "Notification"));
 
                 // Force the JIT compiler to make some job before network access
                 device.Cli2Native();
@@ -194,7 +199,6 @@ namespace Wheather2_to_Bacnet
             for (; ; )
             {
                 // Read wheather data from the webservice
-                //String xmlRep = Wheather2_Request("U5bKnfg8gs", "48.658766", "6.151107");
                 String xmlRep = Wheather2_Request(UserAccessKey, Latitude, Longitude);
                 if (xmlRep != null)                
                     ParseWheather2_Response(xmlRep);
