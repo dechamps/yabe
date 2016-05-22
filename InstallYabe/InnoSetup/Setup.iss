@@ -72,6 +72,10 @@ Source: "..\..\DemoServer\bin\Debug\DeviceStorage.Xml"; DestDir: "{app}\AddOn"; 
 Source: "..\..\CodeExamples\Bacnet.Room.Simulator\bin\Debug\Bacnet.Room.Simulator.exe"; DestDir: "{app}\AddOn"; Flags: ignoreversion
 Source: "..\..\CodeExamples\Bacnet.Room.Simulator\Readme.txt"; DestDir: "{app}\AddOn"; Flags: ignoreversion
 
+Source: "..\..\CodeExamples\Wheather2_to_Bacnet\bin\Debug\Wheather2_to_Bacnet.exe"; DestDir: "{app}\AddOn"; Flags: ignoreversion
+Source: "..\..\CodeExamples\Wheather2_to_Bacnet\Readme.txt"; DestName:"ReadmeWheather2.txt"; DestDir: "{app}\AddOn"; Flags: ignoreversion
+Source: "..\..\CodeExamples\Wheather2_to_Bacnet\Wheather2config.reg"; DestDir: "{app}\AddOn"; Flags: ignoreversion
+
 Source: "..\..\Mstp.BacnetCapture\bin\Debug\Mstp.BacnetCapture.exe"; DestDir: "{app}\AddOn"; Flags: ignoreversion
 
 [Icons]
@@ -86,8 +90,12 @@ Name: "{group}\Doc\Full source code"; Filename: "http://sourceforge.net/p/yetano
    
 Name: "{group}\AddOn\DemoServer"; Filename: "{app}\AddOn\DemoServer.Exe"
 Name: "{group}\AddOn\Mstp.BacnetCapture"; Filename: "{app}\AddOn\Mstp.BacnetCapture.exe"
+
 Name: "{group}\AddOn\Bacnet.Room.Simulator"; Filename: "{app}\AddOn\Bacnet.Room.Simulator.exe"
 Name: "{group}\AddOn\RoomSimulatorReadme"; Filename: "{app}\AddOn\Readme.txt"
+
+Name: "{group}\AddOn\Wheather2_to_Bacnet"; Filename: "{app}\AddOn\Wheather2_to_Bacnet.exe"; Parameters: "ConsoleMode"
+Name: "{group}\AddOn\Wheather2Readme"; Filename: "{app}\AddOn\ReadmeWheather2.txt"
 
 Name: "{commondesktop}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"; Tasks: desktopicon
 

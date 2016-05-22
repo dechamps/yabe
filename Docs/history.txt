@@ -3,6 +3,7 @@
 -------------------------------------------------------------------------------
 1.0.9
  - Remove a sporadic bug while sorting the object dictionary
+ - Wheather2_to_Bacnet service application added into the package
 
 1.0.8 - 20160501
  - Remote Bacnet/IP node access without BBMD 

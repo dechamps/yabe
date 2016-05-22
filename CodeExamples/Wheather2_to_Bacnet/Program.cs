@@ -38,40 +38,29 @@ using BaCSharp;
 using AnotherStorageImplementation;
 using System.IO.BACnet;
 
-// You must first creates a user account into  http://www.myweather2.com/
-// in order to get a UserAccessKey : see Developper Zone for a 2 Day Forecast Weather API access
-
-// You have to modify and add information into the registry : have a look to the .Reg file
-// UserAccessKey, Latitude, Longitude must be modified 
-// On a Win32 only PC, removes Wow6432Node from this code and from the .reg
-// An alternative is to embbed data into this code, or to use another way (configuration file, ...)
-
-// To use it as a console application just run it with any kind of parameters such as 'Wheather2_to_Bacnet Console'
-// a parameter is already set into the Visual Studio project user option file, so debug mode will be OK as a console application
-
-// To register as a Windows service : in an admin console type installutil.exe Wheather2_to_Bacnet.exe
-// installutil is located on Windows\Microsoft.NET\Framework\V4xxxx and/or Windows\Microsoft.NET\Framework64\V4xxxx
-// then start manually the service or reboot the pc
-
 namespace Wheather2_to_Bacnet
 {
     public class MyService : System.ServiceProcess.ServiceBase
     {
         ManualResetEvent StopSrv = new ManualResetEvent(false);
 
-        const uint deviceId = 12345;
+        const uint deviceId = 12345; // could be a parameter
         DeviceObject device;
         AnalogInput<int> Temp, Windspeed, Humidity, Pressure;
         TrendLog TrendTemp;
         CharacterString Windsdir, WheatherDescr;
 
-        string UserAccessKey = (string)Registry.GetValue(@"HKEY_LOCAL_MACHINE\SOFTWARE\Wow6432Node\Wheather2_to_Bacnet", "UserAccessKey", null);
-        string Latitude = (string)Registry.GetValue(@"HKEY_LOCAL_MACHINE\SOFTWARE\Wow6432Node\Wheather2_to_Bacnet", "Latitude", null);
-        string Longitude = (string)Registry.GetValue(@"HKEY_LOCAL_MACHINE\SOFTWARE\Wow6432Node\Wheather2_to_Bacnet", "Longitude", null);
+        // An alternative is to embbed data into code, or to use another way (configuration file, ...)
+        string UserAccessKey = (string)Registry.GetValue(@"HKEY_LOCAL_MACHINE\SOFTWARE\Wheather2_to_Bacnet", "UserAccessKey", null);
+        string Latitude = (string)Registry.GetValue(@"HKEY_LOCAL_MACHINE\SOFTWARE\Wheather2_to_Bacnet", "Latitude", null);
+        string Longitude = (string)Registry.GetValue(@"HKEY_LOCAL_MACHINE\SOFTWARE\Wheather2_to_Bacnet", "Longitude", null);
 
-        public void RunAsConsoleApp()
+        public bool RunAsConsoleApp()
         {
+            if ((UserAccessKey == null) || (Latitude == null) || (Longitude == null))
+                return false;
             new Thread(WorkingLoop).Start();
+            return true;
         }
 
         const string XMLREP_TEST = "<?xml version=\"1.0\" encoding=\"UTF-8\"?><weather><curren_weather><temp>14</temp><temp_unit>c</temp_unit><wind><speed>5</speed><dir>SW</dir><wind_unit>kph</wind_unit></wind><humidity>77</humidity><pressure>1018</pressure><weather_text>Mostly cloudy</weather_text><weather_code>1</weather_code></curren_weather><forecast><date>2016-05-20</date><temp_unit>c</temp_unit><day_max_temp>16</day_max_temp><night_min_temp>13</night_min_temp><day><weather_text>Overcast skies</weather_text><weather_code>3</weather_code><wind><speed>25</speed><dir>S</dir><dir_degree>188</dir_degree><wind_unit>kph</wind_unit></wind></day><night><weather_text>Overcast skies</weather_text><weather_code>3</weather_code><wind><speed>36</speed><dir>SSW</dir><dir_degree>201</dir_degree><wind_unit>kph</wind_unit></wind></night></forecast><forecast><date>2016-05-21</date><temp_unit>c</temp_unit><day_max_temp>17</day_max_temp><night_min_temp>12</night_min_temp><day><weather_text>Moderate rain</weather_text><weather_code>63</weather_code><wind><speed>36</speed><dir>S</dir><dir_degree>180</dir_degree><wind_unit>kph</wind_unit></wind></day><night><weather_text>Clear skies</weather_text><weather_code>0</weather_code><wind><speed>32</speed><dir>WSW</dir><dir_degree>255</dir_degree><wind_unit>kph</wind_unit></wind></night></forecast></weather>";
@@ -234,8 +223,15 @@ namespace Wheather2_to_Bacnet
             // Console Mode detected via a param
             if (args.Length > 0)
             {
+                Console.WriteLine("Wheather2_to_Bacnet Running as a console application");
+                Console.WriteLine("Can be installed and started as a windows services");
                 MyService ConsoleModeApp = new MyService();
-                ConsoleModeApp.RunAsConsoleApp();
+                if (ConsoleModeApp.RunAsConsoleApp() == false)
+                {
+                    Console.WriteLine("\nError : Unable to find Parameters in the windows registry");
+                    Console.WriteLine("\t   see the corresponding Readme file and");
+                    Console.WriteLine("\t   Wheather2config.reg in "+Directory.GetCurrentDirectory());
+                }
             }
             else
             {

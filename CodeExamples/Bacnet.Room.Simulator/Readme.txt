@@ -1,3 +1,18 @@
+/********************************************************************
+*                           MIT License
+* 
+* Copyright (C) 2016 Frederic Chaxel <fchaxel@free.fr>
+*
+* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+* EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+* MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+* IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
+* CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
+* TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
+* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+*
+*********************************************************************/
+
 This application "simulates" an heating/cooling room controler. It's something like 
 a very simplifed version of the Schneider Electric SE8000 series / Viconics VT8300 
 (However I've creates it before knowing these products).
