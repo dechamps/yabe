@@ -144,10 +144,11 @@ namespace BaCSharp
             get { return (uint)BacnetMaxSegments.MAX_SEG64; } 
         }
 
+        public BacnetDeviceStatus m_PROP_SYSTEM_STATUS=BacnetDeviceStatus.OPERATIONAL;
         [BaCSharpType(BacnetApplicationTags.BACNET_APPLICATION_TAG_ENUMERATED)]
         public virtual uint PROP_SYSTEM_STATUS
         {
-            get { return (uint)BacnetDeviceStatus.OPERATIONAL; } 
+            get { return (uint)m_PROP_SYSTEM_STATUS; } 
         }
 
         [BaCSharpType(BacnetApplicationTags.BACNET_APPLICATION_TAG_NULL)]

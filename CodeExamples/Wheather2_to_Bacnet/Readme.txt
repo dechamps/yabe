@@ -41,3 +41,10 @@ To register the Windows service : in an admin console type :
 installutil is located on Windows\Microsoft.NET\Framework\V4xxxx
 
 then start manually the service or reboot the pc
+
+
+The code could be simply ported to Linux-Mono :
+	removes the 3 lines of code concerning services in the Main method
+	hard code (for instance) the 3 parameters : UserAccessKey ...
+	removes the inheritence between MyService and ServiceBase
+	removes MyServiceInstaller class

@@ -171,10 +171,12 @@ namespace Wheather2_to_Bacnet
                 device.AddBacnetObject(WheatherDescr);
 
                 device.AddBacnetObject(new NotificationClass(0, "Notification", "Notification"));
-
-                // Force the JIT compiler to make some job before network access
-                device.Cli2Native();
             }
+            else
+                device.m_PROP_SYSTEM_STATUS = BacnetDeviceStatus.NON_OPERATIONAL;
+
+            // Force the JIT compiler to make some job before network access
+            device.Cli2Native();
             BacnetActivity.StartActivity(device);
         }
 
@@ -229,8 +231,8 @@ namespace Wheather2_to_Bacnet
                 if (ConsoleModeApp.RunAsConsoleApp() == false)
                 {
                     Console.WriteLine("\nError : Unable to find Parameters in the windows registry");
-                    Console.WriteLine("\t   see the corresponding Readme file and");
-                    Console.WriteLine("\t   Wheather2config.reg in "+Directory.GetCurrentDirectory());
+                    Console.WriteLine("\tsee the corresponding Readme file and");
+                    Console.WriteLine("\tWheather2config.reg in "+Directory.GetCurrentDirectory());
                 }
             }
             else
