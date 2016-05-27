@@ -118,6 +118,12 @@ namespace BaCSharp
             }
             else
             {
+                // Thank's to Steve Karg
+                // The 135-2016 text:
+                // 19.2.2 Application Priority Assignments
+                // All commandable objects within a device shall be configurable to accept writes to all priorities except priority 6
+                if (WritePriority == 6) { ErrorCode_PropertyWrite = ErrorCodes.WriteAccessDenied; return; }
+
                 m_PROP_PRIORITY_ARRAY[(int)WritePriority - 1] = Value[0];
 
                 bool done = false;
