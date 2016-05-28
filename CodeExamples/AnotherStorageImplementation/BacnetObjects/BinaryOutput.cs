@@ -28,6 +28,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.IO.BACnet;
+using System.Threading;
 
 namespace BaCSharp
 {
@@ -55,6 +56,8 @@ namespace BaCSharp
     {
         public bool UsePriorityArray = false;
 
+        private object LockObj = new object();
+
         public uint m_PROP_RELINQUISH_DEFAULT;
         [BaCSharpType(BacnetApplicationTags.BACNET_APPLICATION_TAG_ENUMERATED)]
         public virtual uint PROP_RELINQUISH_DEFAULT
@@ -65,6 +68,19 @@ namespace BaCSharp
                 m_PROP_RELINQUISH_DEFAULT = value;
                 ExternalCOVManagement(BacnetPropertyIds.PROP_PRESENT_VALUE);
             }
+        }
+
+        public uint m_PROP_MINIMUM_OFF_TIME = 0;
+        [BaCSharpType(BacnetApplicationTags.BACNET_APPLICATION_TAG_UNSIGNED_INT)]
+        public uint PROP_MINIMUM_OFF_TIME
+        {
+            get { return m_PROP_MINIMUM_OFF_TIME; }
+        }
+        public uint m_PROP_MINIMUM_ON_TIME = 0;
+        [BaCSharpType(BacnetApplicationTags.BACNET_APPLICATION_TAG_UNSIGNED_INT)]
+        public uint PROP_MINIMUM_ON_TIME
+        {
+            get { return m_PROP_MINIMUM_ON_TIME; }
         }
 
         public BacnetValue[] m_PROP_PRIORITY_ARRAY = new BacnetValue[16];
@@ -95,7 +111,6 @@ namespace BaCSharp
             else
                 return base.BacnetMethodNametoId(Name);
         }
-
         // Since set_PROP_PRESENT_VALUE offered by the inherited property PROP_PRESENT_VALUE cannot
         // receive null value to clear the Priority Array, and do not have the priority
         // it is 'override' here with the set2_xxx (which replace set_xx in the call if exist)        
@@ -108,31 +123,69 @@ namespace BaCSharp
             }
             else
             {
+
                 // Thank's to Steve Karg
                 // The 135-2016 text:
                 // 19.2.2 Application Priority Assignments
                 // All commandable objects within a device shall be configurable to accept writes to all priorities except priority 6
-                if (WritePriority == 6) { ErrorCode_PropertyWrite = ErrorCodes.WriteAccessDenied; return; }
+                if ((WritePriority == 6) && (Value != null)) { ErrorCode_PropertyWrite = ErrorCodes.WriteAccessDenied; return; }
 
-                m_PROP_PRIORITY_ARRAY[(int)WritePriority - 1] = Value[0];
-
-                bool done = false;
-                for (int i = 0; i < 16; i++)
+                lock (LockObj)
                 {
-                    if (m_PROP_PRIORITY_ARRAY[i].Value != null)    // A value is OK
+                    if (Value != null)
+                        m_PROP_PRIORITY_ARRAY[(int)WritePriority - 1] = Value[0];
+                    else
+                        m_PROP_PRIORITY_ARRAY[(int)WritePriority - 1] = new BacnetValue();  // normaly only due to internal call at priority level 6  
+                    
+                    bool done = false;
+                    for (int i = 0; i < 16; i++)
                     {
-                        PROP_PRESENT_VALUE = (uint)m_PROP_PRIORITY_ARRAY[i].Value;
-                        done = true;
-                        break;
-                    }
-                }
-                if (done == false)  // Nothing in the array : PROP_PRESENT_VALUE = PROP_RELINQUISH_DEFAULT
-                {
-                    PROP_PRESENT_VALUE = m_PROP_RELINQUISH_DEFAULT;
-                }
+                        if (m_PROP_PRIORITY_ARRAY[i].Value != null)    // A value is OK
+                        {
+                            uint Old_VALUE=PROP_PRESENT_VALUE;
+                            PROP_PRESENT_VALUE = (uint)m_PROP_PRIORITY_ARRAY[i].Value;
 
-                return;
+                            if ((i > 5) && (Old_VALUE != PROP_PRESENT_VALUE)) // new value and priority > PRIORITY_MIN_ON_OFF
+                            {
+                                int MiniHoldTime = (int)(PROP_PRESENT_VALUE == 0 ? m_PROP_MINIMUM_OFF_TIME : m_PROP_MINIMUM_ON_TIME);
+                                if (MiniHoldTime != 0)
+                                {
+                                    m_PROP_PRIORITY_ARRAY[5] = m_PROP_PRIORITY_ARRAY[i];
+                                    System.Threading.ThreadPool.QueueUserWorkItem((o) =>
+                                    {
+                                        Thread.Sleep(MiniHoldTime * 1000);
+                                        set2_PROP_PRESENT_VALUE(null, 6); // dummy call to release the PRIORITY_MIN_ON_OFF level
+
+                                    }, null);
+                                }
+                            }
+
+                            done = true;
+                            break;
+                        }
+                    }
+                    if (done == false)  // Nothing in the array : PROP_PRESENT_VALUE = PROP_RELINQUISH_DEFAULT
+                    {
+                        if (PROP_PRESENT_VALUE != m_PROP_RELINQUISH_DEFAULT)
+                        {
+                            PROP_PRESENT_VALUE = m_PROP_RELINQUISH_DEFAULT;
+                            int MiniHoldTime = (int)(PROP_PRESENT_VALUE == 0 ? m_PROP_MINIMUM_OFF_TIME : m_PROP_MINIMUM_ON_TIME);
+                            if (MiniHoldTime != 0)
+                            {
+                                m_PROP_PRIORITY_ARRAY[5] = new BacnetValue(BacnetApplicationTags.BACNET_APPLICATION_TAG_UNSIGNED_INT, m_PROP_RELINQUISH_DEFAULT);
+                                System.Threading.ThreadPool.QueueUserWorkItem((o) =>
+                                {
+                                    Thread.Sleep(MiniHoldTime * 1000);
+                                    set2_PROP_PRESENT_VALUE(null, 6); // dummy call to release the PRIORITY_MIN_ON_OFF level
+
+                                }, null);
+                            }
+                        }
+                    }
+
+                    return;
+                }
             }
-        }
+        }        
     }
 }

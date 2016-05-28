@@ -127,7 +127,9 @@ namespace AnotherStorageImplementation
             device.AddBacnetObject(ana0);   // don't forget to do this
           
             // Binary Output
-            device.AddBacnetObject (new BinaryOutput(0, "Bin Out", "An output", false));
+            BinaryOutput bo = new BinaryOutput(0, "Bin Out", "An output", false);
+            bo.m_PROP_MINIMUM_ON_TIME = bo.m_PROP_MINIMUM_OFF_TIME= 30; // 30s Minumum states time
+            device.AddBacnetObject (bo);
 
             // Create A StructuredView
             StructuredView s = new StructuredView(0, "Content","A View");
