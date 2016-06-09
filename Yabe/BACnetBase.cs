@@ -855,7 +855,7 @@ namespace System.IO.BACnet
         OBJECT_LOAD_CONTROL = 28,
         OBJECT_STRUCTURED_VIEW = 29,
         OBJECT_ACCESS_DOOR = 30,
-        OBJECT_31 = 31,/* 31 was lighting output, but BACnet editor changed it... */        
+        OBJECT_TIMER = 31,                  /* Addendum 135-2012ay */        
         OBJECT_ACCESS_CREDENTIAL = 32,      /* Addendum 2008-j */
         OBJECT_ACCESS_POINT = 33,
         OBJECT_ACCESS_RIGHTS = 34,
@@ -879,6 +879,7 @@ namespace System.IO.BACnet
         OBJECT_ALERT_ENROLLMENT = 52,       /* Addendum 2010-af */
         OBJECT_CHANNEL = 53,        /* Addendum 2010-aa */
         OBJECT_LIGHTING_OUTPUT = 54,        /* Addendum 2010-i */
+        OBJECT_BINARY_LIGHTING_OUTPUT = 55,        /* Addendum 135-2012az */
         /* Enumerated values 0-127 are reserved for definition by ASHRAE. */
         /* Enumerated values 128-1023 may be used by others subject to  */
         /* the procedures and constraints described in Clause 23. */
@@ -2838,6 +2839,22 @@ namespace System.IO.BACnet
         PROP_POWER = 384,
         PROP_TRANSITION = 385,
         PROP_EGRESS_ACTIVE = 386,
+
+        PROP_INTERFACE_VALUE = 387,
+        PROP_FAULT_HIGH_LIMIT = 388,
+        PROP_FAULT_LOW_LIMIT = 389,
+        PROP_LOW_DIFF_LIMIT = 390,
+        /* enumerations 391-392 are defined in Addendum 135-2012az */
+        PROP_STRIKE_COUNT = 391,
+        PROP_TIME_OF_STRIKE_COUNT_RESET = 392,
+        /* enumerations 393-398 are defined in Addendum 135-2012ay */
+        PROP_DEFAULT_TIMEOUT = 393,
+        PROP_INITIAL_TIMEOUT = 394,
+        PROP_LAST_STATE_CHANGE = 395,
+        PROP_STATE_CHANGE_VALUES = 396,
+        PROP_TIMER_RUNNING = 397,
+        PROP_TIMER_STATE = 398,
+
         /* The special property identifiers all, optional, and required  */
         /* are reserved for use in the ReadPropertyConditional and */
         /* ReadPropertyMultiple services or services not defined in this standard. */
