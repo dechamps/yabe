@@ -70,6 +70,7 @@
     <Compile Include="BacnetObjects\AnalogObject.cs" />
     <Compile Include="BacnetObjects\AnalogObjectEvent.cs" />
     <Compile Include="BacnetObjects\AnalogOutput.cs" />
+    <Compile Include="BacnetObjects\BacnetDateTime.cs" />
     <Compile Include="BacnetObjects\BacnetFile.cs" />
     <Compile Include="BacnetObjects\BaCSharpObject.cs" />
     <Compile Include="BacnetObjects\BaCSharpType.cs" />
