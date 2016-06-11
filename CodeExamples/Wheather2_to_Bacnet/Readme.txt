@@ -18,12 +18,12 @@ from MyWeather2 Internet Webservice and 'sends' them on Bacnet.
 
 You must first creates a user account into http://www.myweather2.com/
 in order to get a UserAccessKey : see Developper Zone for a 2 Day Forecast 
-Weather API access.
+Weather API access. It's free of charge for basic services.
 
 You have to modify and add information into the registry : have a look to 
 the .Reg file (UserAccessKey, Latitude, Longitude must be modified).
 
-On a Win32 only PC, removes Wow6432Node from the .reg file entry :
+On an old Win32 only PC, removes Wow6432Node from the .reg file entry :
 	[HKEY_LOCAL_MACHINE\SOFTWARE\Wow6432Node\Wheather2_to_Bacnet]
 	changes by
 	[HKEY_LOCAL_MACHINE\SOFTWARE\Wheather2_to_Bacnet]
@@ -45,6 +45,6 @@ then start manually the service or reboot the pc
 
 The code could be simply ported to Linux-Mono :
 	removes the 3 lines of code concerning services in the Main method
-	hard code (for instance) the 3 parameters : UserAccessKey ...
+	hard code (for instance) the 4 parameters : UserAccessKey ...
 	removes the inheritence between MyService and ServiceBase
 	removes MyServiceInstaller class

@@ -64,6 +64,9 @@
     <Compile Include="..\AnotherStorageImplementation\BacnetObjects\AnalogObjectEvent.cs">
       <Link>AnalogObjectEvent.cs</Link>
     </Compile>
+    <Compile Include="..\AnotherStorageImplementation\BacnetObjects\BacnetDateTime.cs">
+      <Link>BacnetDateTime.cs</Link>
+    </Compile>
     <Compile Include="..\AnotherStorageImplementation\BacnetObjects\BaCSharpObject.cs">
       <Link>BaCSharpObject.cs</Link>
     </Compile>
@@ -85,6 +88,7 @@
     <Compile Include="..\AnotherStorageImplementation\Subscription.cs">
       <Link>Subscription.cs</Link>
     </Compile>
+    <Compile Include="AAUtil.cs" />
     <Compile Include="BacnetActivity.cs" />
     <Compile Include="Program.cs">
       <SubType>Component</SubType>

@@ -62,6 +62,7 @@ AnotherStorageImplementation
 		Notification Class
 		Schedule
 		Calendar
+		DateTime
 		... send us your own code !
 	Objects persistance could be achieved with serialization
 
@@ -114,5 +115,5 @@ Wheather2_to_Bacnet
 	See comments in Readme file in the application directory and look at 
 	Wheather2config.reg file for configuration.
 
-	Available data are : Temperature, Windspeed, Humidity, Pressure, Winddir 
-	and Wheather Description. No wheather forecast data.
+	Available data are : Temperature, Windspeed, Humidity, Pressure, Winddir, 
+	Wheather Description, Sunset & Sunrise time. No wheather forecast data.

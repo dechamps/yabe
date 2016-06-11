@@ -37,6 +37,7 @@ using Microsoft.Win32;
 using BaCSharp;
 using AnotherStorageImplementation;
 using System.IO.BACnet;
+using System.Globalization;
 
 namespace Wheather2_to_Bacnet
 {
@@ -44,29 +45,33 @@ namespace Wheather2_to_Bacnet
     {
         ManualResetEvent StopSrv = new ManualResetEvent(false);
 
-        const uint deviceId = 12345; // could be a parameter
+        // BacnetObjects dictionnary
         DeviceObject device;
         AnalogInput<int> Temp, Windspeed, Humidity, Pressure;
         TrendLog TrendTemp;
         CharacterString Windsdir, WheatherDescr;
+        BacnetDateTime SunSet, SunRise;
 
         // An alternative is to embbed data into code, or to use another way (configuration file, ...)
+        string BacnetDeviceId = (string)Registry.GetValue(@"HKEY_LOCAL_MACHINE\SOFTWARE\Wheather2_to_Bacnet", "BacnetDeviceId", null);
         string UserAccessKey = (string)Registry.GetValue(@"HKEY_LOCAL_MACHINE\SOFTWARE\Wheather2_to_Bacnet", "UserAccessKey", null);
         string Latitude = (string)Registry.GetValue(@"HKEY_LOCAL_MACHINE\SOFTWARE\Wheather2_to_Bacnet", "Latitude", null);
         string Longitude = (string)Registry.GetValue(@"HKEY_LOCAL_MACHINE\SOFTWARE\Wheather2_to_Bacnet", "Longitude", null);
 
         public bool RunAsConsoleApp()
         {
+            new Thread(WorkingLoop).Start();
+
             if ((UserAccessKey == null) || (Latitude == null) || (Longitude == null))
                 return false;
-            new Thread(WorkingLoop).Start();
-            return true;
+            else
+                return true;
         }
 
-        const string XMLREP_TEST = "<?xml version=\"1.0\" encoding=\"UTF-8\"?><weather><curren_weather><temp>14</temp><temp_unit>c</temp_unit><wind><speed>5</speed><dir>SW</dir><wind_unit>kph</wind_unit></wind><humidity>77</humidity><pressure>1018</pressure><weather_text>Mostly cloudy</weather_text><weather_code>1</weather_code></curren_weather><forecast><date>2016-05-20</date><temp_unit>c</temp_unit><day_max_temp>16</day_max_temp><night_min_temp>13</night_min_temp><day><weather_text>Overcast skies</weather_text><weather_code>3</weather_code><wind><speed>25</speed><dir>S</dir><dir_degree>188</dir_degree><wind_unit>kph</wind_unit></wind></day><night><weather_text>Overcast skies</weather_text><weather_code>3</weather_code><wind><speed>36</speed><dir>SSW</dir><dir_degree>201</dir_degree><wind_unit>kph</wind_unit></wind></night></forecast><forecast><date>2016-05-21</date><temp_unit>c</temp_unit><day_max_temp>17</day_max_temp><night_min_temp>12</night_min_temp><day><weather_text>Moderate rain</weather_text><weather_code>63</weather_code><wind><speed>36</speed><dir>S</dir><dir_degree>180</dir_degree><wind_unit>kph</wind_unit></wind></day><night><weather_text>Clear skies</weather_text><weather_code>0</weather_code><wind><speed>32</speed><dir>WSW</dir><dir_degree>255</dir_degree><wind_unit>kph</wind_unit></wind></night></forecast></weather>";
+
         private string Wheather2_Request(string UserAccessKey, string Lat, string Long)
         {
-            //return XMLREP_TEST;
+            //return "<?xml version=\"1.0\" encoding=\"UTF-8\"?><weather><curren_weather><temp>14</temp><temp_unit>c</temp_unit><wind><speed>5</speed><dir>SW</dir><wind_unit>kph</wind_unit></wind><humidity>77</humidity><pressure>1018</pressure><weather_text>Mostly cloudy</weather_text><weather_code>1</weather_code></curren_weather><forecast><date>2016-05-20</date><temp_unit>c</temp_unit><day_max_temp>16</day_max_temp><night_min_temp>13</night_min_temp><day><weather_text>Overcast skies</weather_text><weather_code>3</weather_code><wind><speed>25</speed><dir>S</dir><dir_degree>188</dir_degree><wind_unit>kph</wind_unit></wind></day><night><weather_text>Overcast skies</weather_text><weather_code>3</weather_code><wind><speed>36</speed><dir>SSW</dir><dir_degree>201</dir_degree><wind_unit>kph</wind_unit></wind></night></forecast><forecast><date>2016-05-21</date><temp_unit>c</temp_unit><day_max_temp>17</day_max_temp><night_min_temp>12</night_min_temp><day><weather_text>Moderate rain</weather_text><weather_code>63</weather_code><wind><speed>36</speed><dir>S</dir><dir_degree>180</dir_degree><wind_unit>kph</wind_unit></wind></day><night><weather_text>Clear skies</weather_text><weather_code>0</weather_code><wind><speed>32</speed><dir>WSW</dir><dir_degree>255</dir_degree><wind_unit>kph</wind_unit></wind></night></forecast></weather>";
 
             try
             {
@@ -74,9 +79,11 @@ namespace Wheather2_to_Bacnet
 
                 WebRequest req = WebRequest.Create(Url);
                 WebResponse resp = req.GetResponse();
-
+                
                 StreamReader respReader = new StreamReader(resp.GetResponseStream());
                 String response = respReader.ReadToEnd();
+
+                resp.Close();
 
                 return response;
             }
@@ -117,7 +124,13 @@ namespace Wheather2_to_Bacnet
 
         void InitBacnetDictionary()
         {
+            uint deviceId;
+
+            if (UInt32.TryParse(BacnetDeviceId, out deviceId) == false)
+                deviceId = 12345; // default value
+
             device = new DeviceObject(deviceId, "Wheather2 to Bacnet ", "Wheather2 data", false);
+
             if ((UserAccessKey != null) && (Latitude != null) && (Longitude != null))
             {
                 Temp = new AnalogInput<int>
@@ -129,6 +142,7 @@ namespace Wheather2_to_Bacnet
                     BacnetUnitsId.UNITS_DEGREES_CELSIUS
                 );
 
+                // 24h trendlog
                 TrendTemp = new TrendLog(0, "Temperature Trend", "Temperature Trend", 6 * 24, BacnetTrendLogValueType.TL_TYPE_SIGN);
 
                 Windspeed = new AnalogInput<int>
@@ -157,10 +171,13 @@ namespace Wheather2_to_Bacnet
                 );
 
                 Windsdir = new CharacterString
-                (0, "Windir", "Wind Direction", "Not available", false);
+                (0, "Winddir", "Wind Direction", "Not available", false);
 
                 WheatherDescr = new CharacterString
                 (1, "WheatherDescr", "Wheather Description", "Not available", false);
+
+                SunRise = new BacnetDateTime(0, "Sunrise", "Sun up time");
+                SunSet = new BacnetDateTime(1, "Sunset", "Sun down time");
 
                 device.AddBacnetObject(Temp);
                 device.AddBacnetObject(TrendTemp);
@@ -169,6 +186,8 @@ namespace Wheather2_to_Bacnet
                 device.AddBacnetObject(Pressure);
                 device.AddBacnetObject(Windsdir);
                 device.AddBacnetObject(WheatherDescr);
+                device.AddBacnetObject(SunRise);
+                device.AddBacnetObject(SunSet);
 
                 device.AddBacnetObject(new NotificationClass(0, "Notification", "Notification"));
             }
@@ -185,15 +204,40 @@ namespace Wheather2_to_Bacnet
             InitBacnetDictionary();
 
             if ((UserAccessKey == null) || (Latitude == null) || (Longitude == null))
+            {
+                StopSrv.WaitOne();
                 return;
+            }
+
+            double lat=0, lon=0;
+            try
+            {
+                lat = Convert.ToDouble(Latitude, CultureInfo.InvariantCulture);
+                lon = Convert.ToDouble(Longitude, CultureInfo.InvariantCulture);
+            }
+            catch { }
+
+            DateTime today = DateTime.MinValue;
 
             for (; ; )
             {
+                if (DateTime.Today != today) // sunset & sunride time
+                {
+                    today = DateTime.Today;
+
+                    double JD = NAA.Util.calcJD(today);
+                    double sunRise = NAA.Util.calcSunRiseUTC(JD, lat, lon);
+                    double sunSet = NAA.Util.calcSunSetUTC(JD, lat, lon);
+
+                    SunRise.m_PresentValue = NAA.Util.getDateTime(sunRise, 0, today, false).Value.ToLocalTime();                   
+                    SunSet.m_PresentValue = NAA.Util.getDateTime(sunSet, 0, today, false).Value.ToLocalTime();
+                }
+
                 // Read wheather data from the webservice
                 String xmlRep = Wheather2_Request(UserAccessKey, Latitude, Longitude);
-                if (xmlRep != null)                
+                if (xmlRep != null)
                     ParseWheather2_Response(xmlRep);
-                
+
                 // Wait 10 minutes or a stop condition
                 if (StopSrv.WaitOne(new TimeSpan(0, 10, 0)) == true)
                     return;
