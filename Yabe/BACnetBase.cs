@@ -4642,7 +4642,19 @@ namespace System.IO.BACnet.Serialize
                         len += tag_len;
                         local_value_list.Add(v);
                     }
-                    new_entry.value = local_value_list;
+                    // FC : two values one Date & one Time => change to one datetime
+                    if ((local_value_list.Count == 2) && (local_value_list[0].Tag == BacnetApplicationTags.BACNET_APPLICATION_TAG_DATE) && (local_value_list[1].Tag == BacnetApplicationTags.BACNET_APPLICATION_TAG_TIME))
+                    {
+                        DateTime date, time;
+                        date = (DateTime)local_value_list[0].Value;
+                        time = (DateTime)local_value_list[1].Value;
+                        DateTime bdatetime = new DateTime(date.Year, date.Month, date.Day, time.Hour, time.Minute, time.Second, time.Millisecond);
+                        local_value_list.Clear();
+                        local_value_list.Add(new BacnetValue(BacnetApplicationTags.BACNET_APPLICATION_TAG_DATETIME,bdatetime));
+                        new_entry.value = local_value_list;
+                    }
+                    else
+                        new_entry.value = local_value_list;
                     len++;
                 }
                 else if (tag_number == 5)
@@ -5243,6 +5255,19 @@ namespace System.IO.BACnet.Serialize
             }
         }
 
+        public static int decode_bacnet_datetime(byte[] buffer, int offset, out DateTime bdatetime)
+        {
+            int len = 0;
+            DateTime date;
+            len++; // Opening Tag
+            len += ASN1.decode_application_date(buffer, offset + len, out date); // Date
+            DateTime time;
+            len += ASN1.decode_application_time(buffer, offset + len, out time); // Time
+            len++; // closing Tag
+            bdatetime = new DateTime(date.Year, date.Month, date.Day, time.Hour, time.Minute, time.Second, time.Millisecond);
+            return len;
+        }
+
         public static int decode_object_id(byte[] buffer, int offset, out ushort object_type, out uint instance)
         {
             uint value = 0;
@@ -5644,6 +5669,7 @@ namespace System.IO.BACnet.Serialize
                 if (tag_len > 0)
                 {
                     len += tag_len;
+
                     decode_len = bacapp_decode_data(buffer, offset + len, max_offset, (BacnetApplicationTags)tag_number, len_value_type, out value);
                     if (decode_len < 0) return decode_len;
                     len += decode_len;
@@ -5714,6 +5740,14 @@ namespace System.IO.BACnet.Serialize
                     value.Tag = BacnetApplicationTags.BACNET_APPLICATION_TAG_CONTEXT_SPECIFIC_DECODED;
                     value.Value = v;
                     return tag_len;
+                }
+                else if (property_id == BacnetPropertyIds.PROP_EVENT_TIME_STAMPS) 
+                {
+                    DateTime dt;
+                    len += decode_bacnet_datetime(buffer, offset, out dt);
+                    value.Tag = BacnetApplicationTags.BACNET_APPLICATION_TAG_DATETIME;
+                    value.Value = dt;
+                    return len;
                 }
 
                 value.Tag = BacnetApplicationTags.BACNET_APPLICATION_TAG_CONTEXT_SPECIFIC_DECODED;
