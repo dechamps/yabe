@@ -39,24 +39,28 @@ using AnotherStorageImplementation;
 using System.IO.BACnet;
 using System.Globalization;
 
-namespace Wheather2_to_Bacnet
+namespace Weather2_to_Bacnet
 {
     public class MyService : System.ServiceProcess.ServiceBase
     {
+        const int UpdateDelay = 10; // Requests are sent to myweather2 every 10 minutes
+                                    // This is half the maximum for the free service
+
         ManualResetEvent StopSrv = new ManualResetEvent(false);
 
         // BacnetObjects dictionnary
         DeviceObject device;
         AnalogInput<int> Temp, Windspeed, Humidity, Pressure;
+        AnalogInput<double> DewPoint, VaporPressure;
         TrendLog TrendTemp;
-        CharacterString Windsdir, WheatherDescr;
-        BacnetDateTime SunSet, SunRise;
+        CharacterString Windsdir, WeatherDescr;
+        BacnetDateTime SunSet, SunRise, Updatetime, NextUpdatetime;
 
         // An alternative is to embbed data into code, or to use another way (configuration file, ...)
-        string BacnetDeviceId = (string)Registry.GetValue(@"HKEY_LOCAL_MACHINE\SOFTWARE\Wheather2_to_Bacnet", "BacnetDeviceId", null);
-        string UserAccessKey = (string)Registry.GetValue(@"HKEY_LOCAL_MACHINE\SOFTWARE\Wheather2_to_Bacnet", "UserAccessKey", null);
-        string Latitude = (string)Registry.GetValue(@"HKEY_LOCAL_MACHINE\SOFTWARE\Wheather2_to_Bacnet", "Latitude", null);
-        string Longitude = (string)Registry.GetValue(@"HKEY_LOCAL_MACHINE\SOFTWARE\Wheather2_to_Bacnet", "Longitude", null);
+        string BacnetDeviceId = (string)Registry.GetValue(@"HKEY_LOCAL_MACHINE\SOFTWARE\Weather2_to_Bacnet", "BacnetDeviceId", null);
+        string UserAccessKey = (string)Registry.GetValue(@"HKEY_LOCAL_MACHINE\SOFTWARE\Weather2_to_Bacnet", "UserAccessKey", null);
+        string Latitude = (string)Registry.GetValue(@"HKEY_LOCAL_MACHINE\SOFTWARE\Weather2_to_Bacnet", "Latitude", null);
+        string Longitude = (string)Registry.GetValue(@"HKEY_LOCAL_MACHINE\SOFTWARE\Weather2_to_Bacnet", "Longitude", null);
 
         public bool RunAsConsoleApp()
         {
@@ -110,14 +114,27 @@ namespace Wheather2_to_Bacnet
                 node = doc.SelectSingleNode("/weather/curren_weather/wind/dir");
                 Windsdir.internal_PROP_PRESENT_VALUE = node.InnerText;
 
-                node = doc.SelectSingleNode("/weather/curren_weather/humidity");
-                Humidity.internal_PROP_PRESENT_VALUE= Convert.ToInt32(node.InnerText);
+                    node = doc.SelectSingleNode("/weather/curren_weather/humidity");
+                    Humidity.internal_PROP_PRESENT_VALUE= Convert.ToInt32(node.InnerText);
 
-                node = doc.SelectSingleNode("/weather/curren_weather/pressure");
-                Pressure.internal_PROP_PRESENT_VALUE= Convert.ToInt32(node.InnerText);
+                    node = doc.SelectSingleNode("/weather/curren_weather/pressure");
+                    Pressure.internal_PROP_PRESENT_VALUE= Convert.ToInt32(node.InnerText);
 
-                node = doc.SelectSingleNode("/weather/curren_weather/weather_text");
-                WheatherDescr.internal_PROP_PRESENT_VALUE = node.InnerText;
+                    node = doc.SelectSingleNode("/weather/curren_weather/weather_text");
+                    WeatherDescr.internal_PROP_PRESENT_VALUE = node.InnerText;
+
+                    // http://www.meteo.psu.edu/~jyh10/classes/meteo473/java-tdew.htm
+                    // by Jerry Y. Harrington
+                    double es = 6.112 * Math.Exp(1.0 * 17.67 * Temp.internal_PROP_PRESENT_VALUE / (243.5 + Temp.internal_PROP_PRESENT_VALUE));
+                    double ed = Humidity.internal_PROP_PRESENT_VALUE / 100.0 * es;
+                    double eln = Math.Log(ed/6.112);
+                    double td = -243.5 * eln / (eln - 17.67);
+
+                DewPoint.internal_PROP_PRESENT_VALUE = Math.Round(td,1);
+                VaporPressure.internal_PROP_PRESENT_VALUE = Math.Round(es,1);
+
+                Updatetime.m_PresentValue = DateTime.Now;
+
             }
             catch { }
         }
@@ -129,7 +146,7 @@ namespace Wheather2_to_Bacnet
             if (UInt32.TryParse(BacnetDeviceId, out deviceId) == false)
                 deviceId = 12345; // default value
 
-            device = new DeviceObject(deviceId, "Wheather2 to Bacnet ", "Wheather2 data", false);
+            device = new DeviceObject(deviceId, "Weather2 to Bacnet ", "Weather2 data", false);
 
             if ((UserAccessKey != null) && (Latitude != null) && (Longitude != null))
             {
@@ -170,25 +187,48 @@ namespace Wheather2_to_Bacnet
                     BacnetUnitsId.UNITS_HECTOPASCALS
                 );
 
+                DewPoint = new AnalogInput<double>
+                (
+                    4,
+                    "DewPoint",
+                    "Dew Point",
+                    0,
+                    BacnetUnitsId.UNITS_DEGREES_CELSIUS
+                );
+
+                VaporPressure = new AnalogInput<double>
+                (
+                    5,
+                    "VaporPressure",
+                    "Equilibrium Vapor Pressure",
+                    0,
+                    BacnetUnitsId.UNITS_HECTOPASCALS
+                );
+
                 Windsdir = new CharacterString
                 (0, "Winddir", "Wind Direction", "Not available", false);
 
-                WheatherDescr = new CharacterString
-                (1, "WheatherDescr", "Wheather Description", "Not available", false);
+                WeatherDescr = new CharacterString
+                (1, "WeatherDescr", "Weather Description", "Not available", false);
 
                 SunRise = new BacnetDateTime(0, "Sunrise", "Sun up time");
                 SunSet = new BacnetDateTime(1, "Sunset", "Sun down time");
+                Updatetime = new BacnetDateTime(2, "Updatetime", "Date & Time of the current values");
+                NextUpdatetime = new BacnetDateTime(3, "NextUpdatetime", "Date & Time of the next request");
 
                 device.AddBacnetObject(Temp);
                 device.AddBacnetObject(TrendTemp);
                 device.AddBacnetObject(Windspeed);
                 device.AddBacnetObject(Humidity);
                 device.AddBacnetObject(Pressure);
+                device.AddBacnetObject(DewPoint);
+                device.AddBacnetObject(VaporPressure);
                 device.AddBacnetObject(Windsdir);
-                device.AddBacnetObject(WheatherDescr);
+                device.AddBacnetObject(WeatherDescr);
                 device.AddBacnetObject(SunRise);
                 device.AddBacnetObject(SunSet);
-
+                device.AddBacnetObject(Updatetime);
+                device.AddBacnetObject(NextUpdatetime);
                 device.AddBacnetObject(new NotificationClass(0, "Notification", "Notification"));
             }
             else
@@ -221,7 +261,7 @@ namespace Wheather2_to_Bacnet
 
             for (; ; )
             {
-                if (DateTime.Today != today) // sunset & sunride time
+                if (DateTime.Today != today) // sunset & sunride time, computed once a day
                 {
                     today = DateTime.Today;
 
@@ -238,8 +278,10 @@ namespace Wheather2_to_Bacnet
                 if (xmlRep != null)
                     ParseWheather2_Response(xmlRep);
 
+                NextUpdatetime.m_PresentValue = DateTime.Now.AddMinutes(UpdateDelay);
+
                 // Wait 10 minutes or a stop condition
-                if (StopSrv.WaitOne(new TimeSpan(0, 10, 0)) == true)
+                if (StopSrv.WaitOne(new TimeSpan(0, UpdateDelay, 0)) == true)
                     return;
             }
         }
@@ -300,9 +342,9 @@ namespace Wheather2_to_Bacnet
             ServiceInstaller serviceAdmin = new ServiceInstaller();
 
             serviceAdmin.StartType = ServiceStartMode.Automatic;
-            serviceAdmin.ServiceName = "WheatherBacnet";
-            serviceAdmin.DisplayName = "Wheather2 to Bacnet";
-            serviceAdmin.Description = "Bridge Wheather2 to Bacnet";
+            serviceAdmin.ServiceName = "WeatherBacnet";
+            serviceAdmin.DisplayName = "Weather2 to Bacnet";
+            serviceAdmin.Description = "Bridge myWeather2 to Bacnet";
 
             Installers.Add(process);
             Installers.Add(serviceAdmin);

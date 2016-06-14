@@ -24,9 +24,9 @@ You have to modify and add information into the registry : have a look to
 the .Reg file (UserAccessKey, Latitude, Longitude must be modified).
 
 On an old Win32 only PC, removes Wow6432Node from the .reg file entry :
-	[HKEY_LOCAL_MACHINE\SOFTWARE\Wow6432Node\Wheather2_to_Bacnet]
+	[HKEY_LOCAL_MACHINE\SOFTWARE\Wow6432Node\Weather2_to_Bacnet]
 	changes by
-	[HKEY_LOCAL_MACHINE\SOFTWARE\Wheather2_to_Bacnet]
+	[HKEY_LOCAL_MACHINE\SOFTWARE\Weather2_to_Bacnet]
 
 This .reg file should be registered by a double click.
 

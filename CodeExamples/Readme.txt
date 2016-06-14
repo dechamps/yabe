@@ -111,9 +111,10 @@ BacnetToDatabase
 
 Wheather2_to_Bacnet
 	A windows service application (or console) able to get back
-	Wheather2 data (http://www.myweather2.com/), and provides it on Bacnet.
+	Weather2 data (http://www.myweather2.com/), and provides it on Bacnet.
 	See comments in Readme file in the application directory and look at 
 	Wheather2config.reg file for configuration.
 
 	Available data are : Temperature, Windspeed, Humidity, Pressure, Winddir, 
-	Wheather Description, Sunset & Sunrise time. No wheather forecast data.
+	Weather Description, Sunset & Sunrise time, DewPoint & VaporPressure.
+	No weather forecast data.
