@@ -63,15 +63,23 @@ namespace AnotherStorageImplementation
 
             BaCSharpObject.OnExternalCOVNotify += new BaCSharpObject.WriteNotificationCallbackHandler(handler_OnCOVManagementNotify);
 
-            bacnet_client.Start();    // go
-            // Send Iam
-            bacnet_client.Iam(deviceId, new BacnetSegmentations());
-            bacnet_client.OnWhoIs += new BacnetClient.WhoIsHandler(handler_OnWhoIs);
-
-            if ((_device.FindBacnetObjectType(BacnetObjectTypes.OBJECT_NOTIFICATION_CLASS))|| (_device.FindBacnetObjectType(BacnetObjectTypes.OBJECT_SCHEDULE)))
+            try
             {
-                bacnet_client.WhoIs();                          // Send WhoIs : needed BY Notification & Schedule for deviceId<->IP endpoint
-                device.SetIpEndpoint(bacnet_client);            // Register the endpoint for IP Notification usage with IP:Port
+                bacnet_client.Start();    // go
+                // Send Iam
+                bacnet_client.Iam(deviceId, new BacnetSegmentations());
+                bacnet_client.OnWhoIs += new BacnetClient.WhoIsHandler(handler_OnWhoIs);
+
+                if ((_device.FindBacnetObjectType(BacnetObjectTypes.OBJECT_NOTIFICATION_CLASS)) || (_device.FindBacnetObjectType(BacnetObjectTypes.OBJECT_SCHEDULE)))
+                {
+                    bacnet_client.WhoIs();                          // Send WhoIs : needed BY Notification & Schedule for deviceId<->IP endpoint
+                    device.SetIpEndpoint(bacnet_client);            // Register the endpoint for IP Notification usage with IP:Port
+                }
+            }
+            catch
+            {
+                if (Environment.UserInteractive)
+                    Console.WriteLine("\nSocket Error, Udp Port already in used in exclusive mode ?");
             }
         }         
 

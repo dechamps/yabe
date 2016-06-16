@@ -44,7 +44,7 @@ namespace Weather2_to_Bacnet
     public class MyService : System.ServiceProcess.ServiceBase
     {
         const int UpdateDelay = 10; // Requests are sent to myweather2 every 10 minutes
-                                    // This is half the maximum for the free service
+                                    // This ~1/3 the maximum for the free service
 
         ManualResetEvent StopSrv = new ManualResetEvent(false);
 
@@ -308,16 +308,17 @@ namespace Weather2_to_Bacnet
     {
         static void Main(string[] args)
         {
-            // Console Mode detected via a param
-            if (args.Length > 0)
+            // detect Console Mode
+            if (Environment.UserInteractive)
             {
-                Console.WriteLine("Wheather2_to_Bacnet Running as a console application");
-                Console.WriteLine("Can be installed and started as a windows services");
+                Console.WriteLine("Running as a console application");
+                Console.WriteLine("Can be installed and started as a Windows services");
+                Console.WriteLine("... see the associated Readme file");
                 MyService ConsoleModeApp = new MyService();
                 if (ConsoleModeApp.RunAsConsoleApp() == false)
                 {
                     Console.WriteLine("\nError : Unable to find Parameters in the windows registry");
-                    Console.WriteLine("\tsee the corresponding Readme file and");
+                    Console.WriteLine("\tsee the associated Readme file and");
                     Console.WriteLine("\tWheather2config.reg in "+Directory.GetCurrentDirectory());
                 }
             }

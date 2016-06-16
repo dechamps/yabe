@@ -2,6 +2,7 @@
 *                           MIT License
 * 
 * Copyright (C) 2016 Frederic Chaxel <fchaxel@free.fr>
+* Icon Copyright David Vignoni, licence LGPL
 *
 * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
 * EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
@@ -13,7 +14,7 @@
 *
 *********************************************************************/
 
-This program (windows service or console) gets current wheather data
+This program (windows service or console) gets current weather data
 from MyWeather2 Internet Webservice and 'sends' them on Bacnet.
 
 You must first creates a user account into http://www.myweather2.com/
@@ -30,11 +31,7 @@ On an old Win32 only PC, removes Wow6432Node from the .reg file entry :
 
 This .reg file should be registered by a double click.
 
-To use it as a console application just run it with any kind of parameters 
-such as 'Wheather2_to_Bacnet Console' 
-
-A parameter is already set into the Visual Studio project user option file, 
-so debug mode will be OK as a console application.
+To use it as a console application just run the application.
 
 To register the Windows service : in an admin console type :
 	installutil.exe Wheather2_to_Bacnet.exe
@@ -48,3 +45,4 @@ The code could be simply ported to Linux-Mono :
 	hard code (for instance) the 4 parameters : UserAccessKey ...
 	removes the inheritence between MyService and ServiceBase
 	removes MyServiceInstaller class
+
