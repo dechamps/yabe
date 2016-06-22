@@ -3349,13 +3349,20 @@ namespace System.IO.BACnet.Serialize
 
         public static int Decode(byte[] buffer, int offset, int max_length, out BacnetMstpFrameTypes frame_type, out byte destination_address, out byte source_address, out int msg_length)
         {
+            if (max_length < MSTP_HEADER_LENGTH)  //not enough data
+            {
+                frame_type = BacnetMstpFrameTypes.FRAME_TYPE_BACNET_DATA_EXPECTING_REPLY; // don't care
+                destination_address = source_address = 0;   // don't care
+                msg_length = 0;
+                return -1;   
+            }
             frame_type = (BacnetMstpFrameTypes)buffer[offset + 2];
             destination_address = buffer[offset + 3];
             source_address = buffer[offset + 4];
             msg_length = (buffer[offset + 5] << 8) | (buffer[offset + 6] << 0);
             byte crc_header = buffer[offset + 7];
             ushort crc_data = 0;
-            if (max_length < MSTP_HEADER_LENGTH) return -1;     //not enough data
+
             if (msg_length > 0) crc_data = (ushort)((buffer[offset + 8 + msg_length + 1] << 8) | (buffer[offset + 8 + msg_length + 0] << 0));
             if (buffer[offset + 0] != MSTP_PREAMBLE1) return -1;
             if (buffer[offset + 1] != MSTP_PREAMBLE2) return -1;
@@ -3394,6 +3401,12 @@ namespace System.IO.BACnet.Serialize
 
         public static int Decode(byte[] buffer, int offset, int max_length, out BacnetPtpFrameTypes frame_type, out int msg_length)
         {
+            if (max_length < PTP_HEADER_LENGTH) // not enough data
+            {
+                frame_type = BacnetPtpFrameTypes.FRAME_TYPE_CONNECT_REQUEST; // don't care
+                msg_length = 0;
+                return -1;     //not enough data
+            }
             frame_type = (BacnetPtpFrameTypes)buffer[offset + 2];
             msg_length = (buffer[offset + 3] << 8) | (buffer[offset + 4] << 0);
             byte crc_header = buffer[offset + 5];
