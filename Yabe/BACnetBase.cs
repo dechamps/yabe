@@ -3363,7 +3363,12 @@ namespace System.IO.BACnet.Serialize
             byte crc_header = buffer[offset + 7];
             ushort crc_data = 0;
 
-            if (msg_length > 0) crc_data = (ushort)((buffer[offset + 8 + msg_length + 1] << 8) | (buffer[offset + 8 + msg_length + 0] << 0));
+            if (msg_length > 0)
+            {
+                if ((offset + 8 + msg_length + 1) >= buffer.Length)
+                    return -1;
+                crc_data = (ushort)((buffer[offset + 8 + msg_length + 1] << 8) | (buffer[offset + 8 + msg_length + 0] << 0));
+            }
             if (buffer[offset + 0] != MSTP_PREAMBLE1) return -1;
             if (buffer[offset + 1] != MSTP_PREAMBLE2) return -1;
             if (CRC_Calc_Header(buffer, offset + 2, 5) != crc_header) return -1;
@@ -3411,8 +3416,12 @@ namespace System.IO.BACnet.Serialize
             msg_length = (buffer[offset + 3] << 8) | (buffer[offset + 4] << 0);
             byte crc_header = buffer[offset + 5];
             ushort crc_data = 0;
-            if (max_length < PTP_HEADER_LENGTH) return -1;     //not enough data
-            if (msg_length > 0) crc_data = (ushort)((buffer[offset + 6 + msg_length + 1] << 8) | (buffer[offset + 6 + msg_length + 0] << 0));
+            if (msg_length > 0)
+            {
+                if ((offset + 6 + msg_length + 1) >= buffer.Length)
+                    return -1;
+                crc_data = (ushort)((buffer[offset + 6 + msg_length + 1] << 8) | (buffer[offset + 6 + msg_length + 0] << 0));
+            }
             if (buffer[offset + 0] != PTP_PREAMBLE1) return -1;
             if (buffer[offset + 1] != PTP_PREAMBLE2) return -1;
             if (MSTP.CRC_Calc_Header(buffer, offset + 2, 3) != crc_header) return -1;

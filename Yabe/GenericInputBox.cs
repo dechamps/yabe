@@ -48,10 +48,10 @@ namespace System.Windows.Forms
     [System.ComponentModel.DesignerCategory("")] // Avoid failure opening with the GUI Designer
     public partial class GenericInputBox<T> : Form where T : Control, new()
     {
-        public GenericInputBox(String BoxTitle, String Lbl, PostInitializeComponent<T> FillInput, double sizeFactor=1)
+        public GenericInputBox(String BoxTitle, String Lbl, PostInitializeComponent<T> FillInput = null, double sizeFactor=1, bool BtCancelVisible=true)
         {
             this.DialogResult = System.Windows.Forms.DialogResult.Cancel;
-            InitializeComponent(sizeFactor);
+            InitializeComponent(sizeFactor, BtCancelVisible);
             genericLbl.Text = Lbl;
             this.Text = BoxTitle;
             if (FillInput!=null)
@@ -70,7 +70,7 @@ namespace System.Windows.Forms
         private System.Windows.Forms.Button btOK;
         private System.Windows.Forms.Button btCancel;
 
-        private void InitializeComponent(double sizeFactor)
+        private void InitializeComponent(double sizeFactor, bool BtCancelVisible)
         {
             this.genericLbl = new System.Windows.Forms.Label();
             this.genericInput = new T();
@@ -95,7 +95,10 @@ namespace System.Windows.Forms
             // 
             // btOK
             // 
-            this.btOK.Location = new System.Drawing.Point(25, 78);
+            if (BtCancelVisible)
+                this.btOK.Location = new System.Drawing.Point(25, 78);
+            else
+                this.btOK.Location = new System.Drawing.Point((int)(155 / 2 * (sizeFactor)), 78);
             this.btOK.Name = "btOK";
             this.btOK.Size = new System.Drawing.Size(70, 23);
             this.btOK.TabIndex = 2;
@@ -103,15 +106,18 @@ namespace System.Windows.Forms
             this.btOK.UseVisualStyleBackColor = true;
             this.btOK.Click += new System.EventHandler(this.bt_Click);
             // 
-            // btOK
+            // btCancel
             // 
-            this.btCancel.Location = new System.Drawing.Point((int)(110 + (155 * (sizeFactor - 1))), 78);
-            this.btCancel.Name = "btCancel";
-            this.btCancel.Size = new System.Drawing.Size(70, 23);
-            this.btCancel.TabIndex = 2;
-            this.btCancel.Text = "Cancel";
-            this.btCancel.UseVisualStyleBackColor = true;
-            this.btCancel.Click += new System.EventHandler(this.bt_Click);
+            if (BtCancelVisible)
+            {
+                this.btCancel.Location = new System.Drawing.Point((int)(110 + (155 * (sizeFactor - 1))), 78);
+                this.btCancel.Name = "btCancel";
+                this.btCancel.Size = new System.Drawing.Size(70, 23);
+                this.btCancel.TabIndex = 2;
+                this.btCancel.Text = "Cancel";
+                this.btCancel.UseVisualStyleBackColor = true;
+                this.btCancel.Click += new System.EventHandler(this.bt_Click);
+            }
             // 
             // GenericInputBox
             // 
@@ -119,7 +125,7 @@ namespace System.Windows.Forms
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size((int)(203 + (155 * (sizeFactor-1))), 133);
             this.Controls.Add(this.btOK);
-            this.Controls.Add(this.btCancel);
+            if (BtCancelVisible) this.Controls.Add(this.btCancel);
             this.Controls.Add(this.genericInput);
             this.Controls.Add(this.genericLbl);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;

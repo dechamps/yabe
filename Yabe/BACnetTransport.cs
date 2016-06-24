@@ -2100,9 +2100,12 @@ namespace System.IO.BACnet
             //one preamble?
             if (m_local_offset > 0 && m_local_buffer[m_local_offset - 1] == MSTP.MSTP_PREAMBLE1)
             {
-                m_local_buffer[0] = MSTP.MSTP_PREAMBLE1;
-                m_local_offset = 1;
-                Trace.WriteLine("Garbage", null);
+                if (m_local_offset != 1)
+                {
+                    m_local_buffer[0] = MSTP.MSTP_PREAMBLE1;
+                    m_local_offset = 1;
+                    Trace.WriteLine("Garbage", null);
+                }
                 return;
             }
 
