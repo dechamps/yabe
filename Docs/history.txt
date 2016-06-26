@@ -1,9 +1,11 @@
 -------------------------------------------------------------------------------
                    YABE - YET ANOTHER BACNET EXPLORER
 -------------------------------------------------------------------------------
-1.0.9
+1.1.0 - 20160630
  - Remove a sporadic bug while sorting the object dictionary
  - Wheather2_to_Bacnet service application added into the package
+ - Clean DateTime propertites display
+ - Remove bug in Mstp & Ptp code
 
 1.0.8 - 20160501
  - Remote Bacnet/IP node access without BBMD 
