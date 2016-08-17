@@ -546,6 +546,13 @@ could be 'ovveride' by an optional external file
     </propsId>
 </BacnetObjectDescription>
 <BacnetObjectDescription>
+    <typeId>OBJECT_TIME_VALUE</typeId>
+    <propsId>
+    <BacnetPropertyIds>PROP_PRESENT_VALUE</BacnetPropertyIds>
+    <BacnetPropertyIds>PROP_STATUS_FLAGS</BacnetPropertyIds>
+    </propsId>
+</BacnetObjectDescription>
+<BacnetObjectDescription>
     <typeId>OBJECT_NOTIFICATION_FORWARDER</typeId>
     <propsId>
     <BacnetPropertyIds>PROP_STATUS_FLAGS</BacnetPropertyIds>
