@@ -4697,6 +4697,7 @@ namespace System.IO.BACnet.Serialize
                 }
 
                 _value_list.Add(new_entry);
+
             }
             value.values = _value_list;
 
@@ -5763,14 +5764,14 @@ namespace System.IO.BACnet.Serialize
                     value.Value = v;
                     return tag_len;
                 }
-                else if (property_id == BacnetPropertyIds.PROP_EVENT_TIME_STAMPS) 
+           /*     else if (property_id == BacnetPropertyIds.PROP_EVENT_TIME_STAMPS) 
                 {
                     DateTime dt;
                     len += decode_bacnet_datetime(buffer, offset, out dt);
                     value.Tag = BacnetApplicationTags.BACNET_APPLICATION_TAG_DATETIME;
                     value.Value = dt;
                     return len;
-                }
+                }*/
 
                 value.Tag = BacnetApplicationTags.BACNET_APPLICATION_TAG_CONTEXT_SPECIFIC_DECODED;
                 List<BacnetValue> list = new List<BacnetValue>();
