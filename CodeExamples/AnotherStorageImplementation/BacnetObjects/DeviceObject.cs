@@ -244,6 +244,9 @@ namespace BaCSharp
         {
             if (this.Equals(objId)) return this;
 
+            // conformity to §15.5.2
+            if ((objId.type==BacnetObjectTypes.OBJECT_DEVICE)&&(objId.instance==4194303)) return this;
+
             foreach (BaCSharpObject b in ObjectsList)
                 if (b.Equals(objId))
                     return b;
