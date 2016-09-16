@@ -1030,6 +1030,10 @@ namespace Utilities
         }
     }
 
+    // In order to remove the PriorityArray editor which is a problem
+    public class BacnetEditPriorityArray : UITypeEditor
+    {
+    }
     // In order to give a readable name to classic enums
     public class BacnetEnumValueDisplay : UITypeEditor
     {
@@ -1419,6 +1423,9 @@ namespace Utilities
                     return new BacnetEnumValueDisplay(new BacnetWritePriority());
                 case BacnetPropertyIds.PROP_PROGRAM_CHANGE:
                     return new BacnetEnumValueDisplay(new BacnetProgramChange());
+                case BacnetPropertyIds.PROP_PRIORITY_ARRAY:
+                    return new BacnetEditPriorityArray();
+
                 default :
                     return base.GetEditor(editorBaseType);
             }
