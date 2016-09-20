@@ -152,37 +152,37 @@
 		- Select an Ethernet or Wifi Interface
 		- Press the "Add" button in the "BACnet/Ethernet" field.
 
-	2.5 OPTIONS
+	2.6 OPTIONS
 	A few selected options.
 
-		2.5.1 Udp_ExclusiveUseOfSocket
+		2.6.1 Udp_ExclusiveUseOfSocket
 			Set this to 'true' to force single socket usage on port 0xBAC0. A value of 
 			'false' will create an extra unicast socket and allow multiple clients on
 			same ip/machine.
 
-		2.5.2 Subscriptions_Lifetime
+		2.6.2 Subscriptions_Lifetime
 			Subscriptions will be created with this lifetime. Eg. after 120 seconds the
 			subscription will be removed by device. Set to 0 to disable.
 	
-		2.5.3 Subscriptions_IssueConfirmedNotifies
+		2.6.3 Subscriptions_IssueConfirmedNotifies
 			By default notifications will be sent 'unconfirmed'. If you think your 
 			notifications are important set this to 'true' instead. 
 
-		2.5.4 MSTP_DisplayFreeAddresses
+		2.6.4 MSTP_DisplayFreeAddresses
 			By default a MSTP connection will display all 'free' addresses in the 
 			'Device' tree. This can help select a source_address for the program.
 			If you don't want to see the 'free' entries, set this option to 'false'
 
-		2.5.5 MSTP_LogStateMachine
+		2.6.5 MSTP_LogStateMachine
 			The MSTP code is able to display all state changes in log. This is very
 			verbose. It may help you understand the MSTP better though.
 	
-		2.5.6 Segments_Max
+		2.6.6 Segments_Max
 			This value sets 'allowed max_segments' to send to the client. The client
 			might not support segmentation though. If it gives you trouble, set this 
 			to 0 to disable.
 	
-		2.5.7 DefaultDownloadSpeed
+		2.6.7 DefaultDownloadSpeed
 			This value sets the method for 'file download'. (This is part of the 
 			original tests.) 
 			The default value of '0' will result in a standard 'send request, wait 
@@ -192,32 +192,32 @@
 			Value '2' will result in a 'segmented' sequence. This is the most efficient
 			for both Udp and MSTP. This is the result I sought!
 	
-		2.5.8 Udp_DontFragment
+		2.6.8 Udp_DontFragment
 			This will enforce (if set to 'true') no fragmentation on the udp. It ought
 			to be enforced, but it turns out that MTU is a bit tricky. (See 2.5.9)
 
-		2.5.9 Udp_MaxPayload
+		2.6.9 Udp_MaxPayload
 			The max payload for udp seems to differ from the expectations of BACnet.
 			The most common payload is 1472. Which is 1500 when added with the 28 bytes
 			ip headers. This number is determined by your local switch/router through.
 
-		2.5.10 DefaultPreferStructuredView
+		2.6.10 DefaultPreferStructuredView
 			The Addendum 135d defines a 'Structured View' entry in the address space.
 			This enables a hierarchical address space. (Thank you very much.)
 			Though if you like the flat model better, set this to 'false'.
 
-		2.5.11 DefaultWritePriority
+		2.6.11 DefaultWritePriority
 			Priorty level used for write operation. Can be changed without reboot.
 			<Ctrl><Alt> + 0 to 9 keys are shortcuts to change this value directly 
 			from the main form (0: no priority to priority level 9, for others ... 
 			no shortcut): a sound is played.
 
-		2.5.12 YabeDeviceId
+		2.6.12 YabeDeviceId
 			If this value is positive Yabe send response to Who-Is with this Bacnet
 			device Id. Can be usefull to set recipients list in notification class 
 			objects without using Yabe Ip endpoint. 
 
-	2.5 Bacnet Object name
+	2.7 Bacnet Object name
 			By default Bacnet objects are displayed using the object identifier eg : 
 			ANALOG_INPUT:0, DEVICE:333 ...
 			During network exploration, when object properties are read this

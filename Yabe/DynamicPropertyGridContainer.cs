@@ -1030,9 +1030,13 @@ namespace Utilities
         }
     }
 
-    // In order to remove the PriorityArray editor which is a problem
+    // In order to remove the default PriorityArray editor which is a problem
     public class BacnetEditPriorityArray : UITypeEditor
     {
+        public override UITypeEditorEditStyle GetEditStyle(ITypeDescriptorContext context)
+        {
+            return UITypeEditorEditStyle.None;
+        }
     }
     // In order to give a readable name to classic enums
     public class BacnetEnumValueDisplay : UITypeEditor
