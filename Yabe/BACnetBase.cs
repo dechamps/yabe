@@ -4582,12 +4582,12 @@ namespace System.IO.BACnet.Serialize
                 if (p_value.property.propertyArrayIndex != ASN1.BACNET_ARRAY_ALL)
                     ASN1.encode_context_unsigned(buffer, 3, p_value.property.propertyArrayIndex);
 
-                if (p_value.value != null && p_value.value is IList<BacnetError>)
+                if (p_value.value != null && p_value.value[0].Value is BacnetError)
                 {
                     /* Tag 5: Error */
                     ASN1.encode_opening_tag(buffer, 5);
-                    ASN1.encode_application_enumerated(buffer, (uint)((IList<BacnetError>)p_value.value)[0].error_class);
-                    ASN1.encode_application_enumerated(buffer, (uint)((IList<BacnetError>)p_value.value)[0].error_code);
+                    ASN1.encode_application_enumerated(buffer, (uint)((BacnetError)p_value.value[0].Value).error_class);
+                    ASN1.encode_application_enumerated(buffer, (uint)((BacnetError)p_value.value[0].Value).error_code);
                     ASN1.encode_closing_tag(buffer, 5);
                 }
                 else
