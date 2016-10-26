@@ -199,6 +199,7 @@ namespace DemoServer
 
                 //send
                 sender.ReadRangeResponse(adr, invoke_id, sender.GetSegmentBuffer(max_segments), objectId, property, status, (uint)count, application_data, requestType, position);
+                
             }
             else
                 sender.ErrorResponse(adr, BacnetConfirmedServices.SERVICE_CONFIRMED_READ_RANGE, invoke_id, BacnetErrorClasses.ERROR_CLASS_DEVICE, BacnetErrorCodes.ERROR_CODE_OTHER);    
@@ -658,65 +659,6 @@ namespace DemoServer
             }, null);
         }
 
-        private static void HandleSegmentationResponse(BacnetClient sender, BacnetAddress adr, byte invoke_id, BacnetMaxSegments max_segments, Action<BacnetClient.Segmentation> transmit)
-        {
-            BacnetClient.Segmentation segmentation = sender.GetSegmentBuffer(max_segments);
-
-            //send first
-            transmit(segmentation);
-
-            if (segmentation == null || segmentation.buffer.result == System.IO.BACnet.Serialize.EncodeResult.Good) return;
-
-            //start new thread to handle the segment sequence
-            System.Threading.ThreadPool.QueueUserWorkItem((o) =>
-            {
-                byte old_max_info_frames = sender.Transport.MaxInfoFrames;
-                sender.Transport.MaxInfoFrames = segmentation.window_size;      //increase max_info_frames, to increase throughput. This might be against 'standard'
-                while (true)
-                {
-                    bool more_follows = (segmentation.buffer.result & System.IO.BACnet.Serialize.EncodeResult.NotEnoughBuffer) > 0;
-
-                    //wait for segmentACK
-                    if ((segmentation.sequence_number - 1) % segmentation.window_size == 0 || !more_follows)
-                    {
-                        if (!sender.WaitForAllTransmits(sender.TransmitTimeout))
-                        {
-                            Trace.TraceWarning("Transmit timeout");
-                            break;
-                        }
-                        byte current_number = segmentation.sequence_number;
-                        if (!sender.WaitForSegmentAck(adr, invoke_id, segmentation, sender.Timeout))
-                        {
-                            Trace.TraceWarning("Didn't get segmentACK");
-                            break;
-                        }
-                        if (segmentation.sequence_number != current_number)
-                        {
-                            Trace.WriteLine("Oh, a retransmit", null);
-                            more_follows = true;
-                        }
-                    }
-                    else
-                    {
-                        //a negative segmentACK perhaps
-                        byte current_number = segmentation.sequence_number;
-                        sender.WaitForSegmentAck(adr, invoke_id, segmentation, 0);      //don't wait
-                        if (segmentation.sequence_number != current_number)
-                        {
-                            Trace.WriteLine("Oh, a retransmit", null);
-                            more_follows = true;
-                        }
-                    }
-
-                    if (more_follows)
-                        lock (m_lockObject) transmit(segmentation);
-                    else
-                        break;
-                }
-                sender.Transport.MaxInfoFrames = old_max_info_frames;
-            });
-        }
-
         private static void OnDeviceCommunicationControl(BacnetClient sender, BacnetAddress adr, byte invoke_id, uint time_duration, uint enable_disable, string password, BacnetMaxSegments max_segments)
         {
             switch (enable_disable)
@@ -780,11 +722,8 @@ namespace DemoServer
                     for (int i = 0; i < count; i += bogus.Length)
                         Array.Copy(bogus, 0, file_buffer, i, Math.Min(bogus.Length, count - i));
 
-                    //send
-                    HandleSegmentationResponse(sender, adr, invoke_id, max_segments, (seg) =>
-                    {
-                        sender.ReadFileResponse(adr, invoke_id, seg, position, count, end_of_file, file_buffer);
-                    });
+                    sender.ReadFileResponse(adr, invoke_id, sender.GetSegmentBuffer(max_segments), position, count, end_of_file, file_buffer);
+                   
                 }
                 catch (Exception)
                 {
@@ -812,10 +751,8 @@ namespace DemoServer
                     if (counts[0] == 0) m_storage.WritePropertyValue(object_id, BacnetPropertyIds.PROP_FILE_SIZE, 0);      //clear file
 
                     //send confirm
-                    HandleSegmentationResponse(sender, adr, invoke_id, max_segments, (seg) =>
-                    {
-                        sender.WriteFileResponse(adr, invoke_id, seg, position);
-                    });
+                    sender.WriteFileResponse(adr, invoke_id, sender.GetSegmentBuffer(max_segments), position);
+  
                 }
                 catch (Exception)
                 {
@@ -863,10 +800,8 @@ namespace DemoServer
                         values.Add(new BacnetReadAccessResult(p.objectIdentifier, value));
                     }
 
-                    HandleSegmentationResponse(sender, adr, invoke_id, max_segments, (seg) => 
-                    { 
-                        sender.ReadPropertyMultipleResponse(adr, invoke_id, seg, values); 
-                    });
+                    sender.ReadPropertyMultipleResponse(adr, invoke_id, sender.GetSegmentBuffer(max_segments), values); 
+
                 }
                 catch (Exception)
                 {
@@ -907,6 +842,7 @@ namespace DemoServer
                     DeviceStorage.ErrorCodes code = m_storage.ReadProperty(object_id, (BacnetPropertyIds)property.propertyIdentifier, property.propertyArrayIndex, out value);
                     if (code == DeviceStorage.ErrorCodes.Good)
                         sender.ReadPropertyResponse(adr, invoke_id, sender.GetSegmentBuffer(max_segments), object_id, property, value);
+
                     else
                         sender.ErrorResponse(adr, BacnetConfirmedServices.SERVICE_CONFIRMED_READ_PROPERTY, invoke_id, BacnetErrorClasses.ERROR_CLASS_DEVICE, BacnetErrorCodes.ERROR_CODE_OTHER);
                 }

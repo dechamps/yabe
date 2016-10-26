@@ -2316,6 +2316,127 @@ namespace System.IO.BACnet
             }
         }
 
+        // en cours
+        private void HandleSegmentationResponse(BacnetAddress adr, byte invoke_id, BacnetMaxSegments max_segments, Action<BacnetClient.Segmentation> transmit)
+        {
+            BacnetClient.Segmentation segmentation = GetSegmentBuffer(max_segments);
+
+            //send first
+            transmit(segmentation);
+
+            if (segmentation == null || segmentation.buffer.result == System.IO.BACnet.Serialize.EncodeResult.Good) return;
+
+            //start new thread to handle the segment sequence
+            System.Threading.ThreadPool.QueueUserWorkItem((o) =>
+            {
+                byte old_max_info_frames = Transport.MaxInfoFrames;
+                Transport.MaxInfoFrames = segmentation.window_size;      //increase max_info_frames, to increase throughput. This might be against 'standard'
+                while (true)
+                {
+                    bool more_follows = (segmentation.buffer.result & System.IO.BACnet.Serialize.EncodeResult.NotEnoughBuffer) > 0;
+
+                    //wait for segmentACK
+                    if ((segmentation.sequence_number - 1) % segmentation.window_size == 0 || !more_follows)
+                    {
+                        if (!WaitForAllTransmits(TransmitTimeout))
+                        {
+                            Trace.TraceWarning("Transmit timeout");
+                            break;
+                        }
+                        byte current_number = segmentation.sequence_number;
+                        if (!WaitForSegmentAck(adr, invoke_id, segmentation, this.Timeout))
+                        {
+                            Trace.TraceWarning("Didn't get segmentACK");
+                            break;
+                        }
+                        if (segmentation.sequence_number != current_number)
+                        {
+                            Trace.WriteLine("Oh, a retransmit", null);
+                            more_follows = true;
+                        }
+                    }
+                    else
+                    {
+                        //a negative segmentACK perhaps
+                        byte current_number = segmentation.sequence_number;
+                        WaitForSegmentAck(adr, invoke_id, segmentation, 0);      //don't wait
+                        if (segmentation.sequence_number != current_number)
+                        {
+                            Trace.WriteLine("Oh, a retransmit", null);
+                            more_follows = true;
+                        }
+                    }
+
+                    if (more_follows)
+                        //lock (m_lockObject) transmit(segmentation);
+                        transmit(segmentation);
+                    else
+                        break;
+                }
+                Transport.MaxInfoFrames = old_max_info_frames;
+            });
+        }
+
+        // Handle the segmentation of several too hugh response (if it's accepted by the client)
+        // used by ReadRange, ReadProperty, ReadPropertyMultiple & ReadFile responses
+        public void HandleSegmentationResponse(BacnetAddress adr, byte invoke_id, Segmentation segmentation, Action<BacnetClient.Segmentation> transmit)
+        {
+
+            //send first
+            transmit(segmentation);
+
+            if (segmentation == null || segmentation.buffer.result == System.IO.BACnet.Serialize.EncodeResult.Good) return;
+
+            //start new thread to handle the segment sequence (if required)
+            System.Threading.ThreadPool.QueueUserWorkItem((o) =>
+            {
+                byte old_max_info_frames = Transport.MaxInfoFrames;
+                Transport.MaxInfoFrames = segmentation.window_size;      //increase max_info_frames, to increase throughput. This might be against 'standard'
+                while (true)
+                {
+                    bool more_follows = (segmentation.buffer.result & System.IO.BACnet.Serialize.EncodeResult.NotEnoughBuffer) > 0;
+
+                    //wait for segmentACK
+                    if ((segmentation.sequence_number - 1) % segmentation.window_size == 0 || !more_follows)
+                    {
+                        if (!WaitForAllTransmits(TransmitTimeout))
+                        {
+                            Trace.TraceWarning("Transmit timeout");
+                            break;
+                        }
+                        byte current_number = segmentation.sequence_number;
+                        if (!WaitForSegmentAck(adr, invoke_id, segmentation, this.Timeout))
+                        {
+                            Trace.TraceWarning("Didn't get segmentACK");
+                            break;
+                        }
+                        if (segmentation.sequence_number != current_number)
+                        {
+                            Trace.WriteLine("Oh, a retransmit", null);
+                            more_follows = true;
+                        }
+                    }
+                    else
+                    {
+                        //a negative segmentACK perhaps
+                        byte current_number = segmentation.sequence_number;
+                        WaitForSegmentAck(adr, invoke_id, segmentation, 0);      //don't wait
+                        if (segmentation.sequence_number != current_number)
+                        {
+                            Trace.WriteLine("Oh, a retransmit", null);
+                            more_follows = true;
+                        }
+                    }
+
+                    if (more_follows)
+                        //lock (m_lockObject) transmit(segmentation);
+                        transmit(segmentation);
+                    else
+                        break;
+                }
+                Transport.MaxInfoFrames = old_max_info_frames;
+            });
+        }
         private void SendComplexAck(BacnetAddress adr, byte invoke_id, Segmentation segmentation, BacnetConfirmedServices service, Action<EncodeBuffer> apdu_content_encode)
         {
             Trace.WriteLine("Sending " + System.Threading.Thread.CurrentThread.CurrentCulture.TextInfo.ToTitleCase(service.ToString().ToLower()) + " ... ", null);
@@ -2357,9 +2478,13 @@ namespace System.IO.BACnet
 
         public void ReadPropertyResponse(BacnetAddress adr, byte invoke_id, Segmentation segmentation, BacnetObjectId object_id, BacnetPropertyReference property, IEnumerable<BacnetValue> value)
         {
-            SendComplexAck(adr, invoke_id, segmentation, BacnetConfirmedServices.SERVICE_CONFIRMED_READ_PROPERTY, (b) =>
+            // response could be segmented
+            HandleSegmentationResponse(adr, invoke_id, segmentation, (o) =>
             {
-                Services.EncodeReadPropertyAcknowledge(b, object_id, property.propertyIdentifier, property.propertyArrayIndex, value);
+                SendComplexAck(adr, invoke_id, segmentation, BacnetConfirmedServices.SERVICE_CONFIRMED_READ_PROPERTY, (b) =>
+                {
+                    Services.EncodeReadPropertyAcknowledge(b, object_id, property.propertyIdentifier, property.propertyArrayIndex, value);
+                });
             });
         }
 
@@ -2373,25 +2498,37 @@ namespace System.IO.BACnet
         }
         public void ReadPropertyMultipleResponse(BacnetAddress adr, byte invoke_id, Segmentation segmentation, IList<BacnetReadAccessResult> values)
         {
-            SendComplexAck(adr, invoke_id, segmentation, BacnetConfirmedServices.SERVICE_CONFIRMED_READ_PROP_MULTIPLE, (b) => 
-            { 
-                Services.EncodeReadPropertyMultipleAcknowledge(b, values); 
+            // response could be segmented
+            HandleSegmentationResponse(adr, invoke_id, segmentation, (o) =>
+            {
+                SendComplexAck(adr, invoke_id, segmentation, BacnetConfirmedServices.SERVICE_CONFIRMED_READ_PROP_MULTIPLE, (b) => 
+                { 
+                    Services.EncodeReadPropertyMultipleAcknowledge(b, values); 
+                });
             });
         }
 
         public void ReadRangeResponse(BacnetAddress adr, byte invoke_id, Segmentation segmentation, BacnetObjectId object_id, BacnetPropertyReference property, BacnetResultFlags status, uint item_count, byte[] application_data, BacnetReadRangeRequestTypes request_type, uint first_sequence_no)
         {
-            SendComplexAck(adr, invoke_id, segmentation, BacnetConfirmedServices.SERVICE_CONFIRMED_READ_RANGE, (b) =>
+            // response could be segmented
+            HandleSegmentationResponse(adr, invoke_id, segmentation, (o) =>
             {
-                Services.EncodeReadRangeAcknowledge(b, object_id, property.propertyIdentifier, property.propertyArrayIndex, BacnetBitString.ConvertFromInt((uint)status), item_count, application_data, request_type, first_sequence_no);
+                SendComplexAck(adr, invoke_id, segmentation, BacnetConfirmedServices.SERVICE_CONFIRMED_READ_RANGE, (b) =>
+                {
+                    Services.EncodeReadRangeAcknowledge(b, object_id, property.propertyIdentifier, property.propertyArrayIndex, BacnetBitString.ConvertFromInt((uint)status), item_count, application_data, request_type, first_sequence_no);
+                });
             });
         }
 
         public void ReadFileResponse(BacnetAddress adr, byte invoke_id, Segmentation segmentation, int position, uint count, bool end_of_file, byte[] file_buffer)
         {
-            SendComplexAck(adr, invoke_id, segmentation, BacnetConfirmedServices.SERVICE_CONFIRMED_ATOMIC_READ_FILE, (b) =>
+            // response could be segmented
+            HandleSegmentationResponse(adr, invoke_id, segmentation, (o) =>
             {
-                Services.EncodeAtomicReadFileAcknowledge(b, true, end_of_file, position, 1, new byte[][] { file_buffer }, new int[] { (int)count });
+                SendComplexAck(adr, invoke_id, segmentation, BacnetConfirmedServices.SERVICE_CONFIRMED_READ_PROPERTY, (b) =>
+                {
+                    Services.EncodeAtomicReadFileAcknowledge(b, true, end_of_file, position, 1, new byte[][] { file_buffer }, new int[] { (int)count });
+                });
             });
         }
 
