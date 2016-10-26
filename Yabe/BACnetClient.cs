@@ -2316,70 +2316,9 @@ namespace System.IO.BACnet
             }
         }
 
-        // en cours
-        private void HandleSegmentationResponse(BacnetAddress adr, byte invoke_id, BacnetMaxSegments max_segments, Action<BacnetClient.Segmentation> transmit)
-        {
-            BacnetClient.Segmentation segmentation = GetSegmentBuffer(max_segments);
-
-            //send first
-            transmit(segmentation);
-
-            if (segmentation == null || segmentation.buffer.result == System.IO.BACnet.Serialize.EncodeResult.Good) return;
-
-            //start new thread to handle the segment sequence
-            System.Threading.ThreadPool.QueueUserWorkItem((o) =>
-            {
-                byte old_max_info_frames = Transport.MaxInfoFrames;
-                Transport.MaxInfoFrames = segmentation.window_size;      //increase max_info_frames, to increase throughput. This might be against 'standard'
-                while (true)
-                {
-                    bool more_follows = (segmentation.buffer.result & System.IO.BACnet.Serialize.EncodeResult.NotEnoughBuffer) > 0;
-
-                    //wait for segmentACK
-                    if ((segmentation.sequence_number - 1) % segmentation.window_size == 0 || !more_follows)
-                    {
-                        if (!WaitForAllTransmits(TransmitTimeout))
-                        {
-                            Trace.TraceWarning("Transmit timeout");
-                            break;
-                        }
-                        byte current_number = segmentation.sequence_number;
-                        if (!WaitForSegmentAck(adr, invoke_id, segmentation, this.Timeout))
-                        {
-                            Trace.TraceWarning("Didn't get segmentACK");
-                            break;
-                        }
-                        if (segmentation.sequence_number != current_number)
-                        {
-                            Trace.WriteLine("Oh, a retransmit", null);
-                            more_follows = true;
-                        }
-                    }
-                    else
-                    {
-                        //a negative segmentACK perhaps
-                        byte current_number = segmentation.sequence_number;
-                        WaitForSegmentAck(adr, invoke_id, segmentation, 0);      //don't wait
-                        if (segmentation.sequence_number != current_number)
-                        {
-                            Trace.WriteLine("Oh, a retransmit", null);
-                            more_follows = true;
-                        }
-                    }
-
-                    if (more_follows)
-                        //lock (m_lockObject) transmit(segmentation);
-                        transmit(segmentation);
-                    else
-                        break;
-                }
-                Transport.MaxInfoFrames = old_max_info_frames;
-            });
-        }
-
         // Handle the segmentation of several too hugh response (if it's accepted by the client)
         // used by ReadRange, ReadProperty, ReadPropertyMultiple & ReadFile responses
-        public void HandleSegmentationResponse(BacnetAddress adr, byte invoke_id, Segmentation segmentation, Action<BacnetClient.Segmentation> transmit)
+        private void HandleSegmentationResponse(BacnetAddress adr, byte invoke_id, Segmentation segmentation, Action<BacnetClient.Segmentation> transmit)
         {
 
             //send first
