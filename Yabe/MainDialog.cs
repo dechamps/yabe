@@ -39,6 +39,7 @@ using System.Xml.Serialization;
 using System.Threading;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.Media;
+using System.Linq;
 
 namespace Yabe
 {
@@ -2528,8 +2529,8 @@ namespace Yabe
             new AlarmSummary(m_AddressSpaceTree.ImageList, comm, adr, device_id, DevicesObjectsName).ShowDialog();
         }
 
-        // Read the Adress Space, and change all object Id by name (using synchronous network access)
-        // Popup Menu Get Properties Name
+        // Read the Adress Space, and change all object Id by name
+        // Popup ToolTipText Get Properties Name
         private void readPropertiesNameToolStripMenuItem_Click(object sender, EventArgs e)
         {
             //fetch end point
@@ -2546,14 +2547,88 @@ namespace Yabe
             }
            
             // Go
-            System.Threading.ThreadPool.QueueUserWorkItem((o) =>
-            {
-                ChangeObjectIdByName(m_AddressSpaceTree.Nodes, comm, adr, AsynchRequestId);
-            });
+            ChangeObjectIdByName(m_AddressSpaceTree.Nodes, comm, adr);
 
         }
 
-        private void ChangeObjectIdByName(TreeNodeCollection tnc, BacnetClient comm, BacnetAddress adr, int AsynchRequestId)
+        // In the Objects TreeNode, get all elements without the Bacnet PROP_OBJECT_NAME not Read out
+        private void GetRequiredObjectName(TreeNodeCollection tnc, List<BacnetReadAccessSpecification> bras)
+        {
+            foreach (TreeNode tn in tnc)
+            {
+                if (tn.ToolTipText == "")
+                {
+                    bras.Add(new BacnetReadAccessSpecification((BacnetObjectId)tn.Tag, new BacnetPropertyReference[] { new BacnetPropertyReference((uint)BacnetPropertyIds.PROP_OBJECT_NAME, System.IO.BACnet.Serialize.ASN1.BACNET_ARRAY_ALL) }));
+                }
+                if (tn.Nodes != null)
+                    GetRequiredObjectName(tn.Nodes, bras);
+            }
+        }
+        // In the Objects TreeNode, set all elements with the ReadPropertyMultiple response
+        private void SetObjectName(TreeNodeCollection tnc, IList<BacnetReadAccessResult> result, BacnetAddress adr)
+        {
+            foreach (TreeNode tn in tnc)
+            {
+                BacnetObjectId b=(BacnetObjectId)tn.Tag;
+
+                try
+                {
+                    if (tn.ToolTipText == "")
+                    {
+                        BacnetReadAccessResult r = result.Single(o => o.objectIdentifier.Equals(b));
+                        tn.ToolTipText = tn.Text;
+                        tn.Text = r.values[0].value[0].ToString();
+                    }
+                }
+                catch { }
+
+                lock (DevicesObjectsName)
+                {
+                    var t = new Tuple<String, BacnetObjectId>(adr.FullHashString(), (BacnetObjectId)tn.Tag);
+                    DevicesObjectsName.Remove(t); // sometimes the same object appears at several place (in Groups for instance).
+                    DevicesObjectsName.Add(t, tn.Text);
+                }
+
+                if (tn.Nodes != null)
+                    SetObjectName(tn.Nodes, result, adr);
+            }
+
+        }
+        // Try a ReadPropertyMultiple for all PROP_OBJECT_NAME not already known
+        private void ChangeObjectIdByName(TreeNodeCollection tnc, BacnetClient comm, BacnetAddress adr)
+        {
+            int _retries = comm.Retries;
+            comm.Retries = 1;
+            bool IsOK = false;
+
+            List<BacnetReadAccessSpecification> bras = new List<BacnetReadAccessSpecification>();
+            GetRequiredObjectName(tnc, bras);
+
+            if (bras.Count==0)
+                IsOK = true;
+            else
+                try
+                {
+                    IList<BacnetReadAccessResult> result = null;
+                    if (comm.ReadPropertyMultipleRequest(adr, bras, out result) == true)
+                    {
+                        SetObjectName(tnc, result, adr);
+                        IsOK = true;
+                    }
+                }
+                catch{}
+
+            // Fail, so go One by One, in a background thread
+            if (!IsOK)
+                System.Threading.ThreadPool.QueueUserWorkItem((o) =>
+                {
+                    ChangeObjectIdByNameOneByOne(m_AddressSpaceTree.Nodes, comm, adr, AsynchRequestId);
+                });  
+
+            comm.Retries = _retries;
+        }
+
+        private void ChangeObjectIdByNameOneByOne(TreeNodeCollection tnc, BacnetClient comm, BacnetAddress adr, int AsynchRequestId)
         {
             int _retries = comm.Retries;
             comm.Retries = 1;
@@ -2589,7 +2664,9 @@ namespace Yabe
                 }
 
                 if (tn.Nodes != null)
-                    ChangeObjectIdByName(tn.Nodes, comm, adr, AsynchRequestId);
+                    ChangeObjectIdByNameOneByOne(tn.Nodes, comm, adr, AsynchRequestId);
+
+                comm.Retries = _retries;
             }
         }
 

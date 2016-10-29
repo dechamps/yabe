@@ -557,7 +557,7 @@
             this.alarmSummaryToolStripMenuItem,
             this.readPropertiesNameToolStripMenuItem});
             this.m_DeviceTreeMenuStrip.Name = "m_DeviceTreeMenuStrip";
-            this.m_DeviceTreeMenuStrip.Size = new System.Drawing.Size(225, 186);
+            this.m_DeviceTreeMenuStrip.Size = new System.Drawing.Size(225, 208);
             // 
             // addDeviceToolStripMenuItem
             // 
