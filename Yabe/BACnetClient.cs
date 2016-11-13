@@ -196,6 +196,7 @@ namespace System.IO.BACnet
                 raw_buffer = buffer;
                 raw_length = length;
                 raw_offset = offset;
+                int Ths_Reject_Reason;
 
                 if (OnConfirmedServiceRequest != null) 
                     OnConfirmedServiceRequest(this, adr, type, service, max_segments, max_adpu, invoke_id, buffer, offset, length);
@@ -208,10 +209,36 @@ namespace System.IO.BACnet
                 {
                     BacnetObjectId object_id;
                     BacnetPropertyReference property;
-                    if (Services.DecodeReadProperty(buffer, offset, length, out object_id, out property) >= 0)
+                    if (Services.DecodeReadProperty(buffer, offset, length, out object_id, out property, out Ths_Reject_Reason) >= 0)
+                    {
                         OnReadPropertyRequest(this, adr, invoke_id, object_id, property, max_segments);
+                    }
                     else
+                    {
+                        if (Ths_Reject_Reason == -1)
+                        {
+                            SendConfirmedServiceReject(adr, invoke_id, BacnetRejectReasons.REJECT_REASON_MISSING_REQUIRED_PARAMETER);
+                        }
+                        else if (Ths_Reject_Reason == -2)
+                        {
+                            SendConfirmedServiceReject(adr, invoke_id, BacnetRejectReasons.REJECT_REASON_INVALID_TAG);
+                        }
+                        else if (Ths_Reject_Reason == -3)
+                        {
+                            SendConfirmedServiceReject(adr, invoke_id, BacnetRejectReasons.REJECT_REASON_TOO_MANY_ARGUMENTS);
+                        }
+
+                        else if (Ths_Reject_Reason == -4)
+                        {
+                            ErrorResponse(adr, BacnetConfirmedServices.SERVICE_CONFIRMED_READ_PROPERTY, invoke_id, BacnetErrorClasses.ERROR_CLASS_PROPERTY, BacnetErrorCodes.ERROR_CODE_PROPERTY_IS_NOT_AN_ARRAY);
+                        }
+
+                        else if (Ths_Reject_Reason == -5)
+                        {
+                            ErrorResponse(adr, BacnetConfirmedServices.SERVICE_CONFIRMED_READ_PROPERTY, invoke_id, BacnetErrorClasses.ERROR_CLASS_PROPERTY, BacnetErrorCodes.ERROR_CODE_INVALID_ARRAY_INDEX);
+                        }
                         Trace.TraceWarning("Couldn't decode DecodeReadProperty");
+                    }
                 }
                 else if (service == BacnetConfirmedServices.SERVICE_CONFIRMED_WRITE_PROPERTY && OnWritePropertyRequest != null)
                 {

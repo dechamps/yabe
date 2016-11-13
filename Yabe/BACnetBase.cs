@@ -3265,7 +3265,7 @@ namespace System.IO.BACnet.Serialize
                     //SendResult(sender, BacnetBvlcResults.BVLC_RESULT_DELETE_FOREIGN_DEVICE_TABLE_ENTRY_NAK);
                     return -1;
                 case BacnetBvlcFunctions.BVLC_READ_BROADCAST_DIST_TABLE:
-                    //SendResult(sender, BacnetBvlcResults.BVLC_RESULT_READ_BROADCAST_DISTRIBUTION_TABLE_NAK);
+                    SendResult(sender, BacnetBvlcResults.BVLC_RESULT_READ_BROADCAST_DISTRIBUTION_TABLE_NAK);
                     return -1;
                 case BacnetBvlcFunctions.BVLC_WRITE_BROADCAST_DISTRIBUTION_TABLE:
                     //SendResult(sender, BacnetBvlcResults.BVLC_RESULT_WRITE_BROADCAST_DISTRIBUTION_TABLE_NAK);
@@ -4581,13 +4581,33 @@ namespace System.IO.BACnet.Serialize
                 /* Tag 3: optional propertyArrayIndex */
                 if (p_value.property.propertyArrayIndex != ASN1.BACNET_ARRAY_ALL)
                     ASN1.encode_context_unsigned(buffer, 3, p_value.property.propertyArrayIndex);
-
-                if (p_value.value != null && p_value.value[0].Value is BacnetError)
+                if (p_value.value != null && p_value.value[0].Tag == BacnetApplicationTags.BACNET_APPLICATION_TAG_ERROR)
                 {
+                    ///Modified by thamersalek
+                    string[] Ths_errors = p_value.value[0].Value.ToString().Split(':');
+                    string err_class1 = Ths_errors[0];
+                    string err_code1 = Ths_errors[1];
+
+
                     /* Tag 5: Error */
                     ASN1.encode_opening_tag(buffer, 5);
-                    ASN1.encode_application_enumerated(buffer, (uint)((BacnetError)p_value.value[0].Value).error_class);
-                    ASN1.encode_application_enumerated(buffer, (uint)((BacnetError)p_value.value[0].Value).error_code);
+                    if (err_class1 == "ERROR_CLASS_OBJECT")
+                    {
+                        ASN1.encode_application_enumerated(buffer, 1);
+                        //ASN1.encode_application_enumerated(buffer, (uint)((IList<BacnetError>)p_value.value)[0].error_code);
+                        ASN1.encode_application_enumerated(buffer, 31);
+                    }
+
+                    else
+                    {
+                        ASN1.encode_application_enumerated(buffer, 2);
+                        //ASN1.encode_application_enumerated(buffer, (uint)((IList<BacnetError>)p_value.value)[0].error_code);
+                        ASN1.encode_application_enumerated(buffer, 32);
+
+                    }
+
+                    //ASN1.encode_application_enumerated(buffer, (uint)((IList<BacnetError>)p_value.value)[0].error_class);
+
                     ASN1.encode_closing_tag(buffer, 5);
                 }
                 else
@@ -7932,28 +7952,47 @@ namespace System.IO.BACnet.Serialize
             return len;
         }
 
-        public static int DecodeReadProperty(byte[] buffer, int offset, int apdu_len, out BacnetObjectId object_id, out BacnetPropertyReference property)
+        /* Added (by Thamer Alsalek) BTL conformance for : BC 135.1: 13.4.3 - Bad Tag Diagnostic & BC 135.1: 13.4.4-A - Missing Required Parameter */
+        public static int DecodeReadProperty(byte[] buffer, int offset, int apdu_len, out BacnetObjectId object_id, out BacnetPropertyReference property, out int Ths_Reject_Reason)
         {
             int len = 0;
             ushort type = 0;
             byte tag_number = 0;
             uint len_value_type = 0;
+            Ths_Reject_Reason = 0;
 
             object_id = new BacnetObjectId();
             property = new BacnetPropertyReference();
 
+            // must have at least 2 tags , otherwise return reject code: Missing required parameter
+            if (apdu_len < 7)
+            {
+                Ths_Reject_Reason = -1;
+                return -1;
+            }
             /* Tag 0: Object ID          */
             if (!ASN1.decode_is_context_tag(buffer, offset + len, 0))
+            {
+
+                Ths_Reject_Reason = -2;
                 return -1;
+            }
+
             len++;
             len += ASN1.decode_object_id(buffer, offset + len, out type, out object_id.instance);
             object_id.type = (BacnetObjectTypes)type;
             /* Tag 1: Property ID */
+
             len +=
                 ASN1.decode_tag_number_and_value(buffer, offset + len, out tag_number, out len_value_type);
             if (tag_number != 1)
+            {
+                Ths_Reject_Reason = -2;
                 return -1;
+            }
+
             len += ASN1.decode_enumerated(buffer, offset + len, len_value_type, out property.propertyIdentifier);
+
             /* Tag 2: Optional Array Index */
             if (len < apdu_len)
             {
@@ -7961,13 +8000,36 @@ namespace System.IO.BACnet.Serialize
                 if ((tag_number == 2) && (len < apdu_len))
                 {
                     len += ASN1.decode_unsigned(buffer, offset + len, len_value_type, out property.propertyArrayIndex);
+
+
+                    // Thamer Alsalek: the below check is not accurate , somebody needs to provide better check for : BacnetErrorCodes.ERROR_CODE_INVALID_ARRAY_INDEX , contact : thamersalek@yahoo.com to cooperate to resolve
+                    if (property.propertyArrayIndex > 8)
+                    {
+                        Ths_Reject_Reason = -5;
+                        return -1;
+                    }
+
                 }
                 else
+                {
+
+                    Ths_Reject_Reason = -2;
                     return -1;
+                }
+
             }
             else
-                property.propertyArrayIndex = ASN1.BACNET_ARRAY_ALL;
+            {
 
+                property.propertyArrayIndex = ASN1.BACNET_ARRAY_ALL;
+            }
+
+            if (len < apdu_len)
+            {
+                /* If something left over now, we have an invalid request */
+                Ths_Reject_Reason = -3;
+                return -1;
+            }
             return len;
         }
 

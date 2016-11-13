@@ -57,7 +57,7 @@ namespace System.IO.BACnet.Storage
             Objects = new Object[0];
         }
 
-        private Property FindProperty(BacnetObjectId object_id, BacnetPropertyIds property_id)
+        public Property FindProperty(BacnetObjectId object_id, BacnetPropertyIds property_id)
         {
             //liniear search
             Object obj = FindObject(object_id);
@@ -110,7 +110,10 @@ namespace System.IO.BACnet.Storage
             GenericError = -1,
             NotExist = -2,
             NotForMe = -3,
-            WriteAccessDenied = -4
+            WriteAccessDenied = -4,
+            //Added by thamersalek
+            UnKnownObject = -5,
+            UnKnownProperty = -6,
         }
 
         public int ReadPropertyValue(BacnetObjectId object_id, BacnetPropertyIds property_id)
@@ -143,7 +146,11 @@ namespace System.IO.BACnet.Storage
                 if (handled) return status;
             }
 
-            //find in storage
+            //By thamersalek : find Object in storage            
+            Object Obj1 = FindObject(object_id);
+            if (Obj1 == null)
+                return ErrorCodes.UnKnownObject;
+            //Object found now find property
             Property p = FindProperty(object_id, property_id);
             if (p == null) return ErrorCodes.NotExist;
 
@@ -171,13 +178,26 @@ namespace System.IO.BACnet.Storage
             int count = 0;
             foreach (BacnetPropertyReference entry in properties)
             {
+                
                 BacnetPropertyValue new_entry = new BacnetPropertyValue();
                 new_entry.property = entry;
-                if (ReadProperty(object_id, (BacnetPropertyIds)entry.propertyIdentifier, entry.propertyArrayIndex, out new_entry.value) != ErrorCodes.Good)
-                    new_entry.value = new BacnetValue[] { new BacnetValue(BacnetApplicationTags.BACNET_APPLICATION_TAG_ERROR, new BacnetError(BacnetErrorClasses.ERROR_CLASS_OBJECT, BacnetErrorCodes.ERROR_CODE_UNKNOWN_PROPERTY)) };
+                //modified by thamersalek
+                if (ReadProperty(object_id, (BacnetPropertyIds)entry.propertyIdentifier, entry.propertyArrayIndex, out new_entry.value) == ErrorCodes.UnKnownObject)
+                {
+                    
+                    new_entry.value = new BacnetValue[] { new BacnetValue(BacnetApplicationTags.BACNET_APPLICATION_TAG_ERROR, new BacnetError(BacnetErrorClasses.ERROR_CLASS_OBJECT, BacnetErrorCodes.ERROR_CODE_UNKNOWN_OBJECT)) };
+                }
+
+                else if (ReadProperty(object_id, (BacnetPropertyIds)entry.propertyIdentifier, entry.propertyArrayIndex, out new_entry.value) == ErrorCodes.NotExist)
+                {
+                    
+                    new_entry.value = new BacnetValue[] { new BacnetValue(BacnetApplicationTags.BACNET_APPLICATION_TAG_ERROR, new BacnetError(BacnetErrorClasses.ERROR_CLASS_PROPERTY, BacnetErrorCodes.ERROR_CODE_UNKNOWN_PROPERTY)) };
+                }
+
                 values_ret[count] = new_entry;
+
                 count++;
-            }
+            }    
 
             values = values_ret;
         }
