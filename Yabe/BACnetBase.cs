@@ -7953,30 +7953,23 @@ namespace System.IO.BACnet.Serialize
         }
 
         /* Added (by Thamer Alsalek) BTL conformance for : BC 135.1: 13.4.3 - Bad Tag Diagnostic & BC 135.1: 13.4.4-A - Missing Required Parameter */
-        public static int DecodeReadProperty(byte[] buffer, int offset, int apdu_len, out BacnetObjectId object_id, out BacnetPropertyReference property, out int Ths_Reject_Reason)
+        public static int DecodeReadProperty(byte[] buffer, int offset, int apdu_len, out BacnetObjectId object_id, out BacnetPropertyReference property)
         {
             int len = 0;
             ushort type = 0;
             byte tag_number = 0;
             uint len_value_type = 0;
-            Ths_Reject_Reason = 0;
 
             object_id = new BacnetObjectId();
             property = new BacnetPropertyReference();
 
             // must have at least 2 tags , otherwise return reject code: Missing required parameter
             if (apdu_len < 7)
-            {
-                Ths_Reject_Reason = -1;
                 return -1;
-            }
+
             /* Tag 0: Object ID          */
             if (!ASN1.decode_is_context_tag(buffer, offset + len, 0))
-            {
-
-                Ths_Reject_Reason = -2;
-                return -1;
-            }
+                return -2;
 
             len++;
             len += ASN1.decode_object_id(buffer, offset + len, out type, out object_id.instance);
@@ -7986,10 +7979,7 @@ namespace System.IO.BACnet.Serialize
             len +=
                 ASN1.decode_tag_number_and_value(buffer, offset + len, out tag_number, out len_value_type);
             if (tag_number != 1)
-            {
-                Ths_Reject_Reason = -2;
-                return -1;
-            }
+                return -2;
 
             len += ASN1.decode_enumerated(buffer, offset + len, len_value_type, out property.propertyIdentifier);
 
@@ -8004,18 +7994,10 @@ namespace System.IO.BACnet.Serialize
 
                     // Thamer Alsalek: the below check is not accurate , somebody needs to provide better check for : BacnetErrorCodes.ERROR_CODE_INVALID_ARRAY_INDEX , contact : thamersalek@yahoo.com to cooperate to resolve
                     if (property.propertyArrayIndex > 8)
-                    {
-                        Ths_Reject_Reason = -5;
-                        return -1;
-                    }
-
+                        return -5;
                 }
                 else
-                {
-
-                    Ths_Reject_Reason = -2;
-                    return -1;
-                }
+                    return -2;
 
             }
             else
@@ -8025,11 +8007,9 @@ namespace System.IO.BACnet.Serialize
             }
 
             if (len < apdu_len)
-            {
                 /* If something left over now, we have an invalid request */
-                Ths_Reject_Reason = -3;
-                return -1;
-            }
+                return -3;
+
             return len;
         }
 

@@ -196,7 +196,6 @@ namespace System.IO.BACnet
                 raw_buffer = buffer;
                 raw_length = length;
                 raw_offset = offset;
-                int Ths_Reject_Reason;
 
                 if (OnConfirmedServiceRequest != null) 
                     OnConfirmedServiceRequest(this, adr, type, service, max_segments, max_adpu, invoke_id, buffer, offset, length);
@@ -209,7 +208,9 @@ namespace System.IO.BACnet
                 {
                     BacnetObjectId object_id;
                     BacnetPropertyReference property;
-                    if (Services.DecodeReadProperty(buffer, offset, length, out object_id, out property, out Ths_Reject_Reason) >= 0)
+                    int Ths_Reject_Reason;
+
+                    if ((Ths_Reject_Reason=Services.DecodeReadProperty(buffer, offset, length, out object_id, out property)) >= 0)
                     {
                         OnReadPropertyRequest(this, adr, invoke_id, object_id, property, max_segments);
                     }
@@ -247,7 +248,11 @@ namespace System.IO.BACnet
                     if (Services.DecodeWriteProperty(buffer, offset, length, out object_id, out value) >= 0)
                         OnWritePropertyRequest(this, adr, invoke_id, object_id, value, max_segments);
                     else
+                    {
+                        ErrorResponse(adr, service, invoke_id, BacnetErrorClasses.ERROR_CLASS_SERVICES, BacnetErrorCodes.ERROR_CODE_ABORT_OTHER);
+                        //SendConfirmedServiceReject(adr, invoke_id, BacnetRejectReasons.REJECT_REASON_OTHER); 
                         Trace.TraceWarning("Couldn't decode DecodeWriteProperty");
+                    }
                 }
                 else if (service == BacnetConfirmedServices.SERVICE_CONFIRMED_READ_PROP_MULTIPLE && OnReadPropertyMultipleRequest != null)
                 {
@@ -255,7 +260,10 @@ namespace System.IO.BACnet
                     if (Services.DecodeReadPropertyMultiple(buffer, offset, length, out properties) >= 0)
                         OnReadPropertyMultipleRequest(this, adr, invoke_id, properties, max_segments);
                     else
+                    {
+                        ErrorResponse(adr, service, invoke_id, BacnetErrorClasses.ERROR_CLASS_SERVICES, BacnetErrorCodes.ERROR_CODE_ABORT_OTHER);
                         Trace.TraceWarning("Couldn't decode DecodeReadPropertyMultiple");
+                    }
                 }
                 else if (service == BacnetConfirmedServices.SERVICE_CONFIRMED_WRITE_PROP_MULTIPLE && OnWritePropertyMultipleRequest != null)
                 {
@@ -264,7 +272,10 @@ namespace System.IO.BACnet
                     if (Services.DecodeWritePropertyMultiple(buffer, offset, length, out object_id, out values) >= 0)
                         OnWritePropertyMultipleRequest(this, adr, invoke_id, object_id, values, max_segments);
                     else
+                    {
+                        ErrorResponse(adr, service, invoke_id, BacnetErrorClasses.ERROR_CLASS_SERVICES, BacnetErrorCodes.ERROR_CODE_ABORT_OTHER);
                         Trace.TraceWarning("Couldn't decode DecodeWritePropertyMultiple");
+                    }
                 }
                 else if (service == BacnetConfirmedServices.SERVICE_CONFIRMED_COV_NOTIFICATION && OnCOVNotification != null)
                 {
@@ -276,7 +287,10 @@ namespace System.IO.BACnet
                     if (Services.DecodeCOVNotifyUnconfirmed(buffer, offset, length, out subscriberProcessIdentifier, out initiatingDeviceIdentifier, out monitoredObjectIdentifier, out timeRemaining, out values) >= 0)
                         OnCOVNotification(this, adr, invoke_id, subscriberProcessIdentifier, initiatingDeviceIdentifier, monitoredObjectIdentifier, timeRemaining, true, values, max_segments);
                     else
+                    {
+                        ErrorResponse(adr, service, invoke_id, BacnetErrorClasses.ERROR_CLASS_SERVICES, BacnetErrorCodes.ERROR_CODE_ABORT_OTHER);
                         Trace.TraceWarning("Couldn't decode COVNotify");
+                    }
                 }
                 else if (service == BacnetConfirmedServices.SERVICE_CONFIRMED_ATOMIC_WRITE_FILE && OnAtomicWriteFileRequest != null)
                 {
@@ -289,7 +303,10 @@ namespace System.IO.BACnet
                     if (Services.DecodeAtomicWriteFile(buffer, offset, length, out is_stream, out object_id, out position, out block_count, out blocks, out counts) >= 0)
                         OnAtomicWriteFileRequest(this, adr, invoke_id, is_stream, object_id, position, block_count, blocks, counts, max_segments);
                     else
+                    {
+                        ErrorResponse(adr, service, invoke_id, BacnetErrorClasses.ERROR_CLASS_SERVICES, BacnetErrorCodes.ERROR_CODE_ABORT_OTHER);
                         Trace.TraceWarning("Couldn't decode AtomicWriteFile");
+                    }
                 }
                 else if (service == BacnetConfirmedServices.SERVICE_CONFIRMED_ATOMIC_READ_FILE && OnAtomicReadFileRequest != null)
                 {
@@ -300,7 +317,10 @@ namespace System.IO.BACnet
                     if (Services.DecodeAtomicReadFile(buffer, offset, length, out is_stream, out object_id, out position, out count) >= 0)
                         OnAtomicReadFileRequest(this, adr, invoke_id, is_stream, object_id, position, count, max_segments);
                     else
+                    {
+                        ErrorResponse(adr, service, invoke_id, BacnetErrorClasses.ERROR_CLASS_SERVICES, BacnetErrorCodes.ERROR_CODE_ABORT_OTHER);
                         Trace.TraceWarning("Couldn't decode AtomicReadFile");
+                    }
                 }
                 else if (service == BacnetConfirmedServices.SERVICE_CONFIRMED_SUBSCRIBE_COV && OnSubscribeCOV != null)
                 {
@@ -312,7 +332,10 @@ namespace System.IO.BACnet
                     if (Services.DecodeSubscribeCOV(buffer, offset, length, out subscriberProcessIdentifier, out monitoredObjectIdentifier, out cancellationRequest, out issueConfirmedNotifications, out lifetime) >= 0)
                         OnSubscribeCOV(this, adr, invoke_id, subscriberProcessIdentifier, monitoredObjectIdentifier, cancellationRequest, issueConfirmedNotifications, lifetime, max_segments);
                     else
+                    {
+                        ErrorResponse(adr, service, invoke_id, BacnetErrorClasses.ERROR_CLASS_SERVICES, BacnetErrorCodes.ERROR_CODE_ABORT_OTHER);
                         Trace.TraceWarning("Couldn't decode SubscribeCOV");
+                    }
                 }
                 else if (service == BacnetConfirmedServices.SERVICE_CONFIRMED_SUBSCRIBE_COV_PROPERTY && OnSubscribeCOVProperty != null)
                 {
@@ -326,7 +349,10 @@ namespace System.IO.BACnet
                     if (Services.DecodeSubscribeProperty(buffer, offset, length, out subscriberProcessIdentifier, out monitoredObjectIdentifier, out monitoredProperty, out cancellationRequest, out issueConfirmedNotifications, out lifetime, out covIncrement) >= 0)
                         OnSubscribeCOVProperty(this, adr, invoke_id, subscriberProcessIdentifier, monitoredObjectIdentifier, monitoredProperty, cancellationRequest, issueConfirmedNotifications, lifetime, covIncrement, max_segments);
                     else
+                    {
+                        ErrorResponse(adr, service, invoke_id, BacnetErrorClasses.ERROR_CLASS_SERVICES, BacnetErrorCodes.ERROR_CODE_ABORT_OTHER);
                         Trace.TraceWarning("Couldn't decode SubscribeCOVProperty");
+                    }
                 }
                 else if (service == BacnetConfirmedServices.SERVICE_CONFIRMED_DEVICE_COMMUNICATION_CONTROL && OnDeviceCommunicationControl != null)
                 {
@@ -336,7 +362,10 @@ namespace System.IO.BACnet
                     if (Services.DecodeDeviceCommunicationControl(buffer, offset, length, out timeDuration, out enable_disable, out password) >= 0)
                         OnDeviceCommunicationControl(this, adr, invoke_id, timeDuration, enable_disable, password, max_segments);
                     else
+                    {
+                        ErrorResponse(adr, service, invoke_id, BacnetErrorClasses.ERROR_CLASS_SERVICES, BacnetErrorCodes.ERROR_CODE_ABORT_OTHER);
                         Trace.TraceWarning("Couldn't decode DeviceCommunicationControl");
+                    }
                 }
                 else if (service == BacnetConfirmedServices.SERVICE_CONFIRMED_REINITIALIZE_DEVICE && OnReinitializedDevice != null)
                 {
@@ -345,7 +374,10 @@ namespace System.IO.BACnet
                     if (Services.DecodeReinitializeDevice(buffer, offset, length, out state, out password) >= 0)
                         OnReinitializedDevice(this, adr, invoke_id, state, password, max_segments);
                     else
+                    {
+                        ErrorResponse(adr, service, invoke_id, BacnetErrorClasses.ERROR_CLASS_SERVICES, BacnetErrorCodes.ERROR_CODE_ABORT_OTHER);
                         Trace.TraceWarning("Couldn't decode ReinitializeDevice");
+                    }
                 }
                 else if (service == BacnetConfirmedServices.SERVICE_CONFIRMED_EVENT_NOTIFICATION && OnEventNotify != null) // F. Chaxel
                 {
@@ -355,7 +387,10 @@ namespace System.IO.BACnet
                         OnEventNotify(this, adr, EventData);
                     }
                     else
+                    {
+                        ErrorResponse(adr, service, invoke_id, BacnetErrorClasses.ERROR_CLASS_SERVICES, BacnetErrorCodes.ERROR_CODE_ABORT_OTHER);
                         Trace.TraceWarning("Couldn't decode Event/Alarm Notification");
+                    }
                 }
                 else if (service == BacnetConfirmedServices.SERVICE_CONFIRMED_READ_RANGE && OnReadRange != null)
                 {
@@ -370,7 +405,10 @@ namespace System.IO.BACnet
                         OnReadRange(this, adr, invoke_id, objectId, property, requestType, position, time, count, max_segments);
                     }
                     else
+                    {
+                        ErrorResponse(adr, service, invoke_id, BacnetErrorClasses.ERROR_CLASS_SERVICES, BacnetErrorCodes.ERROR_CODE_ABORT_OTHER);
                         Trace.TraceWarning("Couldn't decode ReadRange");
+                    }
                 }
                 else if (service == BacnetConfirmedServices.SERVICE_CONFIRMED_CREATE_OBJECT && OnCreateObjectRequest != null)
                 {
@@ -380,6 +418,7 @@ namespace System.IO.BACnet
                         OnCreateObjectRequest(this, adr, invoke_id, object_id, values, max_segments);
                     else
                     {
+                        ErrorResponse(adr, service, invoke_id, BacnetErrorClasses.ERROR_CLASS_SERVICES, BacnetErrorCodes.ERROR_CODE_ABORT_OTHER);
                         Trace.TraceWarning("Couldn't decode CreateObject");
                     }
                 }
@@ -391,18 +430,20 @@ namespace System.IO.BACnet
                         OnDeleteObjectRequest(this, adr, invoke_id, object_id, max_segments);
                     else
                     {
+                        ErrorResponse(adr, service, invoke_id, BacnetErrorClasses.ERROR_CLASS_SERVICES, BacnetErrorCodes.ERROR_CODE_ABORT_OTHER);
                         Trace.TraceWarning("Couldn't decode DecodeDeleteObject");
                     }
                 }
 
                 else
                 {
+                    ErrorResponse(adr, service, invoke_id, BacnetErrorClasses.ERROR_CLASS_SERVICES, BacnetErrorCodes.ERROR_CODE_REJECT_UNRECOGNIZED_SERVICE);
                     Trace.TraceWarning("Confirmed service not handled: " + service.ToString());
-                    SendConfirmedServiceReject(adr, invoke_id, BacnetRejectReasons.REJECT_REASON_UNRECOGNIZED_SERVICE);
                 }
             }
             catch (Exception ex)
             {
+                ErrorResponse(adr, service, invoke_id, BacnetErrorClasses.ERROR_CLASS_DEVICE, BacnetErrorCodes.ERROR_CODE_ABORT_OTHER);
                 Trace.TraceError("Error in ProcessConfirmedServiceRequest: " + ex.Message);
             }
         }
