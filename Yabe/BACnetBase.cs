@@ -7990,21 +7990,12 @@ namespace System.IO.BACnet.Serialize
                 if ((tag_number == 2) && (len < apdu_len))
                 {
                     len += ASN1.decode_unsigned(buffer, offset + len, len_value_type, out property.propertyArrayIndex);
-
-
-                    // Thamer Alsalek: the below check is not accurate , somebody needs to provide better check for : BacnetErrorCodes.ERROR_CODE_INVALID_ARRAY_INDEX , contact : thamersalek@yahoo.com to cooperate to resolve
-                    if (property.propertyArrayIndex > 8)
-                        return -5;
                 }
                 else
                     return -2;
-
             }
             else
-            {
-
                 property.propertyArrayIndex = ASN1.BACNET_ARRAY_ALL;
-            }
 
             if (len < apdu_len)
                 /* If something left over now, we have an invalid request */

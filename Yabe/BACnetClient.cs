@@ -228,16 +228,6 @@ namespace System.IO.BACnet
                         {
                             SendConfirmedServiceReject(adr, invoke_id, BacnetRejectReasons.REJECT_REASON_TOO_MANY_ARGUMENTS);
                         }
-
-                        else if (Ths_Reject_Reason == -4)
-                        {
-                            ErrorResponse(adr, BacnetConfirmedServices.SERVICE_CONFIRMED_READ_PROPERTY, invoke_id, BacnetErrorClasses.ERROR_CLASS_PROPERTY, BacnetErrorCodes.ERROR_CODE_PROPERTY_IS_NOT_AN_ARRAY);
-                        }
-
-                        else if (Ths_Reject_Reason == -5)
-                        {
-                            ErrorResponse(adr, BacnetConfirmedServices.SERVICE_CONFIRMED_READ_PROPERTY, invoke_id, BacnetErrorClasses.ERROR_CLASS_PROPERTY, BacnetErrorCodes.ERROR_CODE_INVALID_ARRAY_INDEX);
-                        }
                         Trace.TraceWarning("Couldn't decode DecodeReadProperty");
                     }
                 }
