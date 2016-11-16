@@ -40,7 +40,8 @@ namespace BaCSharp
         NotExist = -2,
         NotForMe = -3,
         WriteAccessDenied = -4,
-        OutOfRange = -5
+        OutOfRange = -5,
+        IndexNotExist = -6
     }
 
     // All children classes are serializable, except Device and Structured View
@@ -56,7 +57,7 @@ namespace BaCSharp
     //]
     public abstract class BaCSharpObject
     {
-        // 3 common properties to all kind of Bacnet objects ... I suppose ! 
+        // 3 common properties to all kind of Bacnet objects 
 
         public string m_PROP_OBJECT_NAME;
         [BaCSharpType(BacnetApplicationTags.BACNET_APPLICATION_TAG_CHARACTER_STRING)]
@@ -222,7 +223,12 @@ namespace BaCSharp
 
                 // only a particular element
                 else if (PropRef.propertyArrayIndex != System.IO.BACnet.Serialize.ASN1.BACNET_ARRAY_ALL)
-                    propVal = new BacnetValue[] { propVal[(int)PropRef.propertyArrayIndex - 1] };
+                {
+                    if ((int)PropRef.propertyArrayIndex <= (uint)propVal.Count)
+                        propVal = new BacnetValue[] { propVal[(int)PropRef.propertyArrayIndex - 1] };
+                    else
+                        return ErrorCodes.IndexNotExist;
+                }
 
                 return ErrorCodes.Good;
 
