@@ -4581,33 +4581,13 @@ namespace System.IO.BACnet.Serialize
                 /* Tag 3: optional propertyArrayIndex */
                 if (p_value.property.propertyArrayIndex != ASN1.BACNET_ARRAY_ALL)
                     ASN1.encode_context_unsigned(buffer, 3, p_value.property.propertyArrayIndex);
-                if (p_value.value != null && p_value.value[0].Tag == BacnetApplicationTags.BACNET_APPLICATION_TAG_ERROR)
+
+                if (p_value.value != null && p_value.value[0].Value is BacnetError)
                 {
-                    ///Modified by thamersalek
-                    string[] Ths_errors = p_value.value[0].Value.ToString().Split(':');
-                    string err_class1 = Ths_errors[0];
-                    string err_code1 = Ths_errors[1];
-
-
                     /* Tag 5: Error */
                     ASN1.encode_opening_tag(buffer, 5);
-                    if (err_class1 == "ERROR_CLASS_OBJECT")
-                    {
-                        ASN1.encode_application_enumerated(buffer, 1);
-                        //ASN1.encode_application_enumerated(buffer, (uint)((IList<BacnetError>)p_value.value)[0].error_code);
-                        ASN1.encode_application_enumerated(buffer, 31);
-                    }
-
-                    else
-                    {
-                        ASN1.encode_application_enumerated(buffer, 2);
-                        //ASN1.encode_application_enumerated(buffer, (uint)((IList<BacnetError>)p_value.value)[0].error_code);
-                        ASN1.encode_application_enumerated(buffer, 32);
-
-                    }
-
-                    //ASN1.encode_application_enumerated(buffer, (uint)((IList<BacnetError>)p_value.value)[0].error_class);
-
+                    ASN1.encode_application_enumerated(buffer, (uint)((BacnetError)p_value.value[0].Value).error_class);
+                    ASN1.encode_application_enumerated(buffer, (uint)((BacnetError)p_value.value[0].Value).error_code);
                     ASN1.encode_closing_tag(buffer, 5);
                 }
                 else
