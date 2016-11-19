@@ -105,7 +105,7 @@ namespace BaCSharp
         [BaCSharpType(BacnetApplicationTags.BACNET_APPLICATION_TAG_UNSIGNED_INT)]
         public virtual uint PROP_PROTOCOL_REVISION
         {
-            get { return 6; }
+            get { return 7; }
         }
 
         [BaCSharpType(BacnetApplicationTags.BACNET_APPLICATION_TAG_UNSIGNED_INT)]
@@ -176,9 +176,11 @@ namespace BaCSharp
             m_PROP_STRUCTURED_OBJECT_LIST.Add(new BacnetValue(BacnetApplicationTags.BACNET_APPLICATION_TAG_OBJECT_ID, m_PROP_OBJECT_IDENTIFIER));
 
             m_PROP_PROTOCOL_OBJECT_TYPES_SUPPORTED.SetBit((byte)BacnetObjectTypes.OBJECT_DEVICE, true);
+            m_PROP_PROTOCOL_OBJECT_TYPES_SUPPORTED.SetBit((byte)BacnetObjectTypes.OBJECT_ACCESS_DOOR, false); // this may be set true after
 
-            m_PROP_PROTOCOL_SERVICES_SUPPORTED.SetBit((byte)BacnetServicesSupported.MAX_BACNET_SERVICES_SUPPORTED, false); //set all false
+            m_PROP_PROTOCOL_SERVICES_SUPPORTED.SetBit((byte)BacnetServicesSupported.MAX_BACNET_SERVICES_SUPPORTED-2, false); //set all false
             m_PROP_PROTOCOL_SERVICES_SUPPORTED.SetBit((byte)BacnetServicesSupported.SERVICE_SUPPORTED_I_AM, true);
+            m_PROP_PROTOCOL_SERVICES_SUPPORTED.SetBit((byte)BacnetServicesSupported.SERVICE_SUPPORTED_WHO_HAS, true);
             m_PROP_PROTOCOL_SERVICES_SUPPORTED.SetBit((byte)BacnetServicesSupported.SERVICE_SUPPORTED_WHO_IS, true);
             m_PROP_PROTOCOL_SERVICES_SUPPORTED.SetBit((byte)BacnetServicesSupported.SERVICE_SUPPORTED_READ_PROP_MULTIPLE, true);
             m_PROP_PROTOCOL_SERVICES_SUPPORTED.SetBit((byte)BacnetServicesSupported.SERVICE_SUPPORTED_READ_PROPERTY, true);
@@ -249,6 +251,15 @@ namespace BaCSharp
 
             foreach (BaCSharpObject b in ObjectsList)
                 if (b.Equals(objId))
+                    return b;
+            return null;
+        }
+
+        // Can be use to find a particular object with it's Name
+        public virtual BaCSharpObject FindBacnetObject(string Name)
+        {
+            foreach (BaCSharpObject b in ObjectsList)
+                if (b.m_PROP_OBJECT_NAME==Name)
                     return b;
             return null;
         }

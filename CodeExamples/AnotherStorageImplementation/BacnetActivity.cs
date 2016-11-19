@@ -57,6 +57,7 @@ namespace AnotherStorageImplementation
             bacnet_client.OnReadRange += new BacnetClient.ReadRangeHandler(handler_OnReadRange);
             bacnet_client.OnAtomicWriteFileRequest += new BacnetClient.AtomicWriteFileRequestHandler(handler_OnAtomicWriteFileRequest);
             bacnet_client.OnAtomicReadFileRequest += new BacnetClient.AtomicReadFileRequestHandler(handler_OnAtomicReadFileRequest);
+            bacnet_client.OnWhoHas += new BacnetClient.WhoHasHandler(handler_OnWhoHas);
             // A sample to shows CreateObject & DeleteObject
             bacnet_client.OnCreateObjectRequest += new BacnetClient.CreateObjectRequestHandler(handler_OnCreateObjectRequest);
             device.m_PROP_PROTOCOL_SERVICES_SUPPORTED.SetBit((byte)BacnetServicesSupported.SERVICE_SUPPORTED_CREATE_OBJECT, true);
@@ -75,6 +76,22 @@ namespace AnotherStorageImplementation
                 bacnet_client.WhoIs();                          // Send WhoIs : needed BY Notification & Schedule for deviceId<->IP endpoint
                 device.SetIpEndpoint(bacnet_client);            // Register the endpoint for IP Notification usage with IP:Port
             }
+        }
+
+        static void handler_OnWhoHas(BacnetClient sender, BacnetAddress adr, int low_limit, int high_limit, BacnetObjectId ObjId, string ObjName)
+        {
+            if (low_limit != -1 && deviceId < low_limit) return;
+            else if (high_limit != -1 && deviceId > high_limit) return;
+
+            BaCSharpObject o;
+
+            if (ObjName == null)
+                o = device.FindBacnetObject(ObjId);
+            else
+                o = device.FindBacnetObject(ObjName);
+
+            if (o != null)
+                    sender.IHave(device.m_PROP_OBJECT_IDENTIFIER, ObjId, o.m_PROP_OBJECT_NAME);
         }         
 
         static void handler_OnIam(BacnetClient sender, BacnetAddress adr, uint device_id, uint max_apdu, BacnetSegmentations segmentation, ushort vendor_id)
