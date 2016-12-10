@@ -135,6 +135,8 @@ namespace Yabe
         {
             return state.ToString().Substring(12);
         }
+
+
         private void OnEventNotify(BacnetClient sender, BacnetAddress adr, BacnetEventNotificationData EventData)
         {
             if (InvokeRequired)
@@ -172,6 +174,9 @@ namespace Yabe
                 itm.SubItems[4].Text = EventData.timeStamp.Time.ToString("HH:mm:ss");   //time
                 itm.SubItems[5].Text = EventData.notifyType.ToString();   //status
             }
+
+            AddLogAlarmEvent(itm);
+
         }
 
         private void OnCOVNotification(BacnetClient sender, BacnetAddress adr, byte invoke_id, uint subscriberProcessIdentifier, BacnetObjectId initiatingDeviceIdentifier, BacnetObjectId monitoredObjectIdentifier, uint timeRemaining, bool need_confirm, ICollection<BacnetPropertyValue> values, BacnetMaxSegments max_segments)
@@ -196,6 +201,7 @@ namespace Yabe
                                 itm.SubItems[3].Text = ConvertToText(value.value);
                                 itm.SubItems[4].Text = DateTime.Now.ToString("HH:mm:ss");
                                 if (itm.SubItems[5].Text == "Not started") itm.SubItems[5].Text = "OK";
+                                AddLogAlarmEvent(itm);
                                 break;
                             case BacnetPropertyIds.PROP_STATUS_FLAGS:
                                 if (value.value != null && value.value.Count > 0)
@@ -218,6 +224,9 @@ namespace Yabe
                                     else
                                         itm.SubItems[5].Text = "OK";
                                 }
+
+                                AddLogAlarmEvent(itm);
+
                                 break;
                             default:
                                 //got something else? ignore it
@@ -2748,6 +2757,63 @@ namespace Yabe
                 }
             }
         }
+
+        #region "Alarm Logger"
+
+        StreamWriter AlarmFileWritter;
+        object lockAlarmFileWritter = new object();
+
+        private void EventAlarmLogToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (AlarmFileWritter != null)
+            {
+                lock (lockAlarmFileWritter)
+                {
+                    AlarmFileWritter.Close();
+                    EventAlarmLogToolStripMenuItem.Text = "Start saving Cov/Event/Alarm Log";
+                    AlarmFileWritter = null;
+                }
+                return;
+
+            }
+
+            //which file to use ?
+            SaveFileDialog dlg = new SaveFileDialog();
+            dlg.DefaultExt = ".csv";
+            dlg.Filter = "CSV files (*.csv)|*.csv|All files (*.*)|*.*";
+            if (dlg.ShowDialog(this) != System.Windows.Forms.DialogResult.OK) return;
+            string filename = dlg.FileName;
+
+            try
+            {
+                AlarmFileWritter = new StreamWriter(filename);
+                AlarmFileWritter.WriteLine("Device;ObjectId;Name;Value;Time;Status");
+                EventAlarmLogToolStripMenuItem.Text="Stop saving Cov/Event/Alarm Log";                
+            }
+            catch
+            {
+                MessageBox.Show(this, "File error", "Unable to open the file", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                AlarmFileWritter = null;
+            }
+        }
+        // Event/Alarm logging
+        private void AddLogAlarmEvent(ListViewItem itm)
+        {
+            lock (lockAlarmFileWritter)
+            {
+                if (AlarmFileWritter != null)
+                {
+                    for (int i = 0; i < itm.SubItems.Count; i++)
+                    {
+                        AlarmFileWritter.Write(((i != 0) ? ";" : "") + itm.SubItems[i].Text);
+                    }
+                    AlarmFileWritter.WriteLine();
+                    AlarmFileWritter.Flush();
+                }
+            }
+        }
+
+        #endregion
 
     }
 }

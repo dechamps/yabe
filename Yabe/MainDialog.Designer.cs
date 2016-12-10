@@ -102,6 +102,8 @@
             this.columnHeader4 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeader5 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeader6 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.m_EventSpaceMenuStrip = new System.Windows.Forms.ContextMenuStrip(this.components);
+            this.EventAlarmLogToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.m_DataGrid = new System.Windows.Forms.PropertyGrid();
             this.label1 = new System.Windows.Forms.Label();
             this.m_LogText = new System.Windows.Forms.TextBox();
@@ -130,6 +132,7 @@
             this.m_SplitContainerRight.SuspendLayout();
             this.tabControl1.SuspendLayout();
             this.tabPage1.SuspendLayout();
+            this.m_EventSpaceMenuStrip.SuspendLayout();
             this.SuspendLayout();
             // 
             // m_ImageList
@@ -440,7 +443,7 @@
             // 
             this.settingsToolStripMenuItem.Image = global::Yabe.Properties.Resources.application_form;
             this.settingsToolStripMenuItem.Name = "settingsToolStripMenuItem";
-            this.settingsToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.settingsToolStripMenuItem.Size = new System.Drawing.Size(116, 22);
             this.settingsToolStripMenuItem.Text = "Settings";
             this.settingsToolStripMenuItem.Click += new System.EventHandler(this.settingsToolStripMenuItem_Click);
             // 
@@ -557,7 +560,7 @@
             this.alarmSummaryToolStripMenuItem,
             this.readPropertiesNameToolStripMenuItem});
             this.m_DeviceTreeMenuStrip.Name = "m_DeviceTreeMenuStrip";
-            this.m_DeviceTreeMenuStrip.Size = new System.Drawing.Size(225, 208);
+            this.m_DeviceTreeMenuStrip.Size = new System.Drawing.Size(225, 186);
             // 
             // addDeviceToolStripMenuItem
             // 
@@ -786,6 +789,7 @@
             this.columnHeader4,
             this.columnHeader5,
             this.columnHeader6});
+            this.m_SubscriptionView.ContextMenuStrip = this.m_EventSpaceMenuStrip;
             this.m_SubscriptionView.Dock = System.Windows.Forms.DockStyle.Fill;
             this.m_SubscriptionView.FullRowSelect = true;
             this.m_SubscriptionView.Location = new System.Drawing.Point(3, 3);
@@ -821,6 +825,21 @@
             // columnHeader6
             // 
             this.columnHeader6.Text = "Status";
+            // 
+            // m_EventSpaceMenuStrip
+            // 
+            this.m_EventSpaceMenuStrip.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.EventAlarmLogToolStripMenuItem});
+            this.m_EventSpaceMenuStrip.Name = "m_EventSpaceMenuStrip";
+            this.m_EventSpaceMenuStrip.Size = new System.Drawing.Size(254, 26);
+            // 
+            // EventAlarmLogToolStripMenuItem
+            // 
+            this.EventAlarmLogToolStripMenuItem.Image = global::Yabe.Properties.Resources.database_edit;
+            this.EventAlarmLogToolStripMenuItem.Name = "EventAlarmLogToolStripMenuItem";
+            this.EventAlarmLogToolStripMenuItem.Size = new System.Drawing.Size(253, 22);
+            this.EventAlarmLogToolStripMenuItem.Text = "Start saving Cov/Event/Alarm Log";
+            this.EventAlarmLogToolStripMenuItem.Click += new System.EventHandler(this.EventAlarmLogToolStripMenuItem_Click);
             // 
             // m_DataGrid
             // 
@@ -910,6 +929,7 @@
             this.m_SplitContainerRight.ResumeLayout(false);
             this.tabControl1.ResumeLayout(false);
             this.tabPage1.ResumeLayout(false);
+            this.m_EventSpaceMenuStrip.ResumeLayout(false);
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -992,6 +1012,8 @@
         private System.Windows.Forms.ToolStripMenuItem saveAsToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem cleanToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem sendUnicastUdpWhoIsToolStripMenuItem;
+        private System.Windows.Forms.ContextMenuStrip m_EventSpaceMenuStrip;
+        private System.Windows.Forms.ToolStripMenuItem EventAlarmLogToolStripMenuItem;
     }
 }
 
