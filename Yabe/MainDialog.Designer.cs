@@ -546,6 +546,7 @@
             this.m_DeviceTree.Size = new System.Drawing.Size(164, 174);
             this.m_DeviceTree.TabIndex = 0;
             this.m_DeviceTree.AfterSelect += new System.Windows.Forms.TreeViewEventHandler(this.m_DeviceTree_AfterSelect);
+            this.m_DeviceTree.MouseDown += new System.Windows.Forms.MouseEventHandler(this.TreeView_MouseDown);
             // 
             // m_DeviceTreeMenuStrip
             // 
@@ -660,6 +661,7 @@
             this.m_AddressSpaceTree.TabIndex = 0;
             this.m_AddressSpaceTree.ItemDrag += new System.Windows.Forms.ItemDragEventHandler(this.m_AddressSpaceTree_ItemDrag);
             this.m_AddressSpaceTree.AfterSelect += new System.Windows.Forms.TreeViewEventHandler(this.m_AddressSpaceTree_AfterSelect);
+            this.m_AddressSpaceTree.MouseDown += new System.Windows.Forms.MouseEventHandler(this.TreeView_MouseDown);
             // 
             // m_AddressSpaceMenuStrip
             // 

@@ -1380,6 +1380,14 @@ namespace Yabe
                 this.Cursor = Cursors.Default;
             }
         }
+        // Fixed a small problem when a right click is down in a Treeview
+        private void TreeView_MouseDown(object sender, MouseEventArgs e)
+        {
+            if (e.Button != MouseButtons.Right)
+                return;
+            // Store the selected node (can deselect a node).
+            (sender as TreeView).SelectedNode = (sender as TreeView).GetNodeAt(e.X, e.Y);
+        }
 
         private void m_AddressSpaceTree_AfterSelect(object sender, TreeViewEventArgs e)
         {
@@ -2814,6 +2822,8 @@ namespace Yabe
         }
 
         #endregion
+
+
 
     }
 }
