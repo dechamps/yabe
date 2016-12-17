@@ -2057,7 +2057,7 @@ namespace Yabe
                           (o) =>
                           {
                               // adjustment to the generic control
-                          });
+                          }, 1, true, "Unknown device Id can be replaced by 4194303");
                     DialogResult res = Input.ShowDialog();
 
                     if (res == DialogResult.OK)

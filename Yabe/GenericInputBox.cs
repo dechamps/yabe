@@ -48,11 +48,15 @@ namespace System.Windows.Forms
     [System.ComponentModel.DesignerCategory("")] // Avoid failure opening with the GUI Designer
     public partial class GenericInputBox<T> : Form where T : Control, new()
     {
-        public GenericInputBox(String BoxTitle, String Lbl, PostInitializeComponent<T> FillInput = null, double sizeFactor=1, bool BtCancelVisible=true)
+        public GenericInputBox(String BoxTitle, String Lbl, PostInitializeComponent<T> FillInput = null, double sizeFactor=1, bool BtCancelVisible=true, String ToolTipText=null)
         {
             this.DialogResult = System.Windows.Forms.DialogResult.Cancel;
             InitializeComponent(sizeFactor, BtCancelVisible);
             genericLbl.Text = Lbl;
+
+            if (ToolTipText!=null)
+                new ToolTip().SetToolTip(genericInput, ToolTipText);
+
             this.Text = BoxTitle;
             if (FillInput!=null)
                 FillInput(genericInput); // 'Callback' for optional genericInput content initialization
