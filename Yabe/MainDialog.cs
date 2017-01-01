@@ -500,7 +500,7 @@ namespace Yabe
 
         private void aboutToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            MessageBox.Show(this, "Yet Another Bacnet Explorer - Yabe\nVersion " + this.GetType().Assembly.GetName().Version + "\nBy Morten Kvistgaard - Copyright 2014-2016\nBy Frederic Chaxel - Copyright 2015-2016\n" +
+            MessageBox.Show(this, "Yet Another Bacnet Explorer - Yabe\nVersion " + this.GetType().Assembly.GetName().Version + "\nBy Morten Kvistgaard - Copyright 2014-2017\nBy Frederic Chaxel - Copyright 2015-2017\n" +
                 "\nReference: http://bacnet.sourceforge.net/" + 
                 "\nReference: http://www.unified-automation.com/products/development-tools/uaexpert.html" +
                 "\nReference: http://www.famfamfam.com/"+
@@ -1043,7 +1043,7 @@ namespace Yabe
                                 if (Prop_Object_NameOK)
                                 {
                                     e.Node.ToolTipText = e.Node.Text;
-                                    e.Node.Text = Identifier+" ["+device_id.ToString()+"] ";
+                                    e.Node.Text = Identifier+" ["+bobj_id.Instance.ToString()+"] ";
                                 }
                                 else
                                     try
@@ -1052,7 +1052,7 @@ namespace Yabe
                                         if (comm.ReadPropertyRequest(adr, bobj_id, BacnetPropertyIds.PROP_OBJECT_NAME, out values))
                                         {
                                                 e.Node.ToolTipText = e.Node.Text;   // IP or MSTP node id -> in the Tooltip
-                                                e.Node.Text = values[0].ToString() + " ["+device_id.ToString()+"] ";  // change @ by the Name    
+                                                e.Node.Text = values[0].ToString() + " [" + bobj_id.Instance.ToString() + "] ";  // change @ by the Name    
                                                 lock (DevicesObjectsName)
                                                 {
                                                     Tuple<String, BacnetObjectId> t = new Tuple<String, BacnetObjectId>(adr.FullHashString(), bobj_id);
@@ -1889,23 +1889,30 @@ namespace Yabe
                     m_subscription_list.Add(sub_key, itm);
 
                 //add to device
+
+                bool SubscribeOK = false;
+
                 try
                 {
-                    if (!comm.SubscribeCOVRequest(adr, object_id, m_next_subscription_id, false, Properties.Settings.Default.Subscriptions_IssueConfirmedNotifies, Properties.Settings.Default.Subscriptions_Lifetime))
-                    {
-                        sub.is_active_subscription = false;
-                        DialogResult rep = MessageBox.Show(this, "Couldn't subscribe\rReplace by a periodic ReadProperty process ?", "Error", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
-                        if (rep == DialogResult.Yes)
-                            ThreadPool.QueueUserWorkItem(a => ReadPropertyPoolingRemplacementToCOV(sub)); // echec : launch period acquisiton in the ThreadPool
-                        return;
-                    }
+                    SubscribeOK = comm.SubscribeCOVRequest(adr, object_id, m_next_subscription_id, false, Properties.Settings.Default.Subscriptions_IssueConfirmedNotifies, Properties.Settings.Default.Subscriptions_Lifetime);
                 }
-                catch (Exception ex)
+                catch { }
+
+                if (SubscribeOK == false) 
                 {
-                    sub.is_active_subscription = false;
-                    DialogResult rep = MessageBox.Show(this, "Error during subscribe: " + ex.Message + "\rReplace by a periodic ReadProperty process ?", "Error", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
-                    if (rep==DialogResult.Yes)
-                        ThreadPool.QueueUserWorkItem(a => ReadPropertyPoolingRemplacementToCOV(sub)); // echec : launch period acquisiton in the ThreadPool
+                    sub.is_active_subscription = false;                   
+                    var Qst = new GenericInputBox<NumericUpDown>("Error during subscribe", "Polling period replacement (s)",
+                              (o) =>
+                              {
+                                  o.Minimum = 1; o.Maximum = 120; o.Value = Properties.Settings.Default.Subscriptions_ReplacementPollingPeriod;
+                              });
+
+                    DialogResult rep = Qst.ShowDialog();
+                    if (rep == DialogResult.Yes)
+                    {
+                        int period = (int)Qst.genericInput.Value;
+                        ThreadPool.QueueUserWorkItem(a => ReadPropertyPoolingRemplacementToCOV(sub, period)); // echec : launch period acquisiton in the ThreadPool
+                    }
                     return;
                 }
             }
@@ -1917,7 +1924,7 @@ namespace Yabe
 
         // COV echec, PROP_PRESENT_VALUE read replacement method
         // x seconds poolling period
-        private void ReadPropertyPoolingRemplacementToCOV(Subscription sub)
+        private void ReadPropertyPoolingRemplacementToCOV(Subscription sub, int period)
         {
             for (; ; )
             {
@@ -1932,7 +1939,7 @@ namespace Yabe
                     else
                         return;
 
-                Thread.Sleep((int)Math.Max(1, Properties.Settings.Default.Subscriptions_ReplacementPollingPeriod) * 1000);
+                Thread.Sleep(Math.Max(1, period) * 1000);
             }
         }
 
@@ -2057,12 +2064,13 @@ namespace Yabe
                           (o) =>
                           {
                               // adjustment to the generic control
-                          }, 1, true, "Unknown device Id can be replaced by 4194303");
+                          }, 1, true, "Unknown device Id can be replaced by 4194303 or ?");
                     DialogResult res = Input.ShowDialog();
 
                     if (res == DialogResult.OK)
                     {
                         string[] entry=Input.genericInput.Text.Split('-');
+                        if (entry[0][0] == '?') entry[0] = "4194303";
                         OnIam(comm, new BacnetAddress(BacnetAddressTypes.IP, entry[1].Trim()), Convert.ToUInt32(entry[0]), 0, BacnetSegmentations.SEGMENTATION_NONE, 0);
                     }
                 }

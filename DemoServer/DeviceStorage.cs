@@ -181,18 +181,12 @@ namespace System.IO.BACnet.Storage
                 
                 BacnetPropertyValue new_entry = new BacnetPropertyValue();
                 new_entry.property = entry;
-                //modified by thamersalek
-                if (ReadProperty(object_id, (BacnetPropertyIds)entry.propertyIdentifier, entry.propertyArrayIndex, out new_entry.value) == ErrorCodes.UnKnownObject)
-                {
-                    
-                    new_entry.value = new BacnetValue[] { new BacnetValue(BacnetApplicationTags.BACNET_APPLICATION_TAG_ERROR, new BacnetError(BacnetErrorClasses.ERROR_CLASS_OBJECT, BacnetErrorCodes.ERROR_CODE_UNKNOWN_OBJECT)) };
-                }
 
-                else if (ReadProperty(object_id, (BacnetPropertyIds)entry.propertyIdentifier, entry.propertyArrayIndex, out new_entry.value) == ErrorCodes.NotExist)
-                {
-                    
+                ErrorCodes error = ReadProperty(object_id, (BacnetPropertyIds)entry.propertyIdentifier, entry.propertyArrayIndex, out new_entry.value);
+                if (error == ErrorCodes.UnKnownObject)
+                    new_entry.value = new BacnetValue[] { new BacnetValue(BacnetApplicationTags.BACNET_APPLICATION_TAG_ERROR, new BacnetError(BacnetErrorClasses.ERROR_CLASS_OBJECT, BacnetErrorCodes.ERROR_CODE_UNKNOWN_OBJECT)) };
+                else if (error == ErrorCodes.NotExist)
                     new_entry.value = new BacnetValue[] { new BacnetValue(BacnetApplicationTags.BACNET_APPLICATION_TAG_ERROR, new BacnetError(BacnetErrorClasses.ERROR_CLASS_PROPERTY, BacnetErrorCodes.ERROR_CODE_UNKNOWN_PROPERTY)) };
-                }
 
                 values_ret[count] = new_entry;
 

@@ -2,7 +2,7 @@
 ; SEE THE DOCUMENTATION FOR DETAILS ON CREATING INNO SETUP SCRIPT FILES!
 
 #define MyAppName "Yabe"
-#define MyAppVersion "1.1.2"
+#define MyAppVersion "1.1.3"
 #define MyAppPublisher "Yabe Authors"
 #define MyAppURL "http://sourceforge.net/projects/yetanotherbacnetexplorer"
 #define MyAppExeName "Yabe.exe"
@@ -115,7 +115,7 @@ begin
   begin
     if FileExists('C:\Program Files (x86)\YabeAuthors\Yabe\Yabe.exe') then
     begin
-      MsgBox('Previous Yabe version detected : it should be manually uninstalled from the control panel', mbInformation, MB_OK);
+      MsgBox('Very old Yabe version detected : it should be manually uninstalled from the control panel', mbInformation, MB_OK);
       Result := false;
     end
   end

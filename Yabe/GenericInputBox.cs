@@ -54,8 +54,12 @@ namespace System.Windows.Forms
             InitializeComponent(sizeFactor, BtCancelVisible);
             genericLbl.Text = Lbl;
 
-            if (ToolTipText!=null)
-                new ToolTip().SetToolTip(genericInput, ToolTipText);
+            if (ToolTipText != null)
+            {
+                ToolTip t = new ToolTip();
+                t.SetToolTip(genericInput, ToolTipText);
+                t.SetToolTip(genericLbl, ToolTipText);
+            }
 
             this.Text = BoxTitle;
             if (FillInput!=null)

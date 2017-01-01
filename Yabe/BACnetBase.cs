@@ -77,6 +77,15 @@ namespace System.IO.BACnet
         BACKUP_IN_PROGRESS = 5
     }
 
+    public enum BACnetBackupState
+    {
+        IDLE = 0,
+        PREPARING_FOR_BACKUP = 1,
+        PREPARING_FOR_RESTORE = 2,
+        PERFORMING_A_BACKUP = 3,
+        PERFORMING_A_RESTORE = 4,
+    }
+
     // From Loren Van Spronsen csharp-bacnet
     public enum BacnetRestartReason
     {
