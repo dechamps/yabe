@@ -114,7 +114,7 @@ namespace Bacnet.Room.Simulator
         {
 
             if (Application.CurrentCulture.ToString() == "en-US")
-                return Truncate(C * 1.8 + 32).ToString()+"°F";
+                return Truncate(C).ToString()+"°F";
             else
                 return Truncate(C).ToString()+"°C";
         }
@@ -272,15 +272,15 @@ namespace Bacnet.Room.Simulator
 
             bv = BacnetActivity.GetBacObjectPresentValue(Bac_TempInt);
             f = (float)bv.Value;
-            TempInt.Text = TempDegre2Text(f);
+            TempInt.Text =  TempDegre2Text(f);
 
             bv = BacnetActivity.GetBacObjectPresentValue(Bac_ConsigneTemp);
             f = (float)bv.Value;
-            TempSet.Text = "T Set : " + TempDegre2Value(f).ToString()+"°";
+            TempSet.Text = "T Set : " + f.ToString()+"°";
 
             bv = BacnetActivity.GetBacObjectPresentValue(Bac_TempExterieure);
             f = (float)bv.Value;
-            TempExt.Text = "T Ext : " + TempDegre2Value(f).ToString() + "°";          
+            TempExt.Text = "T Ext : " + f.ToString() + "°";          
         }
 
         private void TmrUpdate_Tick(object sender, EventArgs e)
