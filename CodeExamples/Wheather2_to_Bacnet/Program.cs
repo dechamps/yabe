@@ -50,8 +50,7 @@ namespace Weather2_to_Bacnet
 
         // BacnetObjects dictionnary
         DeviceObject device;
-        AnalogInput<int> Temp, Windspeed, Humidity, Pressure;
-        AnalogInput<double> DewPoint, VaporPressure;
+        AnalogInput<float> Temp, Windspeed, Humidity, Pressure, DewPoint, VaporPressure;
         TrendLog TrendTemp;
         CharacterString Windsdir, WeatherDescr;
         BacnetDateTime SunSet, SunRise, Updatetime, NextUpdatetime;
@@ -130,8 +129,8 @@ namespace Weather2_to_Bacnet
                     double eln = Math.Log(ed/6.112);
                     double td = -243.5 * eln / (eln - 17.67);
 
-                DewPoint.internal_PROP_PRESENT_VALUE = Math.Round(td,1);
-                VaporPressure.internal_PROP_PRESENT_VALUE = Math.Round(es,1);
+                DewPoint.internal_PROP_PRESENT_VALUE = (float)Math.Round(td,1);
+                VaporPressure.internal_PROP_PRESENT_VALUE = (float)Math.Round(es,1);
 
                 Updatetime.m_PresentValue = DateTime.Now;
 
@@ -150,7 +149,7 @@ namespace Weather2_to_Bacnet
 
             if ((UserAccessKey != null) && (Latitude != null) && (Longitude != null))
             {
-                Temp = new AnalogInput<int>
+                Temp = new AnalogInput<float>
                 (
                     0,
                     "Temperature",
@@ -162,7 +161,7 @@ namespace Weather2_to_Bacnet
                 // 24h trendlog
                 TrendTemp = new TrendLog(0, "Temperature Trend", "Temperature Trend", 6 * 24, BacnetTrendLogValueType.TL_TYPE_SIGN);
 
-                Windspeed = new AnalogInput<int>
+                Windspeed = new AnalogInput<float>
                 (
                     1,
                     "Windspeed",
@@ -170,7 +169,7 @@ namespace Weather2_to_Bacnet
                     0,
                     BacnetUnitsId.UNITS_KILOMETERS_PER_HOUR
                 );
-                Humidity = new AnalogInput<int>
+                Humidity = new AnalogInput<float>
                 (
                     2,
                     "Humidity",
@@ -178,7 +177,7 @@ namespace Weather2_to_Bacnet
                     0,
                     BacnetUnitsId.UNITS_PERCENT
                 );
-                Pressure = new AnalogInput<int>
+                Pressure = new AnalogInput<float>
                 (
                     3,
                     "Pressure",
@@ -187,7 +186,7 @@ namespace Weather2_to_Bacnet
                     BacnetUnitsId.UNITS_HECTOPASCALS
                 );
 
-                DewPoint = new AnalogInput<double>
+                DewPoint = new AnalogInput<float>
                 (
                     4,
                     "DewPoint",
@@ -196,7 +195,7 @@ namespace Weather2_to_Bacnet
                     BacnetUnitsId.UNITS_DEGREES_CELSIUS
                 );
 
-                VaporPressure = new AnalogInput<double>
+                VaporPressure = new AnalogInput<float>
                 (
                     5,
                     "VaporPressure",
@@ -269,8 +268,14 @@ namespace Weather2_to_Bacnet
                     double sunRise = NAA.Util.calcSunRiseUTC(JD, lat, lon);
                     double sunSet = NAA.Util.calcSunSetUTC(JD, lat, lon);
 
-                    SunRise.m_PresentValue = NAA.Util.getDateTime(sunRise, 0, today, false).Value.ToLocalTime();                   
-                    SunSet.m_PresentValue = NAA.Util.getDateTime(sunSet, 0, today, false).Value.ToLocalTime();
+                    DateTime? dSunRise = NAA.Util.getDateTime(sunRise, 0, today, false);
+                    DateTime? dSunSet = NAA.Util.getDateTime(sunSet, 0, today, false);
+
+                    if (dSunRise!=null)
+                        SunRise.m_PresentValue = dSunRise.Value.ToLocalTime();
+                    if (dSunSet != null)
+                        SunSet.m_PresentValue = dSunSet.Value.ToLocalTime();
+                   
                 }
 
                 // Read wheather data from the webservice
