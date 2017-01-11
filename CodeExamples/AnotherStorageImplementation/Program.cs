@@ -109,8 +109,10 @@ namespace AnotherStorageImplementation
             // create the device object with StructuredView acceptation
             device = new DeviceObject(deviceId, "Device test","A test Device", true);
 
-            // ANALOG_INPUT:0 uint
-            // initial value 0           
+            // ANALOG_INPUT:0 double
+            // initial value 0 
+            // Take care all ANALOG_INPUT, ANALOG_OUTPUT, ANALOG_VALUE must be float or double not int !
+            // to comply with the standard    
             ana0 = new AnalogInput<double>
             (
                 0,
@@ -152,12 +154,12 @@ namespace AnotherStorageImplementation
 
             b.OnWriteNotify += new BaCSharpObject.WriteNotificationCallbackHandler(handler_OnWriteNotify);
 
-            // ANALOG_OUTPUT:1 int with Priority Array on Present Value
-            b = new AnalogOutput<int>
+            // ANALOG_OUTPUT:1 float with Priority Array on Present Value
+            b = new AnalogOutput<float>
             (
                 1,
-                "Ana1 int",
-                "Ana1 int",
+                "Ana1 float",
+                "Ana1 float",
                 (int)56,
                 BacnetUnitsId.UNITS_DEGREES_CELSIUS
             );

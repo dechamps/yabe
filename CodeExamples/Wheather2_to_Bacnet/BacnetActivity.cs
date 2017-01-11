@@ -67,7 +67,7 @@ namespace AnotherStorageImplementation
             {
                 bacnet_client.Start();    // go
                 // Send Iam
-                bacnet_client.Iam(deviceId, new BacnetSegmentations());
+                bacnet_client.Iam(deviceId, BacnetSegmentations.SEGMENTATION_BOTH, 61440);
                 bacnet_client.OnWhoIs += new BacnetClient.WhoIsHandler(handler_OnWhoIs);
 
                 if ((_device.FindBacnetObjectType(BacnetObjectTypes.OBJECT_NOTIFICATION_CLASS)) || (_device.FindBacnetObjectType(BacnetObjectTypes.OBJECT_SCHEDULE)))
@@ -304,7 +304,7 @@ namespace AnotherStorageImplementation
         {
             if (low_limit != -1 && deviceId < low_limit) return;
             else if (high_limit != -1 && deviceId > high_limit) return;
-            sender.Iam(deviceId, new BacnetSegmentations());
+            sender.Iam(deviceId, BacnetSegmentations.SEGMENTATION_BOTH, 61440);
         }
 
         /*****************************************************************************************************/

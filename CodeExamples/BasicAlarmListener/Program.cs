@@ -98,7 +98,7 @@ namespace BasicAlarmListener
         {
             if (low_limit != -1 && myId < low_limit) return;
             else if (high_limit != -1 && myId > high_limit) return;
-            sender.Iam(myId, new BacnetSegmentations());
+            sender.Iam(myId, BacnetSegmentations.SEGMENTATION_BOTH, 61440);
         }
 
         /*****************************************************************************************************/

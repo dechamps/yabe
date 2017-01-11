@@ -54,9 +54,9 @@ namespace BaCSharp
     [Serializable]
     public abstract class BinaryValueAndOutput : BinaryObject
     {
-        public bool UsePriorityArray = false;
+        IList<BacnetValue> DummyValue = new BacnetValue[0];
 
-        private object LockObj = new object();
+        public bool UsePriorityArray = false;
 
         public uint m_PROP_RELINQUISH_DEFAULT;
         [BaCSharpType(BacnetApplicationTags.BACNET_APPLICATION_TAG_ENUMERATED)]
@@ -67,6 +67,17 @@ namespace BaCSharp
             {
                 m_PROP_RELINQUISH_DEFAULT = value;
                 ExternalCOVManagement(BacnetPropertyIds.PROP_PRESENT_VALUE);
+            }
+        }
+
+        public virtual uint? PROP_CURRENT_COMMAND_PRIORITY
+        {
+            get
+            {
+                for (int i = 0; i < 16; i++)
+                    if (m_PROP_PRIORITY_ARRAY[i].Value != null) return (uint)(i + 1);
+                return null;
+
             }
         }
 
@@ -106,7 +117,9 @@ namespace BaCSharp
         // Do not shows PROP_PRIORITY_ARRAY &  PROP_RELINQUISH_DEFAULT if not in use
         protected override uint BacnetMethodNametoId(String Name)
         {
-            if ((UsePriorityArray == false) && ((Name == "get_PROP_PRIORITY_ARRAY") || (Name == "get_PROP_RELINQUISH_DEFAULT")))  // Hide these properties
+            if ((UsePriorityArray == false) && ((Name == "get_PROP_PRIORITY_ARRAY")
+                                || (Name == "get_PROP_RELINQUISH_DEFAULT")
+                                || (Name == "get_PROP_CURRENT_COMMAND_PRIORITY")))  // Hide these properties
                 return (uint)((int)BacnetPropertyIds.MAX_BACNET_PROPERTY_ID );
             else
                 return base.BacnetMethodNametoId(Name);
@@ -128,14 +141,15 @@ namespace BaCSharp
                 // The 135-2016 text:
                 // 19.2.2 Application Priority Assignments
                 // All commandable objects within a device shall be configurable to accept writes to all priorities except priority 6
-                if ((WritePriority == 6) && (Value != null)) { ErrorCode_PropertyWrite = ErrorCodes.WriteAccessDenied; return; }
+                if ((WritePriority == 6) && (Value != DummyValue)) { ErrorCode_PropertyWrite = ErrorCodes.WriteAccessDenied; return; }
+                if (Value == DummyValue) Value = null; // Duumy value means internal call to release priority 6
 
-                lock (LockObj)
+                lock (m_PROP_PRIORITY_ARRAY)
                 {
                     if (Value != null)
                         m_PROP_PRIORITY_ARRAY[(int)WritePriority - 1] = Value[0];
                     else
-                        m_PROP_PRIORITY_ARRAY[(int)WritePriority - 1] = new BacnetValue();  // normaly only due to internal call at priority level 6  
+                        m_PROP_PRIORITY_ARRAY[(int)WritePriority - 1] = new BacnetValue(); 
                     
                     bool done = false;
                     for (int i = 0; i < 16; i++)
@@ -154,7 +168,7 @@ namespace BaCSharp
                                     System.Threading.ThreadPool.QueueUserWorkItem((o) =>
                                     {
                                         Thread.Sleep(MiniHoldTime * 1000);
-                                        set2_PROP_PRESENT_VALUE(null, 6); // dummy call to release the PRIORITY_MIN_ON_OFF level
+                                        set2_PROP_PRESENT_VALUE(DummyValue, 6); // dummy call to release the PRIORITY_MIN_ON_OFF level
 
                                     }, null);
                                 }
@@ -176,7 +190,7 @@ namespace BaCSharp
                                 System.Threading.ThreadPool.QueueUserWorkItem((o) =>
                                 {
                                     Thread.Sleep(MiniHoldTime * 1000);
-                                    set2_PROP_PRESENT_VALUE(null, 6); // dummy call to release the PRIORITY_MIN_ON_OFF level
+                                    set2_PROP_PRESENT_VALUE(DummyValue, 6); // dummy call to release the PRIORITY_MIN_ON_OFF level
 
                                 }, null);
                             }

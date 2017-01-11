@@ -108,7 +108,7 @@ namespace BasicServer
 
             bacnet_client.Start();    // go
             // Send Iam
-            bacnet_client.Iam(m_storage.DeviceId, new BacnetSegmentations());
+            bacnet_client.Iam(m_storage.DeviceId);
 
         }
 
@@ -151,7 +151,7 @@ namespace BasicServer
         {
             if (low_limit != -1 && m_storage.DeviceId < low_limit) return;
             else if (high_limit != -1 && m_storage.DeviceId > high_limit) return;
-            sender.Iam(m_storage.DeviceId, new BacnetSegmentations());
+            sender.Iam(m_storage.DeviceId, BacnetSegmentations.SEGMENTATION_BOTH, 61440);
         }
 
         /*****************************************************************************************************/

@@ -172,7 +172,7 @@ namespace BasicServer
 
             bacnet_client.Start();    // go
             // Send Iam
-            bacnet_client.Iam(m_storage.DeviceId, new BacnetSegmentations());
+            bacnet_client.Iam(m_storage.DeviceId);
 
         }
         /*****************************************************************************************************/

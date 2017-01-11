@@ -65,6 +65,18 @@ namespace BaCSharp
                 }
         }
 
+        public virtual uint? PROP_CURRENT_COMMAND_PRIORITY
+        {
+            get 
+            { 
+                for (int i=0;i<16;i++)    
+                    if (m_PROP_PRIORITY_ARRAY[i].Value!=null) return (uint)(i+1);
+
+                return null; 
+            
+            }
+        }
+
         public BacnetValue[] m_PROP_PRIORITY_ARRAY = new BacnetValue[16];
         [BaCSharpType(BacnetApplicationTags.BACNET_APPLICATION_TAG_NULL)]
         public virtual BacnetValue[] PROP_PRIORITY_ARRAY
@@ -99,7 +111,9 @@ namespace BaCSharp
         // Do not shows PROP_PRIORITY_ARRAY &  PROP_RELINQUISH_DEFAULT if not in use
         protected override uint BacnetMethodNametoId(String Name)
         {
-            if ((UsePriorityArray == false) && ((Name == "get_PROP_PRIORITY_ARRAY") || (Name == "get_PROP_RELINQUISH_DEFAULT")))  // Hide these properties
+            if ((UsePriorityArray == false) && ((Name == "get_PROP_PRIORITY_ARRAY") 
+                                            || (Name == "get_PROP_RELINQUISH_DEFAULT")
+                                            || (Name == "get_PROP_CURRENT_COMMAND_PRIORITY")))  // Hide these properties
                 return (uint)((int)BacnetPropertyIds.MAX_BACNET_PROPERTY_ID);
             else
                 return base.BacnetMethodNametoId(Name);
@@ -131,7 +145,7 @@ namespace BaCSharp
                 {
                     if (m_PROP_PRIORITY_ARRAY[i].Value != null)    // A value is OK
                     {
-                        PROP_PRESENT_VALUE = (T)(T)Convert.ChangeType(m_PROP_PRIORITY_ARRAY[i].Value, typeof(T));
+                        PROP_PRESENT_VALUE = (T)Convert.ChangeType(m_PROP_PRIORITY_ARRAY[i].Value, typeof(T));
                         //PROP_PRESENT_VALUE = (T)m_PROP_PRIORITY_ARRAY[i].Value;
                         done = true;
                         break;

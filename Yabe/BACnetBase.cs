@@ -2864,6 +2864,13 @@ namespace System.IO.BACnet
         PROP_TIMER_RUNNING = 397,
         PROP_TIMER_STATE = 398,
 
+        // Addendum-135-2012as
+        PROP_COMMAND_TIME_ARRAY	= 430,	
+        PROP_CURRENT_COMMAND_PRIORITY = 431,
+        PROP_LAST_COMMAND_TIME = 432,
+        PROP_VALUE_SOURCE = 433,
+        PROP_VALUE_SOURCE_ARRAY = 434,
+
         /* The special property identifiers all, optional, and required  */
         /* are reserved for use in the ReadPropertyConditional and */
         /* ReadPropertyMultiple services or services not defined in this standard. */
@@ -3508,6 +3515,21 @@ namespace System.IO.BACnet.Serialize
 
         public static void Encode(EncodeBuffer buffer, BacnetNpduControls function, BacnetAddress destination, BacnetAddress source, byte hop_count, BacnetNetworkMessageTypes network_msg_type, ushort vendor_id)
         {
+            Encode(buffer, function, destination, source, hop_count);
+
+            if ((function & BacnetNpduControls.NetworkLayerMessage) > 0) // sure it is, otherwise the other Encode is used
+            {
+                buffer.buffer[buffer.offset++] = (byte)network_msg_type;
+                if (((byte)network_msg_type) >= 0x80) // who used this ??? sure nobody !
+                {                    
+                    buffer.buffer[buffer.offset++] = (byte)((vendor_id & 0xFF00) >> 8);
+                    buffer.buffer[buffer.offset++] = (byte)((vendor_id & 0x00FF) >> 0);
+                }
+            }
+        }
+
+        public static void Encode(EncodeBuffer buffer, BacnetNpduControls function, BacnetAddress destination, BacnetAddress source=null, byte hop_count=0xFF)
+        {
             // Modif FC
             bool has_destination = destination != null && destination.net > 0; // && destination.net != 0xFFFF;
             bool has_source = source != null && source.net > 0 && source.net != 0xFFFF;
@@ -3556,23 +3578,6 @@ namespace System.IO.BACnet.Serialize
                 buffer.buffer[buffer.offset++] = hop_count;
             }
 
-            /*
-            //display warning
-            if (has_destination || has_source)
-            {
-                System.Diagnostics.Trace.TraceWarning("NPDU size is more than 4. This will give an error in the current max_apdu calculation");
-            }
-            */
-
-            if ((function & BacnetNpduControls.NetworkLayerMessage) > 0)
-            {
-                buffer.buffer[buffer.offset++] =(byte)network_msg_type;
-                if (((byte)network_msg_type) >= 0x80)
-                {
-                    buffer.buffer[buffer.offset++] =(byte)((vendor_id & 0xFF00) >> 8);
-                    buffer.buffer[buffer.offset++] =(byte)((vendor_id & 0x00FF) >> 0);
-                }
-            }
         }
     }
 
@@ -3606,7 +3611,7 @@ namespace System.IO.BACnet.Serialize
             }
         }
 
-        public static void EncodeConfirmedServiceRequest(EncodeBuffer buffer, BacnetPduTypes type, BacnetConfirmedServices service, BacnetMaxSegments max_segments, BacnetMaxAdpu max_adpu, byte invoke_id, byte sequence_number, byte proposed_window_size)
+        public static void EncodeConfirmedServiceRequest(EncodeBuffer buffer, BacnetPduTypes type, BacnetConfirmedServices service, BacnetMaxSegments max_segments, BacnetMaxAdpu max_adpu, byte invoke_id, byte sequence_number=0, byte proposed_window_size=0)
         {
             buffer.buffer[buffer.offset++] =(byte)type;
             buffer.buffer[buffer.offset++] =(byte)((byte)max_segments | (byte)max_adpu);
