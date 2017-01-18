@@ -96,6 +96,22 @@ namespace Weather2_to_Bacnet
             }
         }
 
+        private void SetAIValue(AnalogInput<float> AI, XmlNode NodeVal)
+        {
+            try
+            {
+                AI.internal_PROP_PRESENT_VALUE = Convert.ToInt32(NodeVal.InnerText);
+                AI.m_PROP_OUT_OF_SERVICE = false;
+                AI.m_PROP_STATUS_FLAGS.SetBit((byte)3, false);
+            }
+            catch
+            {
+                AI.m_PROP_OUT_OF_SERVICE = true;
+                AI.m_PROP_STATUS_FLAGS.SetBit((byte)3, true);
+            }
+
+        }
+
         private void ParseWheather2_Response(String Rep)
         {
             try
@@ -104,33 +120,48 @@ namespace Weather2_to_Bacnet
                 doc.LoadXml(Rep);
 
                 XmlNode node = doc.SelectSingleNode("/weather/curren_weather/temp");
-                Temp.internal_PROP_PRESENT_VALUE= Convert.ToInt32(node.InnerText);
-                TrendTemp.AddValue(Temp.internal_PROP_PRESENT_VALUE, 0);
+                SetAIValue(Temp, node);
+                if (Temp.m_PROP_OUT_OF_SERVICE == false)
+                    TrendTemp.AddValue(Temp.internal_PROP_PRESENT_VALUE, 0);
 
                 node = doc.SelectSingleNode("/weather/curren_weather/wind/speed");
-                Windspeed.internal_PROP_PRESENT_VALUE = Convert.ToInt32(node.InnerText);
+                SetAIValue(Windspeed, node);
 
                 node = doc.SelectSingleNode("/weather/curren_weather/wind/dir");
                 Windsdir.internal_PROP_PRESENT_VALUE = node.InnerText;
 
-                    node = doc.SelectSingleNode("/weather/curren_weather/humidity");
-                    Humidity.internal_PROP_PRESENT_VALUE= Convert.ToInt32(node.InnerText);
+                node = doc.SelectSingleNode("/weather/curren_weather/humidity");
+                SetAIValue(Humidity, node);
 
-                    node = doc.SelectSingleNode("/weather/curren_weather/pressure");
-                    Pressure.internal_PROP_PRESENT_VALUE= Convert.ToInt32(node.InnerText);
+                node = doc.SelectSingleNode("/weather/curren_weather/pressure");
+                SetAIValue(Pressure, node);
 
-                    node = doc.SelectSingleNode("/weather/curren_weather/weather_text");
-                    WeatherDescr.internal_PROP_PRESENT_VALUE = node.InnerText;
+                node = doc.SelectSingleNode("/weather/curren_weather/weather_text");
+                WeatherDescr.internal_PROP_PRESENT_VALUE = node.InnerText;
 
-                    // http://www.meteo.psu.edu/~jyh10/classes/meteo473/java-tdew.htm
-                    // by Jerry Y. Harrington
+                // http://www.meteo.psu.edu/~jyh10/classes/meteo473/java-tdew.htm
+                // by Jerry Y. Harrington
+                if ((Humidity.m_PROP_OUT_OF_SERVICE == false) || (Temp.m_PROP_OUT_OF_SERVICE == false))
+                {
                     double es = 6.112 * Math.Exp(1.0 * 17.67 * Temp.internal_PROP_PRESENT_VALUE / (243.5 + Temp.internal_PROP_PRESENT_VALUE));
                     double ed = Humidity.internal_PROP_PRESENT_VALUE / 100.0 * es;
-                    double eln = Math.Log(ed/6.112);
+                    double eln = Math.Log(ed / 6.112);
                     double td = -243.5 * eln / (eln - 17.67);
 
-                DewPoint.internal_PROP_PRESENT_VALUE = (float)Math.Round(td,1);
-                VaporPressure.internal_PROP_PRESENT_VALUE = (float)Math.Round(es,1);
+                    DewPoint.internal_PROP_PRESENT_VALUE = (float)Math.Round(td, 1);
+                    DewPoint.m_PROP_OUT_OF_SERVICE = false;
+                    DewPoint.m_PROP_STATUS_FLAGS.SetBit((byte)3, false);
+                    VaporPressure.internal_PROP_PRESENT_VALUE = (float)Math.Round(es, 1);
+                    VaporPressure.m_PROP_OUT_OF_SERVICE = false;
+                    VaporPressure.m_PROP_STATUS_FLAGS.SetBit((byte)3, false);
+                }
+                else
+                {
+                    DewPoint.m_PROP_OUT_OF_SERVICE = true; 
+                    DewPoint.m_PROP_STATUS_FLAGS.SetBit((byte)3, true);
+                    VaporPressure.m_PROP_OUT_OF_SERVICE = true;
+                    VaporPressure.m_PROP_STATUS_FLAGS.SetBit((byte)3, true);
+                }
 
                 Updatetime.m_PresentValue = DateTime.Now;
 
@@ -240,6 +271,7 @@ namespace Weather2_to_Bacnet
 
         void WorkingLoop()
         {
+
             InitBacnetDictionary();
 
             if ((UserAccessKey == null) || (Latitude == null) || (Longitude == null))
@@ -266,7 +298,10 @@ namespace Weather2_to_Bacnet
 
                     double JD = NAA.Util.calcJD(today);
                     double sunRise = NAA.Util.calcSunRiseUTC(JD, lat, lon);
+
                     double sunSet = NAA.Util.calcSunSetUTC(JD, lat, lon);
+
+                    var v = NAA.Util.getDateTime(sunRise, 0, today, false);
 
                     DateTime? dSunRise = NAA.Util.getDateTime(sunRise, 0, today, false);
                     DateTime? dSunSet = NAA.Util.getDateTime(sunSet, 0, today, false);
