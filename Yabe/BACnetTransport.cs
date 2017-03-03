@@ -124,13 +124,25 @@ namespace System.IO.BACnet
                     m_shared_conn.Client.Bind(ep);
                     m_shared_conn.DontFragment = m_dont_fragment;
                 }
-                /* This is our own exclusive port. We'll recieve everything sent to this. */
+
+                /* This is our own exclusive port. We'll receive everything sent to this. */
                 /* So this is how we'll present our selves to the world */
                 if (m_exclusive_conn == null)
                 {
                     System.Net.EndPoint ep = new Net.IPEndPoint(System.Net.IPAddress.Any, 0);
                     if (!string.IsNullOrEmpty(m_local_endpoint)) ep = new Net.IPEndPoint(Net.IPAddress.Parse(m_local_endpoint), 0);
+
+                    // Opens the socket, udp will choose the Port number
                     m_exclusive_conn = new Net.Sockets.UdpClient((Net.IPEndPoint)ep);
+                    // Gets the Endpoint : the assigned Udp port number in fact
+                    ep = m_exclusive_conn.Client.LocalEndPoint;
+                    // closes the socket
+                    m_exclusive_conn.Close();
+                    // Re-opens it with the freeed port number, to be sure it's a real active/server socket
+                    // which cannot be disarmed for listen by .NET for incoming call after a few inactivity
+                    // minutes ... yes it's like this at least on several systems
+                    m_exclusive_conn = new Net.Sockets.UdpClient((Net.IPEndPoint)ep);
+
                     m_exclusive_conn.DontFragment = m_dont_fragment;
                 }
             }
