@@ -67,7 +67,7 @@ namespace DemoServer
                 if (macAddr != null)
                 {
                     byte[] mac = macAddr.GetAddressBytes();
-                    deviceId = ((uint)mac[5] + (uint)((mac[4] << 8) & 0x3F))<<6;
+                    deviceId = (uint)mac[5] + (uint)((mac[4] << 8)<<6);
                 }
                 // Un bricollage du dimanche vite fait ici !
                 deviceId = deviceId + ((uint)(Program.Count & 0x3F));
@@ -111,9 +111,12 @@ namespace DemoServer
             // L'index 0 c'est le nombre de valeurs associées à la propriété
             // L'index 1 pour la première valeur
             // L'index System.IO.BACnet.Serialize.ASN1.BACNET_ARRAY_ALL pour tout le tableau
-            IList<BacnetValue> val=null;
-            m_storage.ReadProperty(id, BacnetPropertyIds.PROP_PRESENT_VALUE, 1, out val);
-            return val[0];
+            lock (m_lockObject)
+            {
+                IList<BacnetValue> val = null;
+                m_storage.ReadProperty(id, BacnetPropertyIds.PROP_PRESENT_VALUE, 1, out val);
+                return val[0];
+            }
         }
 
         public static void SetBacObjectPresentValue(BacnetObjectId id, BacnetValue bv)
@@ -125,8 +128,11 @@ namespace DemoServer
             // L'index 0 c'est le nombre de valeurs associées à la propriété
             // L'index 1 pour la première valeur
             // L'index System.IO.BACnet.Serialize.ASN1.BACNET_ARRAY_ALL pour tout le tableau
-            IList<BacnetValue> val = new BacnetValue[1] {bv};
-            m_storage.WriteProperty(id, BacnetPropertyIds.PROP_PRESENT_VALUE, 1, val, true);
+            lock (m_lockObject)
+            {
+                IList<BacnetValue> val = new BacnetValue[1] { bv };
+                m_storage.WriteProperty(id, BacnetPropertyIds.PROP_PRESENT_VALUE, 1, val, true);
+            }
         }
 
         // Ici les remplacement de la lecture de quelques élements
