@@ -2496,9 +2496,13 @@ namespace Yabe
                             Identifier = out_value[0].Value.ToString();                           
                         }
 
-                        comm.ReadPropertyRequest(adr, Bacobj, BacnetPropertyIds.PROP_DESCRIPTION, out out_value);
-                        if (!(out_value[0].Value is BacnetError))
-                            Identifier = out_value[0].Value.ToString();
+                        try
+                        {
+                            comm.ReadPropertyRequest(adr, Bacobj, BacnetPropertyIds.PROP_DESCRIPTION, out out_value);
+                            if (!(out_value[0].Value is BacnetError))
+                                Description = out_value[0].Value.ToString();
+                        }
+                        catch { }
                     }
 
                     Sw.WriteLine(Bacobj.ToString() + ";" + device_id.ToString() + ";" + Identifier + ";" + ((int)Bacobj.type).ToString() + ";" + Bacobj.instance.ToString() + ";" + Description + ";;;;;;;;;" + UnitCode);
