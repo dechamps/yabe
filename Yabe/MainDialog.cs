@@ -2229,25 +2229,43 @@ namespace Yabe
 
         private void m_subscriptionRenewTimer_Tick(object sender, EventArgs e)
         {
+            // don't want to lock the list for a while
+            // so get element one by one using the indexer            
+            int ItmCount;
             lock (m_subscription_list)
-            foreach (ListViewItem itm in m_subscription_list.Values)
+                ItmCount = m_subscription_list.Count;
+
+            for (int i = 0; i < ItmCount; i++)
             {
+                ListViewItem itm = null;
+
+                // lock another time the list to get the item by indexer
                 try
                 {
-                    Subscription sub = (Subscription)itm.Tag;
-
-                    if (sub.is_active_subscription == false) // not needs to renew, periodic pooling in operation (or nothing) due to COV subscription refused by the remote device
-                        return;
-
-                    if (!sub.comm.SubscribeCOVRequest(sub.adr, sub.object_id, sub.subscribe_id, false, Properties.Settings.Default.Subscriptions_IssueConfirmedNotifies, Properties.Settings.Default.Subscriptions_Lifetime))
-                    {
-                        SetSubscriptionStatus(itm, "Offline");
-                        Trace.TraceWarning("Couldn't renew subscription " + sub.subscribe_id);
-                    }
+                    lock (m_subscription_list)
+                        itm = m_subscription_list.Values.ElementAt(i);
                 }
-                catch (Exception ex)
+                catch { }
+
+                if (itm != null)
                 {
-                    Trace.TraceError("Exception during renew subscription: " + ex.Message);
+                    try
+                    {
+                        Subscription sub = (Subscription)itm.Tag;
+
+                        if (sub.is_active_subscription == false) // not needs to renew, periodic pooling in operation (or nothing) due to COV subscription refused by the remote device
+                            return;
+
+                        if (!sub.comm.SubscribeCOVRequest(sub.adr, sub.object_id, sub.subscribe_id, false, Properties.Settings.Default.Subscriptions_IssueConfirmedNotifies, Properties.Settings.Default.Subscriptions_Lifetime))
+                        {
+                            SetSubscriptionStatus(itm, "Offline");
+                            Trace.TraceWarning("Couldn't renew subscription " + sub.subscribe_id);
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        Trace.TraceError("Exception during renew subscription: " + ex.Message);
+                    }
                 }
             }
         }
