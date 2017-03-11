@@ -407,34 +407,35 @@ namespace AnotherStorageImplementation
             }
 
             // some default values
-            string obj_name = object_id.type.ToString() + object_id.instance.ToString(); 
+            string obj_name = object_id.type.ToString() + object_id.instance.ToString();
             string obj_description = "Sample for you by C. Günter";
             BacnetUnitsId obj_unit = BacnetUnitsId.UNITS_NO_UNITS;
             double obj_value = 0;
 
             // normally only needs objid, these properties values are sent or not by the client
-            foreach (BacnetPropertyValue value in values)
-            {
-                switch (value.property.propertyIdentifier)
+            if (values != null)
+                foreach (BacnetPropertyValue value in values)
                 {
-                    case (uint)BacnetPropertyIds.PROP_DESCRIPTION:
-                        obj_description = (string)value.value[0].Value;
-                        break;
-                    case (uint)BacnetPropertyIds.PROP_OBJECT_NAME:
-                        obj_name = (string)value.value[0].Value;
-                        break;
-                    case (uint)BacnetPropertyIds.PROP_UNITS:
-                        obj_unit = (BacnetUnitsId)value.value[0].Value;
-                        break;
-                    case (uint)BacnetPropertyIds.PROP_PRESENT_VALUE:
-                        try
-                        {
-                            obj_value = Convert.ToDouble(value.value[0].Value); // double is the simplest, quite all values convertible to it
-                        }
-                        catch { }
-                        break;
+                    switch (value.property.propertyIdentifier)
+                    {
+                        case (uint)BacnetPropertyIds.PROP_DESCRIPTION:
+                            obj_description = (string)value.value[0].Value;
+                            break;
+                        case (uint)BacnetPropertyIds.PROP_OBJECT_NAME:
+                            obj_name = (string)value.value[0].Value;
+                            break;
+                        case (uint)BacnetPropertyIds.PROP_UNITS:
+                            obj_unit = (BacnetUnitsId)value.value[0].Value;
+                            break;
+                        case (uint)BacnetPropertyIds.PROP_PRESENT_VALUE:
+                            try
+                            {
+                                obj_value = Convert.ToDouble(value.value[0].Value); // double is the simplest, quite all values convertible to it
+                            }
+                            catch { }
+                            break;
+                    }
                 }
-            }
             //add to device
             switch (object_id.type)
             {
@@ -457,7 +458,7 @@ namespace AnotherStorageImplementation
             //check if exists; if doesn't send error Unknown_Object
             if (device.FindBacnetObject(object_id) == null)
             {
-                sender.ErrorResponse(adr, BacnetConfirmedServices.SERVICE_CONFIRMED_CREATE_OBJECT, invoke_id, BacnetErrorClasses.ERROR_CLASS_OBJECT, BacnetErrorCodes.ERROR_CODE_UNKNOWN_OBJECT);
+                sender.ErrorResponse(adr, BacnetConfirmedServices.SERVICE_CONFIRMED_DELETE_OBJECT, invoke_id, BacnetErrorClasses.ERROR_CLASS_OBJECT, BacnetErrorCodes.ERROR_CODE_UNKNOWN_OBJECT);
                 return;
             }
 
@@ -465,8 +466,8 @@ namespace AnotherStorageImplementation
             // Device not removable, no need to check
             switch (object_id.type)
             {
-                case BacnetObjectTypes.OBJECT_ACCESS_DOOR : // just to shows how to do
-                    sender.ErrorResponse(adr, BacnetConfirmedServices.SERVICE_CONFIRMED_CREATE_OBJECT, invoke_id, BacnetErrorClasses.ERROR_CLASS_OBJECT, BacnetErrorCodes.ERROR_CODE_OBJECT_DELETION_NOT_PERMITTED);
+                case BacnetObjectTypes.OBJECT_ACCESS_DOOR: // just to shows how to do
+                    sender.ErrorResponse(adr, BacnetConfirmedServices.SERVICE_CONFIRMED_DELETE_OBJECT, invoke_id, BacnetErrorClasses.ERROR_CLASS_OBJECT, BacnetErrorCodes.ERROR_CODE_OBJECT_DELETION_NOT_PERMITTED);
                     return;
                 default:
                     break;
@@ -478,7 +479,6 @@ namespace AnotherStorageImplementation
                 Console.WriteLine("unknown Error while deleting object!");
             return;
         }
-
 
     }
 }

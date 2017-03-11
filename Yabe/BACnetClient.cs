@@ -1649,7 +1649,7 @@ namespace System.IO.BACnet
 
         //*********************************************************************************
         // By Christopher Günter
-        public bool CreateObjectRequest(BacnetAddress adr, BacnetObjectId object_id, ICollection<BacnetPropertyValue> value_list, byte invoke_id = 0)
+        public bool CreateObjectRequest(BacnetAddress adr, BacnetObjectId object_id, ICollection<BacnetPropertyValue> value_list = null, byte invoke_id = 0)
         {
             using (BacnetAsyncResult result = (BacnetAsyncResult)BeginCreateObjectRequest(adr, object_id, value_list, true, invoke_id))
             {

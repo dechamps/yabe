@@ -898,7 +898,7 @@ namespace System.IO.BACnet
         OBJECT_PROPRIETARY_MIN = 128,
         OBJECT_PROPRIETARY_MAX = 1023,
         MAX_BACNET_OBJECT_TYPE = 1024,
-        MAX_ASHRAE_OBJECT_TYPE = 55,
+        MAX_ASHRAE_OBJECT_TYPE = 56,
     };
 
     public enum BacnetApplicationTags
@@ -6694,31 +6694,35 @@ namespace System.IO.BACnet.Serialize
             ASN1.encode_context_object_id(buffer, 1, object_id.type, object_id.instance);
             ASN1.encode_closing_tag(buffer, 0);
 
-            ASN1.encode_opening_tag(buffer, 1);
 
-            foreach (BacnetPropertyValue p_value in value_list)
+            if (value_list != null)
             {
+                ASN1.encode_opening_tag(buffer, 1);
 
-                ASN1.encode_context_enumerated(buffer, 0, p_value.property.propertyIdentifier);
-
-
-                if (p_value.property.propertyArrayIndex != ASN1.BACNET_ARRAY_ALL)
-                    ASN1.encode_context_unsigned(buffer, 1, p_value.property.propertyArrayIndex);
-
-
-                ASN1.encode_opening_tag(buffer, 2);
-                foreach (BacnetValue value in p_value.value)
+                foreach (BacnetPropertyValue p_value in value_list)
                 {
-                    ASN1.bacapp_encode_application_data(buffer, value);
+
+                    ASN1.encode_context_enumerated(buffer, 0, p_value.property.propertyIdentifier);
+
+
+                    if (p_value.property.propertyArrayIndex != ASN1.BACNET_ARRAY_ALL)
+                        ASN1.encode_context_unsigned(buffer, 1, p_value.property.propertyArrayIndex);
+
+
+                    ASN1.encode_opening_tag(buffer, 2);
+                    foreach (BacnetValue value in p_value.value)
+                    {
+                        ASN1.bacapp_encode_application_data(buffer, value);
+                    }
+                    ASN1.encode_closing_tag(buffer, 2);
+
+
+                    if (p_value.priority != ASN1.BACNET_NO_PRIORITY)
+                        ASN1.encode_context_unsigned(buffer, 3, p_value.priority);
                 }
-                ASN1.encode_closing_tag(buffer, 2);
 
-
-                if (p_value.priority != ASN1.BACNET_NO_PRIORITY)
-                    ASN1.encode_context_unsigned(buffer, 3, p_value.priority);
+                ASN1.encode_closing_tag(buffer, 1);
             }
-
-            ASN1.encode_closing_tag(buffer, 1);
 
         }
         //***************************************************************
@@ -8416,6 +8420,10 @@ namespace System.IO.BACnet.Serialize
             if (ASN1.decode_is_closing_tag(buffer, offset + len))
                 len++;
             //end objectid
+
+            // No initial values ?
+            if (buffer.Length == offset + len)
+                return len;
 
             /* Tag 1: sequence of WriteAccessSpecification */
             if (!ASN1.decode_is_opening_tag_number(buffer, offset + len, 1))

@@ -96,6 +96,12 @@
     <Compile Include="CalendarEditor.Designer.cs">
       <DependentUpon>CalendarEditor.cs</DependentUpon>
     </Compile>
+    <Compile Include="CreateObject.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="CreateObject.Designer.cs">
+      <DependentUpon>CreateObject.cs</DependentUpon>
+    </Compile>
     <Compile Include="DeviceCommunicationControlDialog.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -166,6 +172,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="CalendarEditor.resx">
       <DependentUpon>CalendarEditor.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="CreateObject.resx">
+      <DependentUpon>CreateObject.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="DeviceCommunicationControlDialog.resx">
       <DependentUpon>DeviceCommunicationControlDialog.cs</DependentUpon>
@@ -252,6 +261,8 @@
     <None Include="Resources\database_delete.png" />
     <None Include="Resources\text_smallcaps.png" />
     <None Include="Resources\find.png" />
+    <None Include="Resources\pencil_add.png" />
+    <None Include="Resources\pencil_delete.png" />
     <Content Include="Search.ico" />
   </ItemGroup>
   <ItemGroup>

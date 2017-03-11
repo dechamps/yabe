@@ -1399,6 +1399,7 @@ namespace Yabe
                 (its as ToolStripMenuItem).Visible = false;
             // Set Subscribe always visible
             m_AddressSpaceMenuStrip.Items[0].Visible = true;
+
             // Get the node type
             GetObjectLink(out cl, out ba, out objId, BacnetObjectTypes.MAX_BACNET_OBJECT_TYPE);
             // Set visible some elements depending of the object type
@@ -1427,6 +1428,9 @@ namespace Yabe
                     break;
             }
 
+            // Allows delete menu 
+            if (objId.type!=BacnetObjectTypes.OBJECT_DEVICE)
+                m_AddressSpaceMenuStrip.Items[7].Visible = true;
         }
 
         private void m_DataGrid_PropertyValueChanged(object s, PropertyValueChangedEventArgs e)
@@ -1768,6 +1772,28 @@ namespace Yabe
 
             }
             catch(Exception ex) { Trace.TraceError("Error loading Schedule : " + ex.Message); }
+        }
+
+        private void deleteObjectToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+
+            try
+            {
+                //fetch end point
+                BacnetClient comm;
+                BacnetAddress adr;
+                BacnetObjectId object_id;
+
+                GetObjectLink(out comm, out adr, out object_id, BacnetObjectTypes.MAX_BACNET_OBJECT_TYPE);
+
+                if (MessageBox.Show("Are you sure you want to delete this object ?", object_id.ToString(), MessageBoxButtons.OKCancel, MessageBoxIcon.Question) == DialogResult.OK)
+                {
+                    comm.DeleteObjectRequest(adr, object_id);
+                    m_DeviceTree_AfterSelect(null, new TreeViewEventArgs(m_DeviceTree.SelectedNode));
+                }
+
+            }
+            catch (Exception ex) { Trace.TraceError("Error : " + ex.Message); }
         }
 
         private void showCalendarToolStripMenuItem_Click(object sender, EventArgs e)
@@ -2771,6 +2797,40 @@ namespace Yabe
 
         }
 
+        private void createObjectToolStripMenuItem1_Click(object sender, EventArgs e)
+        {
+            createObjectToolStripMenuItem_Click(sender, e);
+        }
+        private void createObjectToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            //fetch end point
+            BacnetClient comm = null;
+            BacnetAddress adr;
+            uint device_id;
+
+            FetchEndPoint(out comm, out adr, out device_id);
+
+            if (comm == null)
+                return;
+
+            CreateObject F = new CreateObject();
+            if (F.ShowDialog() == DialogResult.OK)
+            {
+
+                try
+                {
+
+                    comm.CreateObjectRequest(adr, new BacnetObjectId((BacnetObjectTypes)F.ObjectType.SelectedIndex, (uint)F.ObjectId.Value));
+                    m_DeviceTree_AfterSelect(null, new TreeViewEventArgs(m_DeviceTree.SelectedNode));
+                }
+                catch
+                {
+                    MessageBox.Show("Fail to Create Object","CreateObject", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                }
+            }
+
+        }
+
         private void cleanToolStripMenuItem_Click(object sender, EventArgs e)
         {             
             DialogResult res = MessageBox.Show(this, "Clean all "+DevicesObjectsName.Count.ToString()+" entries, really ?", "Name database suppression", MessageBoxButtons.OKCancel, MessageBoxIcon.Information);
@@ -2852,6 +2912,7 @@ namespace Yabe
         }
 
         #endregion
+
 
 
 

@@ -54,6 +54,7 @@
             this.timeSynchronizeToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
             this.communicationControlToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
             this.alarmSummaryToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
+            this.createObjectToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripMenuItem2 = new System.Windows.Forms.ToolStripSeparator();
             this.downloadFileToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
             this.uploadFileToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
@@ -81,6 +82,7 @@
             this.communicationControlToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.alarmSummaryToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.readPropertiesNameToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.createObjectToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.label2 = new System.Windows.Forms.Label();
             this.m_AddressSpaceTree = new System.Windows.Forms.TreeView();
             this.m_AddressSpaceMenuStrip = new System.Windows.Forms.ContextMenuStrip(this.components);
@@ -91,6 +93,7 @@
             this.showScheduleToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
             this.showNotificationToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.showCalendarToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.deleteObjectToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.label3 = new System.Windows.Forms.Label();
             this.m_SplitContainerRight = new System.Windows.Forms.SplitContainer();
             this.tabControl1 = new System.Windows.Forms.TabControl();
@@ -267,6 +270,7 @@
             this.timeSynchronizeToolStripMenuItem1,
             this.communicationControlToolStripMenuItem1,
             this.alarmSummaryToolStripMenuItem1,
+            this.createObjectToolStripMenuItem1,
             this.toolStripMenuItem2,
             this.downloadFileToolStripMenuItem1,
             this.uploadFileToolStripMenuItem1,
@@ -369,6 +373,14 @@
             this.alarmSummaryToolStripMenuItem1.Size = new System.Drawing.Size(224, 22);
             this.alarmSummaryToolStripMenuItem1.Text = "Alarm Summary";
             this.alarmSummaryToolStripMenuItem1.Click += new System.EventHandler(this.alarmSummaryToolStripMenuItem1_Click);
+            // 
+            // createObjectToolStripMenuItem1
+            // 
+            this.createObjectToolStripMenuItem1.Image = global::Yabe.Properties.Resources.pencil_add;
+            this.createObjectToolStripMenuItem1.Name = "createObjectToolStripMenuItem1";
+            this.createObjectToolStripMenuItem1.Size = new System.Drawing.Size(224, 22);
+            this.createObjectToolStripMenuItem1.Text = "Create Object";
+            this.createObjectToolStripMenuItem1.Click += new System.EventHandler(this.createObjectToolStripMenuItem1_Click);
             // 
             // toolStripMenuItem2
             // 
@@ -559,9 +571,10 @@
             this.timeSynchronizeToolStripMenuItem,
             this.communicationControlToolStripMenuItem,
             this.alarmSummaryToolStripMenuItem,
-            this.readPropertiesNameToolStripMenuItem});
+            this.readPropertiesNameToolStripMenuItem,
+            this.createObjectToolStripMenuItem});
             this.m_DeviceTreeMenuStrip.Name = "m_DeviceTreeMenuStrip";
-            this.m_DeviceTreeMenuStrip.Size = new System.Drawing.Size(225, 186);
+            this.m_DeviceTreeMenuStrip.Size = new System.Drawing.Size(225, 208);
             // 
             // addDeviceToolStripMenuItem
             // 
@@ -637,6 +650,15 @@
             this.readPropertiesNameToolStripMenuItem.Text = "Get Properties name";
             this.readPropertiesNameToolStripMenuItem.Click += new System.EventHandler(this.readPropertiesNameToolStripMenuItem_Click);
             // 
+            // createObjectToolStripMenuItem
+            // 
+            this.createObjectToolStripMenuItem.Image = global::Yabe.Properties.Resources.pencil_add;
+            this.createObjectToolStripMenuItem.Name = "createObjectToolStripMenuItem";
+            this.createObjectToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.O)));
+            this.createObjectToolStripMenuItem.Size = new System.Drawing.Size(224, 22);
+            this.createObjectToolStripMenuItem.Text = "Create Object";
+            this.createObjectToolStripMenuItem.Click += new System.EventHandler(this.createObjectToolStripMenuItem_Click);
+            // 
             // label2
             // 
             this.label2.AutoSize = true;
@@ -672,9 +694,10 @@
             this.showTrendLogToolStripMenuItem1,
             this.showScheduleToolStripMenuItem1,
             this.showNotificationToolStripMenuItem,
-            this.showCalendarToolStripMenuItem});
+            this.showCalendarToolStripMenuItem,
+            this.deleteObjectToolStripMenuItem});
             this.m_AddressSpaceMenuStrip.Name = "m_AddressSpaceMenuStrip";
-            this.m_AddressSpaceMenuStrip.Size = new System.Drawing.Size(170, 158);
+            this.m_AddressSpaceMenuStrip.Size = new System.Drawing.Size(170, 180);
             // 
             // subscribeToolStripMenuItem
             // 
@@ -731,6 +754,14 @@
             this.showCalendarToolStripMenuItem.Size = new System.Drawing.Size(169, 22);
             this.showCalendarToolStripMenuItem.Text = "Show Calendar";
             this.showCalendarToolStripMenuItem.Click += new System.EventHandler(this.showCalendarToolStripMenuItem_Click);
+            // 
+            // deleteObjectToolStripMenuItem
+            // 
+            this.deleteObjectToolStripMenuItem.Image = global::Yabe.Properties.Resources.pencil_delete;
+            this.deleteObjectToolStripMenuItem.Name = "deleteObjectToolStripMenuItem";
+            this.deleteObjectToolStripMenuItem.Size = new System.Drawing.Size(169, 22);
+            this.deleteObjectToolStripMenuItem.Text = "DeleteObject";
+            this.deleteObjectToolStripMenuItem.Click += new System.EventHandler(this.deleteObjectToolStripMenuItem_Click);
             // 
             // label3
             // 
@@ -1016,6 +1047,9 @@
         private System.Windows.Forms.ToolStripMenuItem sendUnicastUdpWhoIsToolStripMenuItem;
         private System.Windows.Forms.ContextMenuStrip m_EventSpaceMenuStrip;
         private System.Windows.Forms.ToolStripMenuItem EventAlarmLogToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem createObjectToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem createObjectToolStripMenuItem1;
+        private System.Windows.Forms.ToolStripMenuItem deleteObjectToolStripMenuItem;
     }
 }
 

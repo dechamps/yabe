@@ -279,6 +279,23 @@ namespace BaCSharp
             if (obj != this)
             {
                 obj.Dispose();
+                foreach (var o in m_PROP_OBJECT_LIST)
+                {
+                    if (o.ToString() == objId.ToString())
+                    {
+                        m_PROP_OBJECT_LIST.Remove(o);
+                        break;
+                    }
+                }
+                foreach (var o in m_PROP_STRUCTURED_OBJECT_LIST)
+                {
+                    if (o.ToString() == objId.ToString())
+                    {
+                        m_PROP_STRUCTURED_OBJECT_LIST.Remove(o);
+                        break;
+                    }
+                }
+
                 return ObjectsList.Remove(obj); //since we wont remove object device!!!! using LIST Remove!!
             }
             else
