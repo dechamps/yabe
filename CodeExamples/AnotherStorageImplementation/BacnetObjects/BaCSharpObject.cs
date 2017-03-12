@@ -87,6 +87,9 @@ namespace BaCSharp
             get { return m_PROP_DESCRIPTION; }
         }
 
+        // Cannot be deleted by default
+        public bool AcceptDeleteObject = false;
+
         public delegate void WriteNotificationCallbackHandler(BaCSharpObject sender, BacnetPropertyIds propId);
         // One event for each object if needed
         public event WriteNotificationCallbackHandler OnWriteNotify;

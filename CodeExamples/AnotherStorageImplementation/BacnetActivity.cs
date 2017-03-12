@@ -396,7 +396,7 @@ namespace AnotherStorageImplementation
 
         /*****************************************************************************************************/
         // Create & Delete Object by C. Gunter
-        //  OBJECT_ANALOG_INPUT sample
+        //  OBJECT_ANALOG_VALUE sample
         static void handler_OnCreateObjectRequest(BacnetClient sender, BacnetAddress adr, byte invoke_id, BacnetObjectId object_id, ICollection<BacnetPropertyValue> values, BacnetMaxSegments max_segments)
         {
             // simple not all errortypes!!!!!!!! and for now only Analog inputs
@@ -439,9 +439,10 @@ namespace AnotherStorageImplementation
             //add to device
             switch (object_id.type)
             {
-                case BacnetObjectTypes.OBJECT_ANALOG_INPUT:
-                    AnalogInput<double> newAI = new AnalogInput<double>(object_id, obj_name, obj_description, obj_value, obj_unit);
-                    device.AddBacnetObject(newAI);
+                case BacnetObjectTypes.OBJECT_ANALOG_VALUE:
+                    AnalogValue<double> newAV = new AnalogValue<double>(object_id, obj_name, obj_description, obj_value, obj_unit, false);
+                    newAV.AcceptDeleteObject = true;
+                    device.AddBacnetObject(newAV);
                     break;
                 /* to be added by yourself according to your project requirement
                 */
@@ -462,21 +463,12 @@ namespace AnotherStorageImplementation
                 return;
             }
 
-            // check if objecttype is allowed to be deleted, like for example Device switch() for adding more types which cant be deleted
-            // Device not removable, no need to check
-            switch (object_id.type)
-            {
-                case BacnetObjectTypes.OBJECT_ACCESS_DOOR: // just to shows how to do
-                    sender.ErrorResponse(adr, BacnetConfirmedServices.SERVICE_CONFIRMED_DELETE_OBJECT, invoke_id, BacnetErrorClasses.ERROR_CLASS_OBJECT, BacnetErrorCodes.ERROR_CODE_OBJECT_DELETION_NOT_PERMITTED);
-                    return;
-                default:
-                    break;
-            }
             //remove from device and send ACK normally there should be no error!!!!!!!
+            // Attribut AcceptDeleteObject should be true for deletable objects
             if (device.RemoveBacnetObject(object_id) == true)
                 sender.SimpleAckResponse(adr, BacnetConfirmedServices.SERVICE_CONFIRMED_DELETE_OBJECT, invoke_id);
             else
-                Console.WriteLine("unknown Error while deleting object!");
+                sender.ErrorResponse(adr, BacnetConfirmedServices.SERVICE_CONFIRMED_DELETE_OBJECT, invoke_id, BacnetErrorClasses.ERROR_CLASS_OBJECT, BacnetErrorCodes.ERROR_CODE_OBJECT_DELETION_NOT_PERMITTED);
             return;
         }
 

@@ -1793,7 +1793,11 @@ namespace Yabe
                 }
 
             }
-            catch (Exception ex) { Trace.TraceError("Error : " + ex.Message); }
+            catch (Exception ex) 
+            {
+                Trace.TraceError("Error : " + ex.Message);
+                MessageBox.Show("Fail to Delete Object", "DeleteObject", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
         }
 
         private void showCalendarToolStripMenuItem_Click(object sender, EventArgs e)
@@ -2823,8 +2827,9 @@ namespace Yabe
                     comm.CreateObjectRequest(adr, new BacnetObjectId((BacnetObjectTypes)F.ObjectType.SelectedIndex, (uint)F.ObjectId.Value));
                     m_DeviceTree_AfterSelect(null, new TreeViewEventArgs(m_DeviceTree.SelectedNode));
                 }
-                catch
+                catch (Exception ex)
                 {
+                    Trace.TraceError("Error : " + ex.Message);
                     MessageBox.Show("Fail to Create Object","CreateObject", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 }
             }

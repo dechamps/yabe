@@ -276,30 +276,29 @@ namespace BaCSharp
         public virtual bool RemoveBacnetObject(BacnetObjectId objId)
         {
             BaCSharpObject obj = FindBacnetObject(objId);
-            if (obj != this)
-            {
-                obj.Dispose();
-                foreach (var o in m_PROP_OBJECT_LIST)
-                {
-                    if (o.ToString() == objId.ToString())
-                    {
-                        m_PROP_OBJECT_LIST.Remove(o);
-                        break;
-                    }
-                }
-                foreach (var o in m_PROP_STRUCTURED_OBJECT_LIST)
-                {
-                    if (o.ToString() == objId.ToString())
-                    {
-                        m_PROP_STRUCTURED_OBJECT_LIST.Remove(o);
-                        break;
-                    }
-                }
 
-                return ObjectsList.Remove(obj); //since we wont remove object device!!!! using LIST Remove!!
+            // device object cannot be deleted, even if AcceptDeleteObject is set to true
+            if ((obj.AcceptDeleteObject == false)||(obj==this)) return false;
+
+            obj.Dispose();
+            foreach (var o in m_PROP_OBJECT_LIST)
+            {
+                if (o.ToString() == objId.ToString())
+                {
+                    m_PROP_OBJECT_LIST.Remove(o);
+                    break;
+                }
             }
-            else
-                return false;
+            foreach (var o in m_PROP_STRUCTURED_OBJECT_LIST)
+            {
+                if (o.ToString() == objId.ToString())
+                {
+                    m_PROP_STRUCTURED_OBJECT_LIST.Remove(o);
+                    break;
+                }
+            }
+
+            return ObjectsList.Remove(obj); //since we wont remove object device!!!! using LIST Remove!!
         }
 
         protected override uint BacnetMethodNametoId(String Name)

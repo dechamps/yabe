@@ -38,6 +38,12 @@ namespace BaCSharp
             : base(new BacnetObjectId(BacnetObjectTypes.OBJECT_ANALOG_OUTPUT, (uint)ObjId), ObjName, Description, InitialValue, Unit, true)
         {
         }
+        
+        public AnalogOutput(BacnetObjectId ObjId, String ObjName, String Description, T InitialValue, BacnetUnitsId Unit)
+            : base(ObjId, ObjName, Description, InitialValue, Unit, true)
+        {
+        }
+
         public AnalogOutput() { }
     }
 
@@ -45,6 +51,10 @@ namespace BaCSharp
     {
         public AnalogValue(int ObjId, String ObjName, String Description, T InitialValue, BacnetUnitsId Unit, bool WithPriorityArray)
             : base(new BacnetObjectId(BacnetObjectTypes.OBJECT_ANALOG_VALUE, (uint)ObjId), ObjName, Description, InitialValue, Unit, WithPriorityArray)
+        {
+        }
+        public AnalogValue(BacnetObjectId ObjId, String ObjName, String Description, T InitialValue, BacnetUnitsId Unit, bool WithPriorityArray)
+            : base(ObjId, ObjName, Description, InitialValue, Unit, WithPriorityArray)
         {
         }
         public AnalogValue() { }
