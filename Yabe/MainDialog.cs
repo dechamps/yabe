@@ -2823,7 +2823,6 @@ namespace Yabe
 
                 try
                 {
-
                     comm.CreateObjectRequest(adr, new BacnetObjectId((BacnetObjectTypes)F.ObjectType.SelectedIndex, (uint)F.ObjectId.Value));
                     m_DeviceTree_AfterSelect(null, new TreeViewEventArgs(m_DeviceTree.SelectedNode));
                 }
@@ -2834,6 +2833,20 @@ namespace Yabe
                 }
             }
 
+        }
+
+        private void editBBMDTablesToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            BacnetClient comm = null;
+            BacnetAddress adr;
+            uint device_id;
+
+            FetchEndPoint(out comm, out adr, out device_id);
+
+            if ((comm != null) && (comm.Transport is BacnetIpUdpProtocolTransport) && (adr != null) && (adr.RoutedSource == null))
+                new BBMDEditor(comm, adr).ShowDialog();
+            else
+                MessageBox.Show("An IPv4 device is required", "Wrong device", MessageBoxButtons.OK, MessageBoxIcon.Warning);
         }
 
         private void cleanToolStripMenuItem_Click(object sender, EventArgs e)
@@ -2917,9 +2930,6 @@ namespace Yabe
         }
 
         #endregion
-
-
-
 
     }
 }

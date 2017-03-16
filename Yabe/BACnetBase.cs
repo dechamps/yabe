@@ -2978,6 +2978,9 @@ namespace System.IO.BACnet.Serialize
     // Special thanks to VTS tool (BBMD services not activated but programmed !) and Steve Karg stack
     public class BVLC
     {
+        public delegate void BVLCMessageReceiveHandler(System.Net.IPEndPoint sender, BacnetBvlcFunctions function, BacnetBvlcResults result, object data);
+        public event BVLCMessageReceiveHandler MessageReceived;
+
         BacnetIpUdpProtocolTransport MyBBMDTransport;
         String BroadcastAdd;
 
@@ -3176,6 +3179,36 @@ namespace System.IO.BACnet.Serialize
             MyBBMDTransport.Send(b, 6, BBMD);
         }
 
+        public void SendReadBroadCastTable(System.Net.IPEndPoint BBMD)
+        {
+            byte[] b = new byte[4];
+            First4BytesHeaderEncode(b, BacnetBvlcFunctions.BVLC_READ_BROADCAST_DIST_TABLE, 4);
+            MyBBMDTransport.Send(b, 4, BBMD);
+        }
+
+        public void SendReadFDRTable(System.Net.IPEndPoint BBMD)
+        {
+            byte[] b = new byte[4];
+            First4BytesHeaderEncode(b, BacnetBvlcFunctions.BVLC_READ_FOREIGN_DEVICE_TABLE, 4);
+            MyBBMDTransport.Send(b, 4, BBMD);
+        }
+
+        public void SendWriteBroadCastTable(System.Net.IPEndPoint BBMD, List<Tuple<IPEndPoint, IPAddress>> Entries)
+        {
+            byte[] b = new byte[4+10*Entries.Count];
+            First4BytesHeaderEncode(b, BacnetBvlcFunctions.BVLC_WRITE_BROADCAST_DISTRIBUTION_TABLE, 4 + 10 * Entries.Count);
+
+            for (int i = 0; i < Entries.Count; i++)
+            {
+                Array.Copy(Entries[i].Item1.Address.GetAddressBytes(), 0, b, 4 + i * 10, 4);
+                b[8 + i * 10] = (byte)(Entries[i].Item1.Port >> 8);
+                b[9 + i * 10] = (byte)(Entries[i].Item1.Port & 0xFF);
+                Array.Copy(Entries[i].Item2.GetAddressBytes(), 0, b, 10 + i * 10, 4);
+            }
+
+            MyBBMDTransport.Send(b, 4 + 10 * Entries.Count, BBMD);
+        }
+
         public void SendRemoteWhois(byte[] buffer, System.Net.IPEndPoint BBMD, int msg_length)
         {
             Encode(buffer, 0, BacnetBvlcFunctions.BVLC_DISTRIBUTE_BROADCAST_TO_NETWORK, msg_length);
@@ -3217,7 +3250,10 @@ namespace System.IO.BACnet.Serialize
             switch (function)
             {
                 case BacnetBvlcFunctions.BVLC_RESULT:
-                    return 4;   // only for the upper layers
+                    int ResultCode = (buffer[4] << 8) + buffer[5];
+                    if (MessageReceived != null)
+                        MessageReceived(sender, function, (BacnetBvlcResults)ResultCode, null);
+                    return 0;   // not for the upper layers
 
                 case BacnetBvlcFunctions.BVLC_ORIGINAL_UNICAST_NPDU:
                     return 4;   // only for the upper layers
@@ -3271,21 +3307,76 @@ namespace System.IO.BACnet.Serialize
                         RegisterForeignDevice(sender, TTL);
                         SendResult(sender, BacnetBvlcResults.BVLC_RESULT_SUCCESSFUL_COMPLETION);  // ack
                     }
-                    return -1;  // not for the upper layers
+                    return 0;  // not for the upper layers
 
                 // We don't care about Read/Write operation in the BBMD/FDR tables (who realy use it ?)
                 case BacnetBvlcFunctions.BVLC_READ_FOREIGN_DEVICE_TABLE:
-                    //SendResult(sender, BacnetBvlcResults.BVLC_RESULT_READ_FOREIGN_DEVICE_TABLE_NAK);
-                    return -1;
+                    SendResult(sender, BacnetBvlcResults.BVLC_RESULT_READ_FOREIGN_DEVICE_TABLE_NAK);
+                    return 0;
                 case BacnetBvlcFunctions.BVLC_DELETE_FOREIGN_DEVICE_TABLE_ENTRY:
-                    //SendResult(sender, BacnetBvlcResults.BVLC_RESULT_DELETE_FOREIGN_DEVICE_TABLE_ENTRY_NAK);
-                    return -1;
+                    SendResult(sender, BacnetBvlcResults.BVLC_RESULT_DELETE_FOREIGN_DEVICE_TABLE_ENTRY_NAK);
+                    return 0;
                 case BacnetBvlcFunctions.BVLC_READ_BROADCAST_DIST_TABLE:
                     SendResult(sender, BacnetBvlcResults.BVLC_RESULT_READ_BROADCAST_DISTRIBUTION_TABLE_NAK);
-                    return -1;
+                    return 0;
+
                 case BacnetBvlcFunctions.BVLC_WRITE_BROADCAST_DISTRIBUTION_TABLE:
-                    //SendResult(sender, BacnetBvlcResults.BVLC_RESULT_WRITE_BROADCAST_DISTRIBUTION_TABLE_NAK);
-                    return -1;
+                case BacnetBvlcFunctions.BVLC_READ_BROADCAST_DIST_TABLE_ACK:
+                {
+                    int NbEntries = (msg_length - 4) / 10;
+                    List<Tuple<IPEndPoint, IPAddress>> Entries = new List<Tuple<IPEndPoint, IPAddress>>();
+
+                    for (int i = 0; i < NbEntries; i++)
+                    {
+                        long add = BitConverter.ToInt32(buffer, 4 + i * 10);
+
+                        Array.Reverse(buffer, 8 + i * 10, 2);
+                        ushort port = BitConverter.ToUInt16(buffer, 8 + i * 10);
+
+                        // new IPAddress(long) with 255.255.255.255 (ie -1) not OK
+                        byte[] Mask = new byte[4];
+                        Array.Copy(buffer, 10 + i * 10, Mask, 0, 4);
+
+                        Tuple<IPEndPoint, IPAddress> entry = new Tuple<IPEndPoint, IPAddress>(new IPEndPoint(new IPAddress(add), port), new IPAddress(Mask));
+                        Entries.Add(entry);
+                    }
+
+                    if ((MessageReceived != null) && (function == BacnetBvlcFunctions.BVLC_READ_BROADCAST_DIST_TABLE_ACK))
+                        MessageReceived(sender, function, BacnetBvlcResults.BVLC_RESULT_SUCCESSFUL_COMPLETION, Entries);
+
+                    // Today we don't accept it
+                    if (function == BacnetBvlcFunctions.BVLC_WRITE_BROADCAST_DISTRIBUTION_TABLE)
+                        SendResult(sender, BacnetBvlcResults.BVLC_RESULT_WRITE_BROADCAST_DISTRIBUTION_TABLE_NAK);
+
+                    return 0;
+                }
+
+                case BacnetBvlcFunctions.BVLC_READ_FOREIGN_DEVICE_TABLE_ACK:
+                {
+                    int NbEntries = (msg_length - 4) / 10;
+                    List<Tuple<IPEndPoint, ushort, ushort>> Entries = new List<Tuple<IPEndPoint, ushort, ushort>>();
+
+                    for (int i = 0; i < NbEntries; i++)
+                    {
+                        long add = BitConverter.ToInt32(buffer, 4 + i * 10);
+
+                        Array.Reverse(buffer, 8 + i * 10, 2);
+                        ushort port = BitConverter.ToUInt16(buffer, 8 + i * 10);
+
+                        Array.Reverse(buffer, 10 + i * 10, 2);
+                        ushort TTL=BitConverter.ToUInt16(buffer, 10 + i * 10);
+                        Array.Reverse(buffer, 12 + i * 10, 2);
+                        ushort RemainTTL = BitConverter.ToUInt16(buffer, 12 + i * 10);
+
+                        Tuple<IPEndPoint, ushort, ushort> entry = new Tuple<IPEndPoint, ushort, ushort>(new IPEndPoint(new IPAddress(add), port), TTL, RemainTTL);
+                        Entries.Add(entry);
+                    }
+
+                    if (MessageReceived != null) 
+                        MessageReceived(sender, function, BacnetBvlcResults.BVLC_RESULT_SUCCESSFUL_COMPLETION, Entries);
+
+                    return 0;
+                }
                 // error encoding function or experimental one
                 default:
                     return -1;
