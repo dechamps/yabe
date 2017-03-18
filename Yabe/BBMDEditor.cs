@@ -47,6 +47,11 @@ namespace Yabe
         {
             InitializeComponent();
 
+            DataGridViewCellStyle dgv = new DataGridViewCellStyle();
+            dgv.Alignment = DataGridViewContentAlignment.MiddleCenter;
+
+            BBMDTable.ColumnHeadersDefaultCellStyle = FDRTable.ColumnHeadersDefaultCellStyle = dgv;
+
             transport = (BacnetIpUdpProtocolTransport)comm.Transport;
             BBMDep = new IPEndPoint(System.Net.IPAddress.Parse(adr.ToString().Split(':')[0]),Convert.ToInt32(adr.ToString().Split(':')[1]));
 
@@ -55,8 +60,7 @@ namespace Yabe
 
         void Bvlc_MessageReceived(System.Net.IPEndPoint sender, BacnetBvlcFunctions function, BacnetBvlcResults result, object data)
         {
-            if (!sender.Address.Equals(BBMDep.Address) || (sender.Port != BBMDep.Port)) // don't care
-                return;
+            if (!sender.Equals(BBMDep)) return; // don't care
 
             if (InvokeRequired) // GUI call back
             {

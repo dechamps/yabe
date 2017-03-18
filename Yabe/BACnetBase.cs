@@ -3209,6 +3209,16 @@ namespace System.IO.BACnet.Serialize
             MyBBMDTransport.Send(b, 4 + 10 * Entries.Count, BBMD);
         }
 
+        public void SendDeleteForeignDeviceEntry(System.Net.IPEndPoint BBMD, IPEndPoint Fdevice)
+        {
+            byte[] b = new byte[4+6];
+            First4BytesHeaderEncode(b, BacnetBvlcFunctions.BVLC_READ_FOREIGN_DEVICE_TABLE, 4+6);
+            Array.Copy(Fdevice.Address.GetAddressBytes(), 0, b, 4, 4);
+            b[8] = (byte)(Fdevice.Port >> 8);
+            b[9] = (byte)(Fdevice.Port & 0xFF);
+            MyBBMDTransport.Send(b, 4 + 6, BBMD);
+        }
+
         public void SendRemoteWhois(byte[] buffer, System.Net.IPEndPoint BBMD, int msg_length)
         {
             Encode(buffer, 0, BacnetBvlcFunctions.BVLC_DISTRIBUTE_BROADCAST_TO_NETWORK, msg_length);
@@ -3298,7 +3308,7 @@ namespace System.IO.BACnet.Serialize
                                 SendResult(sender, BacnetBvlcResults.BVLC_RESULT_DISTRIBUTE_BROADCAST_TO_NETWORK_NAK);
                         }
                     }
-                    return 4;   // also for the upper layers
+                    return 0;   // anot for the upper layers
 
                 case BacnetBvlcFunctions.BVLC_REGISTER_FOREIGN_DEVICE:
                     if ((BBMD_FD_ServiceActivated == true)&&(msg_length==6))
