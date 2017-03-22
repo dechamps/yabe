@@ -101,6 +101,7 @@ namespace Yabe
             if ((function == BacnetBvlcFunctions.BVLC_RESULT) && (result == BacnetBvlcResults.BVLC_RESULT_WRITE_BROADCAST_DISTRIBUTION_TABLE_NAK) && (WriteInOperation))
             {
                 lbBBMDlInfo.Visible = true;
+                WriteInOperation = false;
                 lbBBMDlInfo.Text="Write Broadcast Table Rejected";
             }
             if ((function == BacnetBvlcFunctions.BVLC_RESULT) && (result == BacnetBvlcResults.BVLC_RESULT_READ_FOREIGN_DEVICE_TABLE_NAK))

@@ -318,8 +318,8 @@
             // iPFunctionsToolStripMenuItem
             // 
             this.iPFunctionsToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.sendUnicastUdpWhoIsToolStripMenuItem,
             this.foreignDeviceRegistrationToolStripMenuItem,
+            this.sendUnicastUdpWhoIsToolStripMenuItem,
             this.editBBMDTablesToolStripMenuItem});
             this.iPFunctionsToolStripMenuItem.Image = global::Yabe.Properties.Resources.world;
             this.iPFunctionsToolStripMenuItem.Name = "iPFunctionsToolStripMenuItem";

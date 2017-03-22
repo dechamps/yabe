@@ -55,13 +55,16 @@
   <ItemGroup>
     <Reference Include="CalendarView">
       <HintPath>.\CalendarView.dll</HintPath>
+      <Private>False</Private>
     </Reference>
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="PacketDotNet">
       <HintPath>.\PacketDotNet.dll</HintPath>
+      <Private>False</Private>
     </Reference>
     <Reference Include="SharpPcap">
       <HintPath>.\SharpPcap.dll</HintPath>
+      <Private>False</Private>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -73,6 +76,7 @@
     <Reference Include="System.Xml" />
     <Reference Include="ZedGraph">
       <HintPath>.\ZedGraph.dll</HintPath>
+      <Private>False</Private>
     </Reference>
   </ItemGroup>
   <ItemGroup>
@@ -273,6 +277,10 @@
     <None Include="Resources\pencil_add.png" />
     <None Include="Resources\pencil_delete.png" />
     <None Include="Resources\monitor.png" />
+    <EmbeddedResource Include="Resources\EmbeddedDll\CalendarView.dll" />
+    <EmbeddedResource Include="Resources\EmbeddedDll\PacketDotNet.dll" />
+    <EmbeddedResource Include="Resources\EmbeddedDll\SharpPcap.dll" />
+    <EmbeddedResource Include="Resources\EmbeddedDll\ZedGraph.dll" />
     <Content Include="Search.ico" />
   </ItemGroup>
   <ItemGroup>
