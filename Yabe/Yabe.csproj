@@ -54,16 +54,16 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="CalendarView">
-      <HintPath>.\CalendarView.dll</HintPath>
+      <HintPath>.\Resources\EmbeddedDll\CalendarView.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="PacketDotNet">
-      <HintPath>.\PacketDotNet.dll</HintPath>
+      <HintPath>.\Resources\EmbeddedDll\PacketDotNet.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="SharpPcap">
-      <HintPath>.\SharpPcap.dll</HintPath>
+      <HintPath>.\Resources\EmbeddedDll\SharpPcap.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="System" />
@@ -75,7 +75,7 @@
     <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xml" />
     <Reference Include="ZedGraph">
-      <HintPath>.\ZedGraph.dll</HintPath>
+      <HintPath>.\Resources\EmbeddedDll\ZedGraph.dll</HintPath>
       <Private>False</Private>
     </Reference>
   </ItemGroup>
