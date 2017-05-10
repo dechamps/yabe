@@ -137,11 +137,11 @@ namespace Yabe
         }
 
 
-        private void OnEventNotify(BacnetClient sender, BacnetAddress adr, BacnetEventNotificationData EventData)
+        private void OnEventNotify(BacnetClient sender, BacnetAddress adr, byte invoke_id, BacnetEventNotificationData EventData, bool need_confirm)
         {
             if (InvokeRequired)
             {
-                BeginInvoke(new BacnetClient.EventNotificationCallbackHandler(OnEventNotify), new object[] { sender, adr, EventData });
+                BeginInvoke(new BacnetClient.EventNotificationCallbackHandler(OnEventNotify), new object[] { sender, adr, invoke_id, EventData, need_confirm });
                 return;
             }
 
@@ -176,6 +176,12 @@ namespace Yabe
             }
 
             AddLogAlarmEvent(itm);
+
+            //send ack
+            if (need_confirm)
+            {
+                sender.SimpleAckResponse(adr, BacnetConfirmedServices.SERVICE_CONFIRMED_EVENT_NOTIFICATION, invoke_id);
+            }
 
         }
 

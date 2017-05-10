@@ -169,7 +169,8 @@ namespace System.IO.BACnet
         public event AtomicReadFileRequestHandler OnAtomicReadFileRequest;
         public delegate void SubscribeCOVRequestHandler(BacnetClient sender, BacnetAddress adr, byte invoke_id, uint subscriberProcessIdentifier, BacnetObjectId monitoredObjectIdentifier, bool cancellationRequest, bool issueConfirmedNotifications, uint lifetime, BacnetMaxSegments max_segments);
         public event SubscribeCOVRequestHandler OnSubscribeCOV;
-        public delegate void EventNotificationCallbackHandler(BacnetClient sender, BacnetAddress adr, BacnetEventNotificationData EventData);
+        //used by both 'confirmed' and 'unconfirmed' notify
+        public delegate void EventNotificationCallbackHandler(BacnetClient sender, BacnetAddress adr, byte invoke_id, BacnetEventNotificationData EventData, bool need_confirm);
         public event EventNotificationCallbackHandler OnEventNotify;
         public delegate void SubscribeCOVPropertyRequestHandler(BacnetClient sender, BacnetAddress adr, byte invoke_id, uint subscriberProcessIdentifier, BacnetObjectId monitoredObjectIdentifier, BacnetPropertyReference monitoredProperty, bool cancellationRequest, bool issueConfirmedNotifications, uint lifetime, float covIncrement, BacnetMaxSegments max_segments);
         public event SubscribeCOVPropertyRequestHandler OnSubscribeCOVProperty;
@@ -371,7 +372,7 @@ namespace System.IO.BACnet
                     BacnetEventNotificationData EventData;
                     if (Services.DecodeEventNotifyData(buffer, offset, length, out EventData) >= 0)
                     {
-                        OnEventNotify(this, adr, EventData);
+                        OnEventNotify(this, adr, invoke_id, EventData, true);
                     }
                     else
                     {
@@ -522,7 +523,7 @@ namespace System.IO.BACnet
                     BacnetEventNotificationData EventData;
                     if (Services.DecodeEventNotifyData(buffer, offset, length, out EventData) >= 0)
                     {
-                        OnEventNotify(this, adr, EventData);
+                        OnEventNotify(this, adr, 0, EventData, false);
                     }
                     else
                         Trace.TraceWarning("Couldn't decode Event/Alarm Notification");

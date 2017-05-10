@@ -87,9 +87,13 @@ namespace BasicAlarmListener
         /*****************************************************************************************************/
         /* This is the objective of this sample !                                                            */
         /*****************************************************************************************************/
-        static void handler_OnEventNotify(BacnetClient sender, BacnetAddress adr, BacnetEventNotificationData EventData)
+        static void handler_OnEventNotify(BacnetClient sender, BacnetAddress adr, byte invoke_id, BacnetEventNotificationData EventData, bool need_confirm)
         {
             string val = adr.ToString() + ":" + EventData.initiatingObjectIdentifier.type + ":" + EventData.initiatingObjectIdentifier.instance + ":" + EventData.eventObjectIdentifier.type + ":" + EventData.eventObjectIdentifier.instance;
+
+            if (need_confirm)
+                sender.SimpleAckResponse(adr, BacnetConfirmedServices.SERVICE_CONFIRMED_EVENT_NOTIFICATION, invoke_id);
+
             Console.WriteLine(val + " " + EventData.fromState + " to " + EventData.toState + " " + EventData.notifyType.ToString());
         }
 
