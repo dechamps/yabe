@@ -48,8 +48,8 @@
             this.toolStripMenuItem3 = new System.Windows.Forms.ToolStripSeparator();
             this.sendWhoIsToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
             this.iPFunctionsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.sendUnicastUdpWhoIsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.foreignDeviceRegistrationToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.sendUnicastUdpWhoIsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.editBBMDTablesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.exportDeviceDBToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
             this.exportDeviceEDEFileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -326,14 +326,6 @@
             this.iPFunctionsToolStripMenuItem.Size = new System.Drawing.Size(189, 22);
             this.iPFunctionsToolStripMenuItem.Text = "IP Services";
             // 
-            // sendUnicastUdpWhoIsToolStripMenuItem
-            // 
-            this.sendUnicastUdpWhoIsToolStripMenuItem.Image = global::Yabe.Properties.Resources.find;
-            this.sendUnicastUdpWhoIsToolStripMenuItem.Name = "sendUnicastUdpWhoIsToolStripMenuItem";
-            this.sendUnicastUdpWhoIsToolStripMenuItem.Size = new System.Drawing.Size(224, 22);
-            this.sendUnicastUdpWhoIsToolStripMenuItem.Text = "Add Remote Bacnet/IP node";
-            this.sendUnicastUdpWhoIsToolStripMenuItem.Click += new System.EventHandler(this.AddRemoteIpToolStripMenuItem_Click);
-            // 
             // foreignDeviceRegistrationToolStripMenuItem
             // 
             this.foreignDeviceRegistrationToolStripMenuItem.Image = global::Yabe.Properties.Resources.monitor;
@@ -343,6 +335,14 @@
             this.foreignDeviceRegistrationToolStripMenuItem.Size = new System.Drawing.Size(224, 22);
             this.foreignDeviceRegistrationToolStripMenuItem.Text = "Foreign Device Registration";
             this.foreignDeviceRegistrationToolStripMenuItem.Click += new System.EventHandler(this.foreignDeviceRegistrationToolStripMenuItem_Click);
+            // 
+            // sendUnicastUdpWhoIsToolStripMenuItem
+            // 
+            this.sendUnicastUdpWhoIsToolStripMenuItem.Image = global::Yabe.Properties.Resources.find;
+            this.sendUnicastUdpWhoIsToolStripMenuItem.Name = "sendUnicastUdpWhoIsToolStripMenuItem";
+            this.sendUnicastUdpWhoIsToolStripMenuItem.Size = new System.Drawing.Size(224, 22);
+            this.sendUnicastUdpWhoIsToolStripMenuItem.Text = "Add Remote Bacnet/IP node";
+            this.sendUnicastUdpWhoIsToolStripMenuItem.Click += new System.EventHandler(this.AddRemoteIpToolStripMenuItem_Click);
             // 
             // editBBMDTablesToolStripMenuItem
             // 
@@ -492,7 +492,7 @@
             // 
             this.helpToolStripMenuItem1.Image = global::Yabe.Properties.Resources.information;
             this.helpToolStripMenuItem1.Name = "helpToolStripMenuItem1";
-            this.helpToolStripMenuItem1.Size = new System.Drawing.Size(107, 22);
+            this.helpToolStripMenuItem1.Size = new System.Drawing.Size(152, 22);
             this.helpToolStripMenuItem1.Text = "Help";
             this.helpToolStripMenuItem1.Click += new System.EventHandler(this.helpToolStripMenuItem1_Click);
             // 
@@ -500,7 +500,7 @@
             // 
             this.aboutToolStripMenuItem.Image = global::Yabe.Properties.Resources.information;
             this.aboutToolStripMenuItem.Name = "aboutToolStripMenuItem";
-            this.aboutToolStripMenuItem.Size = new System.Drawing.Size(107, 22);
+            this.aboutToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
             this.aboutToolStripMenuItem.Text = "About";
             this.aboutToolStripMenuItem.Click += new System.EventHandler(this.aboutToolStripMenuItem_Click);
             // 

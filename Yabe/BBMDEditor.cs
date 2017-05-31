@@ -76,6 +76,7 @@ namespace Yabe
                 {
                     BBMDTable.Rows.Add(new object[] { tpl.Item1.Address.ToString(), tpl.Item1.Port, tpl.Item2.ToString() });
                 }
+                lbBBMDlInfo.Visible = false;
             }
 
             if (function == BacnetBvlcFunctions.BVLC_READ_FOREIGN_DEVICE_TABLE_ACK)
@@ -86,6 +87,7 @@ namespace Yabe
                 {
                     FDRTable.Rows.Add(new object[] { tpl.Item1.ToString(), tpl.Item2.ToString(), tpl.Item3.ToString() });
                 }
+                lbFDRInfo.Visible = false;
             }
             if ((function == BacnetBvlcFunctions.BVLC_RESULT) && (result == BacnetBvlcResults.BVLC_RESULT_SUCCESSFUL_COMPLETION) && (WriteInOperation))
             {
@@ -106,8 +108,8 @@ namespace Yabe
             }
             if ((function == BacnetBvlcFunctions.BVLC_RESULT) && (result == BacnetBvlcResults.BVLC_RESULT_READ_FOREIGN_DEVICE_TABLE_NAK))
             {
-                ldlFDRInfo.Visible = true;
-                ldlFDRInfo.Text = "Read FDR Table Rejected";
+                lbFDRInfo.Visible = true;
+                lbFDRInfo.Text = "Read FDR Table Rejected";
             }            
         }
 

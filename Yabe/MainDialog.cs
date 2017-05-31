@@ -507,12 +507,13 @@ namespace Yabe
         private void aboutToolStripMenuItem_Click(object sender, EventArgs e)
         {
             MessageBox.Show(this, "Yet Another Bacnet Explorer - Yabe\nVersion " + this.GetType().Assembly.GetName().Version + "\nBy Morten Kvistgaard - Copyright 2014-2017\nBy Frederic Chaxel - Copyright 2015-2017\n" +
-                "\nReference: http://bacnet.sourceforge.net/" + 
-                "\nReference: http://www.unified-automation.com/products/development-tools/uaexpert.html" +
-                "\nReference: http://www.famfamfam.com/"+
-                "\nReference: http://sourceforge.net/projects/zedgraph/"+
-                "\nReference: http://www.codeproject.com/Articles/38699/A-Professional-Calendar-Agenda-View-That-You-Will"+
-                "\nReference: https://github.com/chmorgan/sharppcap"
+                "\nReferences:"+
+                "\nhttp://bacnet.sourceforge.net/" + 
+                "\nhttp://www.unified-automation.com/products/development-tools/uaexpert.html" +
+                "\nhttp://www.famfamfam.com/"+
+                "\nhttp://sourceforge.net/projects/zedgraph/"+
+                "\nhttp://www.codeproject.com/Articles/38699/A-Professional-Calendar-Agenda-View-That-You-Will"+
+                "\nhttps://github.com/chmorgan/sharppcap"
                 
                 , "About", MessageBoxButtons.OK, MessageBoxIcon.Information);
         }

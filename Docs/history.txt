@@ -1,10 +1,18 @@
 -------------------------------------------------------------------------------
                    YABE - YET ANOTHER BACNET EXPLORER
 -------------------------------------------------------------------------------
-1.3.0
+1.1.5 - 20170531
+ - Remote BBMD tables edition : read & write
+ - Integration of externals dll into Yabe.exe
+
+1.1.4 - 20170312
+ - Some fixes
+ - Create/Delete objects services in Yabe menu
+
+1.1.3 - 20170101
  - File logging of Cov notification Event & Alarm
 
-1.2.0 - 20161103
+1.1.2 - 20161103
  - Gets objects name using ReadPropertyMultiple 
  - Hide edition of priority array button
 

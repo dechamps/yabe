@@ -41,7 +41,7 @@
             this.bpRefresh = new System.Windows.Forms.Button();
             this.FDRTable = new System.Windows.Forms.DataGridView();
             this.openFileDialog1 = new System.Windows.Forms.OpenFileDialog();
-            this.ldlFDRInfo = new System.Windows.Forms.Label();
+            this.lbFDRInfo = new System.Windows.Forms.Label();
             this.IPendpoint = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.TTL = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.RemainTTL = new System.Windows.Forms.DataGridViewTextBoxColumn();
@@ -168,14 +168,14 @@
             // 
             // ldlFDRInfo
             // 
-            this.ldlFDRInfo.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.ldlFDRInfo.ForeColor = System.Drawing.Color.Red;
-            this.ldlFDRInfo.Location = new System.Drawing.Point(31, 269);
-            this.ldlFDRInfo.Name = "ldlFDRInfo";
-            this.ldlFDRInfo.Size = new System.Drawing.Size(333, 23);
-            this.ldlFDRInfo.TabIndex = 7;
-            this.ldlFDRInfo.Text = "Read FDR Table without response";
-            this.ldlFDRInfo.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            this.lbFDRInfo.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lbFDRInfo.ForeColor = System.Drawing.Color.Red;
+            this.lbFDRInfo.Location = new System.Drawing.Point(31, 269);
+            this.lbFDRInfo.Name = "ldlFDRInfo";
+            this.lbFDRInfo.Size = new System.Drawing.Size(333, 23);
+            this.lbFDRInfo.TabIndex = 7;
+            this.lbFDRInfo.Text = "Read FDR Table without response";
+            this.lbFDRInfo.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
             // IPendpoint
             // 
@@ -203,7 +203,7 @@
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(382, 306);
-            this.Controls.Add(this.ldlFDRInfo);
+            this.Controls.Add(this.lbFDRInfo);
             this.Controls.Add(this.tabCtrl);
             this.Controls.Add(this.lbBBMDlInfo);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
@@ -237,7 +237,7 @@
         private System.Windows.Forms.DataGridViewTextBoxColumn Mask;
         private System.Windows.Forms.DataGridView FDRTable;
         private System.Windows.Forms.Button bpRefresh;
-        private System.Windows.Forms.Label ldlFDRInfo;
+        private System.Windows.Forms.Label lbFDRInfo;
         private System.Windows.Forms.DataGridViewTextBoxColumn IPendpoint;
         private System.Windows.Forms.DataGridViewTextBoxColumn TTL;
         private System.Windows.Forms.DataGridViewTextBoxColumn RemainTTL;
