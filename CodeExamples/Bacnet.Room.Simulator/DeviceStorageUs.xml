@@ -482,7 +482,7 @@
           <Value>19</Value>
         </Property>
         <Property Id="PROP_PRESENT_VALUE" Tag="BACNET_APPLICATION_TAG_UNSIGNED_INT">
-          <Value>1</Value>
+          <Value>2</Value>
         </Property>
         <Property Id="PROP_PRIORITY_ARRAY" Tag="BACNET_APPLICATION_TAG_NULL">
           <Value></Value>

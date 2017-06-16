@@ -160,15 +160,15 @@ namespace Bacnet.Room.Simulator
             // Récupération du mode choisi
             bv2 = BacnetActivity.GetBacObjectPresentValue(Bac_Mode);
             uint mode = (uint)bv2.Value;
-            if (mode > 2)
+            if (mode > 3)
             {
-                mode = 0;
+                mode = 1;
                 BacnetActivity.SetBacObjectPresentValue(Bac_Mode, new BacnetValue(mode));
             }
 
             switch (mode)
             {
-                case 0: // Mode arret
+                case 1: // Mode arret
                     TempEau = 20.0 + 3 * Math.Cos(RollingCounter / 10.0);
                     TempExt = 20.0;
                     TempInt = Room.GetNextTemp(TempEau, TempExt, (int)Niveausoufflage);
@@ -181,7 +181,7 @@ namespace Bacnet.Room.Simulator
 
                     break;
 
-                case 1: // Mode chauffage
+                case 2: // Mode chauffage
                     TempEau = 37.0 + 3 * Math.Cos(RollingCounter / 10.0);
                     TempExt = 12.0;
                     TempInt = Room.GetNextTemp(TempEau, TempExt, (int)Niveausoufflage);
@@ -207,7 +207,7 @@ namespace Bacnet.Room.Simulator
                     pictureModeFroid.Visible = false;
 
                     break;
-                case 2: // Mode clim
+                case 3: // Mode clim
                     TempEau = 5.0 + 3 * Math.Cos(RollingCounter / 10.0);
                     TempExt = 30.0;
                     TempInt = Room.GetNextTemp(TempEau, TempExt, (int)Niveausoufflage);
@@ -244,7 +244,7 @@ namespace Bacnet.Room.Simulator
             BacnetActivity.SetBacObjectPresentValue(Bac_TempEau, new BacnetValue(TempDegre2Value(TempEau)));
             BacnetActivity.SetBacObjectPresentValue(Bac_TempInt, new BacnetValue(TempDegre2Value(TempInt)));
             BacnetActivity.SetBacObjectPresentValue(Bac_TempExterieure, new BacnetValue(TempDegre2Value(TempExt)));
-            BacnetActivity.SetBacObjectPresentValue(Bac_Niveausoufflage, new BacnetValue(Niveausoufflage));
+            BacnetActivity.SetBacObjectPresentValue(Bac_Niveausoufflage, new BacnetValue(Niveausoufflage+1));
 
             BacnetActivity.SetBacObjectPresentValue(Bac_Cmdchauffage, new BacnetValue(ModeChauf));
             BacnetActivity.SetBacObjectPresentValue(Bac_CmdClim, new BacnetValue(ModeClim));
