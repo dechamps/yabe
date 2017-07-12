@@ -1935,7 +1935,7 @@ namespace Yabe
                 }
                 catch { }
 
-                if (SubscribeOK == false) 
+                if (SubscribeOK == false) // echec : launch period acquisiton in the ThreadPool
                 {
                     sub.is_active_subscription = false;                   
                     var Qst = new GenericInputBox<NumericUpDown>("Error during subscribe", "Polling period replacement (s)",
@@ -1945,10 +1945,11 @@ namespace Yabe
                               });
 
                     DialogResult rep = Qst.ShowDialog();
-                    if (rep == DialogResult.Yes)
+                    if (rep == DialogResult.OK)
                     {
                         int period = (int)Qst.genericInput.Value;
-                        ThreadPool.QueueUserWorkItem(a => ReadPropertyPoolingRemplacementToCOV(sub, period)); // echec : launch period acquisiton in the ThreadPool
+                        Properties.Settings.Default.Subscriptions_ReplacementPollingPeriod = (uint)period;
+                        ThreadPool.QueueUserWorkItem(a => ReadPropertyPoolingRemplacementToCOV(sub, period)); 
                     }
                     return;
                 }
