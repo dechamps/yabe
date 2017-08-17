@@ -48,6 +48,7 @@ could be 'ovveride' by an optional external file
     <BacnetPropertyIds>PROP_STATUS_FLAGS</BacnetPropertyIds>
     <BacnetPropertyIds>PROP_EVENT_STATE</BacnetPropertyIds>
     <BacnetPropertyIds>PROP_OUT_OF_SERVICE</BacnetPropertyIds>
+    <BacnetPropertyIds>PROP_UNITS</BacnetPropertyIds>
     </propsId>
 </BacnetObjectDescription>
 <BacnetObjectDescription>
