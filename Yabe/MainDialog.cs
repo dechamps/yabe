@@ -40,6 +40,7 @@ using System.Threading;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.Media;
 using System.Linq;
+using System.Collections;
 
 namespace Yabe
 {
@@ -343,6 +344,8 @@ namespace Yabe
 
             //display nice floats in propertygrid
             Utilities.CustomSingleConverter.DontDisplayExactFloats = true;
+
+            m_DeviceTree.TreeViewNodeSorter = new NodeSorter();
         }
 
         private TreeNode FindCommTreeNode(BacnetClient comm)
@@ -476,7 +479,7 @@ namespace Yabe
                     KeyValuePair<BacnetAddress, uint>? entry = s.Tag as KeyValuePair<BacnetAddress, uint>?;
                     if (entry!=null && entry.Value.Key.IsMyRouter(adr))
                     {
-                        TreeNode node = s.Nodes.Add("Device "+new_entry.Value+ " - "+ new_entry.Key.ToString(true));
+                        TreeNode node = new TreeNode("Device "+new_entry.Value+ " - "+ new_entry.Key.ToString(true));
                         node.ImageIndex = 2;
                         node.SelectedImageIndex = node.ImageIndex;
                         node.Tag = new_entry;
@@ -485,13 +488,14 @@ namespace Yabe
                             node.ToolTipText = node.Text;
                             node.Text = Identifier + " [" + device_id.ToString() + "] ";
                         }
+                        s.Nodes.Add(node);
                         m_DeviceTree.ExpandAll();
                         return;
                     }
                 }
 
                 //add simply
-                TreeNode basicnode = parent.Nodes.Add("Device " + new_entry.Value + " - " + new_entry.Key.ToString(false));
+                TreeNode basicnode = new TreeNode("Device " + new_entry.Value + " - " + new_entry.Key.ToString(false));
                 basicnode.ImageIndex = 2;
                 basicnode.SelectedImageIndex = basicnode.ImageIndex;
                 basicnode.Tag = new_entry;
@@ -500,6 +504,7 @@ namespace Yabe
                     basicnode.ToolTipText = basicnode.Text;
                     basicnode.Text = Identifier + " [" + device_id.ToString() + "] ";
                 }
+                parent.Nodes.Add(basicnode);
                 m_DeviceTree.ExpandAll();
             });
         }
@@ -2957,5 +2962,25 @@ namespace Yabe
 
         #endregion
 
+    }
+
+    // Used to sort the devices Tree by device_id
+    public class NodeSorter : IComparer
+    {
+        public int Compare(object x, object y)
+        {
+            TreeNode tx = x as TreeNode;
+            TreeNode ty = y as TreeNode;           
+
+
+            KeyValuePair<BacnetAddress, uint>? entryx = tx.Tag as KeyValuePair<BacnetAddress, uint>?;
+            KeyValuePair<BacnetAddress, uint>? entryy = ty.Tag as KeyValuePair<BacnetAddress, uint>?;
+
+            // Two device, compare the device_id
+            if ((entryx != null) && (entryy != null))
+                return entryx.Value.Value.CompareTo(entryy.Value.Value);
+            else // something must be provide
+                return tx.Text.CompareTo(ty.Text);
+        }
     }
 }
