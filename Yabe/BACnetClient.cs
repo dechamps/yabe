@@ -882,8 +882,10 @@ namespace System.IO.BACnet
                 System.Net.IPEndPoint ep = new Net.IPEndPoint(Net.IPAddress.Parse(BBMD_IP), Port);
 
                 // dynamic avoid reference to BacnetIpUdpProtocolTransport or BacnetIpV6UdpProtocolTransport classes
-                dynamic m_client_dyn = m_client;
-                sent = m_client_dyn.SendRegisterAsForeignDevice(ep, TTL);
+                if (m_client is BacnetIpUdpProtocolTransport)
+                    sent = (m_client as BacnetIpUdpProtocolTransport).SendRegisterAsForeignDevice(ep, TTL);
+                else
+                    sent = (m_client as BacnetIpV6UdpProtocolTransport).SendRegisterAsForeignDevice(ep, TTL);
 
                 if (sent==false)
                     Trace.TraceWarning("The given address do not match with the IP version");
@@ -912,8 +914,10 @@ namespace System.IO.BACnet
                 bool sent = false;
 
                 // dynamic avoid reference to BacnetIpUdpProtocolTransport or BacnetIpV6UdpProtocolTransport classes
-                dynamic m_client_dyn = m_client;
-                sent = m_client_dyn.SendRemoteWhois(b.buffer, ep, b.offset);
+                if (m_client is BacnetIpUdpProtocolTransport)
+                    sent = (m_client as BacnetIpUdpProtocolTransport).SendRemoteWhois(b.buffer, ep, b.offset);
+                else
+                    sent = (m_client as BacnetIpV6UdpProtocolTransport).SendRemoteWhois(b.buffer, ep, b.offset);
 
                 if (sent == false)
                     Trace.TraceWarning("The given address do not match with the IP version");
