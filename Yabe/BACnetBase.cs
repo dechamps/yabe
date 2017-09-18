@@ -4812,11 +4812,7 @@ namespace System.IO.BACnet.Serialize
                 }
 
                 _value_list.Add(new_entry);
-
-                if (new_entry.property.propertyIdentifier == 135)
-                    Console.Write("");
                     
-
             }
             value.values = _value_list;
 
@@ -6219,11 +6215,12 @@ namespace System.IO.BACnet.Serialize
                 return -1;
             len += decode_unsigned(buffer, offset + len, len_value_type, out value.TimeRemaining);
 
-            if (len < apdu_len && !IS_CLOSING_TAG(buffer[offset+len]))
+            if ((len < apdu_len) && IS_OPENING_TAG(buffer[offset + len]))
             {
-                len += decode_tag_number_and_value(buffer, offset + len, out tag_number, out len_value_type);
+                decode_tag_number_and_value(buffer, offset + len, out tag_number, out len_value_type);
                 if (tag_number != 4)
-                    return -1;
+                    return len;
+                len++;
                 len += decode_real(buffer, offset + len, out value.COVIncrement);
             }
 
