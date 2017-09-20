@@ -46,14 +46,19 @@ namespace OfflineStackDebug
 
         static void ServiceToBeTested()
         {
-            byte invokeId = SetReplyPackets(@"C:\Users\Fred\Desktop\Ack.pcap", 1, 0x2e);
-            //byte invokeId=SetReplyPackets(@"C:\Users\Fred\Desktop\GetEventInformation.pcap", 1, 0x2e);
-           
+
+            // Try to debug the reception of the first frame from the .pcap file
+            // 2nd param is the number of frames (more than 1 in case of segmentation) 
+            byte invokeId = SetReplyPackets(@"..\..\ReadPropMultiple.pcap", 1, 0x2e);
+
+            BacnetPropertyReference[] properties = new BacnetPropertyReference[] { new BacnetPropertyReference((uint)BacnetPropertyIds.PROP_ALL, System.IO.BACnet.Serialize.ASN1.BACNET_ARRAY_ALL) };
+            IList<BacnetReadAccessResult> multi_value_list;
+
+            BacnetObjectId BOid = new BacnetObjectId(BacnetObjectTypes.OBJECT_DEVICE, 16);
+
             System.Diagnostics.Debugger.Break();
-
-            IList<BacnetGetEventInformationData> Alarms = new List<BacnetGetEventInformationData>();
-            bacnet_client.GetAlarmSummaryOrEventRequest(nowhere, true, ref Alarms, invokeId); // the same InvokeId present in the reply must be used 
-
+            bacnet_client.ReadPropertyMultipleRequest(nowhere, BOid, properties, out multi_value_list, invokeId);
+           
             // to debug server handle methods, just send any kind of unconfirmed message such as whois
         }
 

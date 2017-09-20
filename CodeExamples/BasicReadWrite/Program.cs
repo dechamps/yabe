@@ -67,12 +67,16 @@ namespace BasicReadWrite
         static void StartActivity()
         {
             // Bacnet on UDP/IP/Ethernet
+            // to bind to a specific network interface such as 100.75.35.6 
+            // bacnet_client = new BacnetClient(new BacnetIpUdpProtocolTransport(0xBAC0, false, false, 1472, "100.75.35.6"));
+            // otherwise the default interface is open ... sometimes OK, sometimes not !
             bacnet_client = new BacnetClient(new BacnetIpUdpProtocolTransport(0xBAC0, false));
+
             // or Bacnet Mstp on COM4 à 38400 bps, own master id 8
             // m_bacnet_client = new BacnetClient(new BacnetMstpProtocolTransport("COM4", 38400, 8);
             // Or Bacnet Ethernet
             // bacnet_client = new BacnetClient(new BacnetEthernetProtocolTransport("Connexion au réseau local"));          
-            // Or Bacnet on IPV6
+            // Or Bacnet on IPV6, default interface
             // bacnet_client = new BacnetClient(new BacnetIpV6UdpProtocolTransport(0xBAC0));
 
             bacnet_client.Start();    // go
