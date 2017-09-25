@@ -360,38 +360,79 @@ namespace System.IO.BACnet
             ep = new System.Net.IPEndPoint(ip_address, (int)port);
         }
 
+
+        // Get the IPAddress only if one is present
+        // this could be usefull to find the broadcast address even if the socket is open on the default interface
+        // removes somes virtual interfaces (certainly not all)
+        private Net.NetworkInformation.UnicastIPAddressInformation GettAddress_DefaultInterface()
+        {
+            Net.NetworkInformation.UnicastIPAddressInformation UniIP = null;
+            int NbAdd = 0;
+
+            foreach (System.Net.NetworkInformation.NetworkInterface adapter in System.Net.NetworkInformation.NetworkInterface.GetAllNetworkInterfaces())
+                if (adapter.OperationalStatus == System.Net.NetworkInformation.OperationalStatus.Up)
+                    if (adapter.NetworkInterfaceType != System.Net.NetworkInformation.NetworkInterfaceType.Loopback)
+                        if (!(adapter.Name.Contains("VirtualBox") || adapter.Name.Contains("VMware")))
+                            foreach (System.Net.NetworkInformation.UnicastIPAddressInformation ip in adapter.GetIPProperties().UnicastAddresses)
+                            {
+                                if (ip.Address.AddressFamily == Net.Sockets.AddressFamily.InterNetwork)
+                                {
+                                    UniIP = ip;
+                                    NbAdd++;
+                                }
+                            }
+            if (NbAdd == 1)
+                return UniIP;
+            else
+                return null;
+
+        }
         // A lot of problems on Mono (Raspberry) to get the correct broadcast @
         // so this method is overridable (this allows the implementation of operating system specific code)
         // Marc solution http://stackoverflow.com/questions/8119414/how-to-query-the-subnet-masks-using-mono-on-linux for instance
         //
         protected virtual BacnetAddress _GetBroadcastAddress()
         {
-            // general broadcast
+            Net.NetworkInformation.UnicastIPAddressInformation ipAddr = null;
+            // general broadcast by default if nothing better is found
             System.Net.IPEndPoint ep = new Net.IPEndPoint(System.Net.IPAddress.Parse("255.255.255.255"), m_port);
+
+            if (LocalEndPoint.Address.ToString() == "0.0.0.0")
+                ipAddr = GettAddress_DefaultInterface();
+
             // restricted local broadcast (directed ... routable)
-            foreach (System.Net.NetworkInformation.NetworkInterface adapter in System.Net.NetworkInformation.NetworkInterface.GetAllNetworkInterfaces())
-                foreach (System.Net.NetworkInformation.UnicastIPAddressInformation ip in adapter.GetIPProperties().UnicastAddresses)
-                   if (LocalEndPoint.Address.Equals(ip.Address))
-                   {
-                       try
-                       {
-                           string[] strCurrentIP = ip.Address.ToString().Split('.');
-                           string[] strIPNetMask = ip.IPv4Mask.ToString().Split('.');
-                           StringBuilder BroadcastStr = new StringBuilder();
-                           for (int i = 0; i < 4; i++)
-                           {
-                               BroadcastStr.Append(((byte)(int.Parse(strCurrentIP[i]) | ~int.Parse(strIPNetMask[i]))).ToString());
-                               if (i != 3) BroadcastStr.Append('.');
-                           }
-                           ep = new Net.IPEndPoint(System.Net.IPAddress.Parse(BroadcastStr.ToString()), m_port);
-                       }
-                       catch { }  //On mono IPv4Mask feature not implemented
-                   }
+            if (ipAddr == null)
+                foreach (System.Net.NetworkInformation.NetworkInterface adapter in System.Net.NetworkInformation.NetworkInterface.GetAllNetworkInterfaces())
+                    foreach (System.Net.NetworkInformation.UnicastIPAddressInformation ip in adapter.GetIPProperties().UnicastAddresses)
+                        if (LocalEndPoint.Address.Equals(ip.Address))
+                        {
+                            ipAddr = ip;
+                            break;
+                        }
+
+            if (ipAddr != null)
+            {
+                try
+                {
+                    string[] strCurrentIP = ipAddr.Address.ToString().Split('.');
+                    string[] strIPNetMask = ipAddr.IPv4Mask.ToString().Split('.');
+                    StringBuilder BroadcastStr = new StringBuilder();
+                    for (int i = 0; i < 4; i++)
+                    {
+                        BroadcastStr.Append(((byte)(int.Parse(strCurrentIP[i]) | ~int.Parse(strIPNetMask[i]))).ToString());
+                        if (i != 3) BroadcastStr.Append('.');
+                    }
+                    ep = new Net.IPEndPoint(System.Net.IPAddress.Parse(BroadcastStr.ToString()), m_port);
+                }
+                catch { }  //On mono IPv4Mask feature not implemented
+            }
+
             BacnetAddress broadcast;
             Convert(ep, out broadcast);
             broadcast.net = 0xFFFF;
             return broadcast;
         }
+
 
         BacnetAddress BroadcastAddress = null;
         public BacnetAddress GetBroadcastAddress()
