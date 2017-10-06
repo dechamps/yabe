@@ -160,15 +160,19 @@ namespace Yabe
 
                 if (Properties.Settings.Default.DescriptionInAlarmSummary)
                 {
-                    // Get the Description, network activity, time consuming
-                    IList<BacnetValue> name;
-                    bool retcode = comm.ReadPropertyRequest(adr, alarm.objectIdentifier, BacnetPropertyIds.PROP_DESCRIPTION, out name);
+                    String Descr = "";
+                    try
+                    {
+                        // Get the Description, network activity, time consuming
+                        IList<BacnetValue> name;
+                        bool retcode = comm.ReadPropertyRequest(adr, alarm.objectIdentifier, BacnetPropertyIds.PROP_DESCRIPTION, out name);
 
-                    String Descr= "";
-                    if (retcode)
-                        Descr = name[0].Value.ToString();
+                        if (retcode)
+                            Descr = name[0].Value.ToString();
+                    }
+                    catch { }
 
-                    currentTn.Nodes.Add(new TreeNode("Description : " + Descr));
+                    currentTn.Nodes.Add(new TreeNode("Description : " + Descr, Int32.MaxValue, Int32.MaxValue));
                 }
 
                 icon = Int32.MaxValue; // out bound
