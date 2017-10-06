@@ -406,5 +406,17 @@ namespace Yabe.Properties {
                 this["IPv6_Support"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool DescriptionInAlarmSummary {
+            get {
+                return ((bool)(this["DescriptionInAlarmSummary"]));
+            }
+            set {
+                this["DescriptionInAlarmSummary"] = value;
+            }
+        }
     }
 }

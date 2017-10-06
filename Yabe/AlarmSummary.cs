@@ -158,6 +158,19 @@ namespace Yabe
                     currentTn.Nodes.Clear();
                 }
 
+                if (Properties.Settings.Default.DescriptionInAlarmSummary)
+                {
+                    // Get the Description, network activity, time consuming
+                    IList<BacnetValue> name;
+                    bool retcode = comm.ReadPropertyRequest(adr, alarm.objectIdentifier, BacnetPropertyIds.PROP_DESCRIPTION, out name);
+
+                    String Descr= "";
+                    if (retcode)
+                        Descr = name[0].Value.ToString();
+
+                    currentTn.Nodes.Add(new TreeNode("Description : " + Descr));
+                }
+
                 icon = Int32.MaxValue; // out bound
                 currentTn.Nodes.Add(new TreeNode("Alarm state : " + GetEventStateNiceName(alarm.eventState.ToString()), icon, icon));
 

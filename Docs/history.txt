@@ -1,6 +1,10 @@
 -------------------------------------------------------------------------------
                    YABE - YET ANOTHER BACNET EXPLORER
 -------------------------------------------------------------------------------
+1.1.6 -
+ - Devices treeview sorted by deviceId
+ - Try Reading PROP_LIST if ReadPropertyMultiple is reject
+ 
 1.1.5 - 20170531
  - Remote BBMD tables edition : read & write
  - Integration of externals dll into Yabe.exe

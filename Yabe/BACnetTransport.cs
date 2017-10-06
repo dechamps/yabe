@@ -393,15 +393,16 @@ namespace System.IO.BACnet
         //
         protected virtual BacnetAddress _GetBroadcastAddress()
         {
-            Net.NetworkInformation.UnicastIPAddressInformation ipAddr = null;
             // general broadcast by default if nothing better is found
             System.Net.IPEndPoint ep = new Net.IPEndPoint(System.Net.IPAddress.Parse("255.255.255.255"), m_port);
 
+            Net.NetworkInformation.UnicastIPAddressInformation ipAddr = null;
+
             if (LocalEndPoint.Address.ToString() == "0.0.0.0")
                 ipAddr = GettAddress_DefaultInterface();
-
-            // restricted local broadcast (directed ... routable)
-            if (ipAddr == null)
+            else
+            {
+                // restricted local broadcast (directed ... routable)
                 foreach (System.Net.NetworkInformation.NetworkInterface adapter in System.Net.NetworkInformation.NetworkInterface.GetAllNetworkInterfaces())
                     foreach (System.Net.NetworkInformation.UnicastIPAddressInformation ip in adapter.GetIPProperties().UnicastAddresses)
                         if (LocalEndPoint.Address.Equals(ip.Address))
@@ -409,6 +410,7 @@ namespace System.IO.BACnet
                             ipAddr = ip;
                             break;
                         }
+            }
 
             if (ipAddr != null)
             {
