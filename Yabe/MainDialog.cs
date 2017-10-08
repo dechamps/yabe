@@ -1204,7 +1204,6 @@ namespace Yabe
                     objectsDescriptionExternal = (List<BacnetObjectDescription>)xs.Deserialize(sr);
                 }
                 catch { }
-
             }
 
             value_list = null;
@@ -1213,16 +1212,42 @@ namespace Yabe
 
             int old_retries = comm.Retries;
             comm.Retries = 1;       //we don't want to spend too much time on non existing properties
+
+            // Three mandatory common properties to all objects : PROP_OBJECT_IDENTIFIER,PROP_OBJECT_TYPE, PROP_OBJECT_NAME
+
+            // ReadProperty(comm, adr, object_id, BacnetPropertyIds.PROP_OBJECT_IDENTIFIER, ref values)
+            // No need to query it, known value
+            BacnetPropertyValue new_entry = new BacnetPropertyValue();
+            new_entry.property = new BacnetPropertyReference((uint)BacnetPropertyIds.PROP_OBJECT_IDENTIFIER, System.IO.BACnet.Serialize.ASN1.BACNET_ARRAY_ALL);
+            new_entry.value = new BacnetValue[] { new BacnetValue(object_id) };
+            values.Add(new_entry);
+
+            // ReadProperty(comm, adr, object_id, BacnetPropertyIds.PROP_OBJECT_TYPE, ref values);
+            // No need to query it, known value
+            new_entry = new BacnetPropertyValue();
+            new_entry.property = new BacnetPropertyReference((uint)BacnetPropertyIds.PROP_OBJECT_TYPE, System.IO.BACnet.Serialize.ASN1.BACNET_ARRAY_ALL);
+            new_entry.value = new BacnetValue[] { new BacnetValue(BacnetApplicationTags.BACNET_APPLICATION_TAG_ENUMERATED, (uint)object_id.type) };
+            values.Add(new_entry);
+
+            // We do not know the value here
+            ReadProperty(comm, adr, object_id, BacnetPropertyIds.PROP_OBJECT_NAME, ref values);
+
             try
             {
                 // PROP_LIST was added as an addendum to 135-2010
+                // Object_Name, Object_Type, Object_Identifier, and Property_List properties are not included in the list
                 // Test to see if it is supported, otherwise fall back to the the predefined delault property list.
-                bool objectDidSupplyPropertyList = ReadProperty(comm, adr, object_id, BacnetPropertyIds.PROP_PROPERTY_LIST, ref values);
+                IList<BacnetPropertyValue> valuesList = new List<BacnetPropertyValue>();
+
+                bool objectDidSupplyPropertyList = ReadProperty(comm, adr, object_id, BacnetPropertyIds.PROP_PROPERTY_LIST, ref valuesList);
 
                 //Used the supplied list of supported Properties, otherwise fall back to using the list of default properties.
                 if (objectDidSupplyPropertyList)
-                {
-                    var proplist = values.Last();
+                {                    
+                    var proplist = valuesList.Last();
+
+                    values.Add(proplist); // Add the PROP_LIST to the list of properties
+
                     foreach (var enumeratedValue in proplist.value)
                     {
                         BacnetPropertyIds bpi = (BacnetPropertyIds)(uint)enumeratedValue.Value;
@@ -1232,26 +1257,7 @@ namespace Yabe
                 }
                 else
                 {
-                    // Three mandatory common properties to all objects : PROP_OBJECT_IDENTIFIER,PROP_OBJECT_TYPE, PROP_OBJECT_NAME
-
-                    // ReadProperty(comm, adr, object_id, BacnetPropertyIds.PROP_OBJECT_IDENTIFIER, ref values)
-                    // No need to query it, known value
-                    BacnetPropertyValue new_entry = new BacnetPropertyValue();
-                    new_entry.property = new BacnetPropertyReference((uint)BacnetPropertyIds.PROP_OBJECT_IDENTIFIER, System.IO.BACnet.Serialize.ASN1.BACNET_ARRAY_ALL);
-                    new_entry.value = new BacnetValue[] { new BacnetValue(object_id) };
-                    values.Add(new_entry);
-
-                    // ReadProperty(comm, adr, object_id, BacnetPropertyIds.PROP_OBJECT_TYPE, ref values);
-                    // No need to query it, known value
-                    new_entry = new BacnetPropertyValue();
-                    new_entry.property = new BacnetPropertyReference((uint)BacnetPropertyIds.PROP_OBJECT_TYPE, System.IO.BACnet.Serialize.ASN1.BACNET_ARRAY_ALL);
-                    new_entry.value = new BacnetValue[] { new BacnetValue(BacnetApplicationTags.BACNET_APPLICATION_TAG_ENUMERATED, (uint)object_id.type) };
-                    values.Add(new_entry);
-
-                    // We do not know the value here
-                    ReadProperty(comm, adr, object_id, BacnetPropertyIds.PROP_OBJECT_NAME, ref values);
-
-                    // for all other properties, the list is comming from the internal or external XML file
+                    // the properties list is comming from the internal or external XML file
 
                     BacnetObjectDescription objDescr = new BacnetObjectDescription(); ;
 
@@ -1264,7 +1270,7 @@ namespace Yabe
                         objDescr = objectsDescriptionExternal[Idx];
                     else
                     {
-                        // try to find from the embedded resoruce
+                        // try to find from the embedded resource
                         Idx = objectsDescriptionDefault.FindIndex(o => o.typeId == object_id.type);
                         if (Idx != -1)
                             objDescr = objectsDescriptionDefault[Idx];
