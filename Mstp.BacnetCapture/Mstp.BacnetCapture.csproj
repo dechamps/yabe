@@ -54,6 +54,9 @@
     <Compile Include="..\Yabe\BACnetTransport.cs">
       <Link>BACnetTransport.cs</Link>
     </Compile>
+    <Compile Include="..\Yabe\BacnetTransportSerial.cs">
+      <Link>BacnetTransportSerial.cs</Link>
+    </Compile>
     <Compile Include="BacnetNode.cs" />
     <Compile Include="BacnetCapture.cs">
       <SubType>Form</SubType>

@@ -55,7 +55,7 @@ namespace Yabe
             transport = (BacnetIpUdpProtocolTransport)comm.Transport;
             BBMDep = new IPEndPoint(System.Net.IPAddress.Parse(adr.ToString().Split(':')[0]),Convert.ToInt32(adr.ToString().Split(':')[1]));
 
-            transport.Bvlc.MessageReceived += new System.IO.BACnet.Serialize.BVLC.BVLCMessageReceiveHandler(Bvlc_MessageReceived);
+            transport.Bvlc.MessageReceived += new BVLC.BVLCMessageReceiveHandler(Bvlc_MessageReceived);
         }
 
         void Bvlc_MessageReceived(System.Net.IPEndPoint sender, BacnetBvlcFunctions function, BacnetBvlcResults result, object data)
@@ -152,7 +152,7 @@ namespace Yabe
 
         private void BBMDEditor_FormClosing(object sender, FormClosingEventArgs e)
         {
-            transport.Bvlc.MessageReceived -= new System.IO.BACnet.Serialize.BVLC.BVLCMessageReceiveHandler(Bvlc_MessageReceived);
+            transport.Bvlc.MessageReceived -= new BVLC.BVLCMessageReceiveHandler(Bvlc_MessageReceived);
         }
 
         private void bpRefresh_Click(object sender, EventArgs e)

@@ -30,6 +30,8 @@ using System.Text;
 using System.Linq;
 using System.IO.BACnet.Serialize;
 using System.Diagnostics;
+using System.Net;
+using System.Text.RegularExpressions;
 
 namespace System.IO.BACnet
 {
@@ -167,11 +169,11 @@ namespace System.IO.BACnet
         public void Start()
         {
             Open();
-            
-            if (m_shared_conn != null) 
+
+            if (m_shared_conn != null)
                 m_shared_conn.BeginReceive(OnReceiveData, m_shared_conn);
 
-            if (m_exclusive_conn != null) 
+            if (m_exclusive_conn != null)
                 m_exclusive_conn.BeginReceive(OnReceiveData, m_exclusive_conn);
 
         }
@@ -246,7 +248,7 @@ namespace System.IO.BACnet
 
                         if ((function == BacnetBvlcFunctions.BVLC_ORIGINAL_UNICAST_NPDU) || (function == BacnetBvlcFunctions.BVLC_ORIGINAL_BROADCAST_NPDU) || (function == BacnetBvlcFunctions.BVLC_FORWARDED_NPDU))
                             //send to upper layers
-                            if ((MessageRecieved != null)  &&(rx>HEADER_LENGTH)) MessageRecieved(this, local_buffer, HEADER_LENGTH, rx - HEADER_LENGTH, remote_address);
+                            if ((MessageRecieved != null) && (rx > HEADER_LENGTH)) MessageRecieved(this, local_buffer, HEADER_LENGTH, rx - HEADER_LENGTH, remote_address);
                     }
                 }
                 catch (Exception ex)
@@ -311,7 +313,7 @@ namespace System.IO.BACnet
             try
             {
                 // return m_exclusive_conn.Send(buffer, data_length, ep);
-                System.Threading.ThreadPool.QueueUserWorkItem((o) =>m_exclusive_conn.Send(buffer, data_length, ep), null);
+                System.Threading.ThreadPool.QueueUserWorkItem((o) => m_exclusive_conn.Send(buffer, data_length, ep), null);
                 return data_length;
             }
             catch
@@ -467,1908 +469,450 @@ namespace System.IO.BACnet
         }
     }
 
-
-#if XAMARIN
-#else
-
-    public interface IBacnetSerialTransport : IDisposable
+    public enum BacnetBvlcFunctions : byte
     {
-        void Open();
-        void Write(byte[] buffer, int offset, int length);
-        int Read(byte[] buffer, int offset, int length, int timeout_ms);
-        void Close();
-        int BytesToRead { get; }
-    }
+        BVLC_RESULT = 0,
+        BVLC_WRITE_BROADCAST_DISTRIBUTION_TABLE = 1,
+        BVLC_READ_BROADCAST_DIST_TABLE = 2,
+        BVLC_READ_BROADCAST_DIST_TABLE_ACK = 3,
+        BVLC_FORWARDED_NPDU = 4,
+        BVLC_REGISTER_FOREIGN_DEVICE = 5,
+        BVLC_READ_FOREIGN_DEVICE_TABLE = 6,
+        BVLC_READ_FOREIGN_DEVICE_TABLE_ACK = 7,
+        BVLC_DELETE_FOREIGN_DEVICE_TABLE_ENTRY = 8,
+        BVLC_DISTRIBUTE_BROADCAST_TO_NETWORK = 9,
+        BVLC_ORIGINAL_UNICAST_NPDU = 10,
+        BVLC_ORIGINAL_BROADCAST_NPDU = 11,
+        MAX_BVLC_FUNCTION = 12
+    };
 
-    public class BacnetSerialPortTransport : IBacnetSerialTransport
+    public enum BacnetBvlcResults : ushort
     {
-        private string m_port_name;
-        private int m_baud_rate;
-        private System.IO.Ports.SerialPort m_port;
+        BVLC_RESULT_SUCCESSFUL_COMPLETION = 0x0000,
+        BVLC_RESULT_WRITE_BROADCAST_DISTRIBUTION_TABLE_NAK = 0x0010,
+        BVLC_RESULT_READ_BROADCAST_DISTRIBUTION_TABLE_NAK = 0x0020,
+        BVLC_RESULT_REGISTER_FOREIGN_DEVICE_NAK = 0X0030,
+        BVLC_RESULT_READ_FOREIGN_DEVICE_TABLE_NAK = 0x0040,
+        BVLC_RESULT_DELETE_FOREIGN_DEVICE_TABLE_ENTRY_NAK = 0x0050,
+        BVLC_RESULT_DISTRIBUTE_BROADCAST_TO_NETWORK_NAK = 0x0060
+    };
 
-        public BacnetSerialPortTransport(string port_name, int baud_rate)
-        {
-            m_port_name = port_name;
-            m_baud_rate = baud_rate;
-            m_port = new Ports.SerialPort(m_port_name, m_baud_rate, System.IO.Ports.Parity.None, 8, Ports.StopBits.One);
-        }
-
-        public override bool Equals(object obj)
-        {
-            if (obj == null) return false;
-            else if (!(obj is BacnetSerialPortTransport)) return false;
-            BacnetSerialPortTransport a = (BacnetSerialPortTransport)obj;
-            return m_port_name.Equals(a.m_port_name);
-        }
-
-        public override int GetHashCode()
-        {
-            return m_port_name.GetHashCode();
-        }
-
-        public override string ToString()
-        {
-            return m_port_name.ToString();
-        }
-
-        public void Open()
-        {
-            m_port.Open();
-        }
-
-        public void Write(byte[] buffer, int offset, int length)
-        {
-            if (m_port == null) return;
-            m_port.Write(buffer, offset, length);
-        }
-
-        public int Read(byte[] buffer, int offset, int length, int timeout_ms)
-        {
-            if (m_port == null) return 0;
-            m_port.ReadTimeout = timeout_ms;
-            try
-            {
-                int rx = m_port.Read(buffer, offset, length);
-                return rx;
-            }
-            catch (TimeoutException)
-            {
-                return -BacnetMstpProtocolTransport.ETIMEDOUT;
-            }
-            catch (Exception)
-            {
-                return -1;
-            }
-        }
-
-        public void Close()
-        {
-            if (m_port == null) return;
-            m_port.Close();
-        }
-
-        public int BytesToRead
-        {
-            get { return m_port == null ? 0 : m_port.BytesToRead; }
-        }
-
-        public void Dispose()
-        {
-            Close();
-        }
-    }
-
-    public class BacnetPipeTransport : IBacnetSerialTransport
+    // Special thanks to VTS tool (BBMD services not activated but programmed !) and Steve Karg stack
+    public class BVLC
     {
-        private string m_name;
-        private System.IO.Pipes.PipeStream m_conn;
-        private IAsyncResult m_current_read;
-        private IAsyncResult m_current_connect;
-        private bool m_is_server;
+        public delegate void BVLCMessageReceiveHandler(System.Net.IPEndPoint sender, BacnetBvlcFunctions function, BacnetBvlcResults result, object data);
+        public event BVLCMessageReceiveHandler MessageReceived;
 
-        public string Name { get { return m_name; } }
+        BacnetIpUdpProtocolTransport MyBBMDTransport;
+        String BroadcastAdd;
 
-        public BacnetPipeTransport(string name, bool is_server = false)
+        bool BBMD_FD_ServiceActivated = false;
+
+        public const byte BVLL_TYPE_BACNET_IP = 0x81;
+        public const byte BVLC_HEADER_LENGTH = 4;
+        public const BacnetMaxAdpu BVLC_MAX_APDU = BacnetMaxAdpu.MAX_APDU1476;
+
+        // Two lists for optional BBMD activity
+        List<KeyValuePair<System.Net.IPEndPoint, DateTime>> ForeignDevices = new List<KeyValuePair<System.Net.IPEndPoint, DateTime>>();
+        List<KeyValuePair<System.Net.IPEndPoint, System.Net.IPAddress>> BBMDs = new List<KeyValuePair<System.Net.IPEndPoint, System.Net.IPAddress>>();
+
+        // Contains the rules to accept FRD based on the IP adress
+        // If empty it's equal to *.*.*.*, everyone allows
+        List<Regex> AutorizedFDR = new List<Regex>();
+
+        public BVLC(BacnetIpUdpProtocolTransport Transport)
         {
-            m_name = name;
-            m_is_server = is_server;
+            MyBBMDTransport = Transport;
+            BroadcastAdd = MyBBMDTransport.GetBroadcastAddress().ToString().Split(':')[0];
         }
 
-        /// <summary>
-        /// Get the available byte count. (The .NET pipe interface has a few lackings. See also the "InteropAvailablePorts" function)
-        /// </summary>
-        [System.Runtime.InteropServices.DllImport("kernel32.dll", EntryPoint = "PeekNamedPipe", SetLastError = true)]
-        private static extern bool PeekNamedPipe(IntPtr handle, IntPtr buffer, uint nBufferSize, IntPtr bytesRead, ref uint bytesAvail, IntPtr BytesLeftThisMessage);
-
-        public int PeekPipe()
+        public string FDList()
         {
-            uint bytes_avail = 0;
-            if (PeekNamedPipe(m_conn.SafePipeHandle.DangerousGetHandle(), IntPtr.Zero, 0, IntPtr.Zero, ref bytes_avail, IntPtr.Zero))
-                return (int)bytes_avail;
-            else
-                return 0;
-        }
-
-        public override string ToString()
-        {
-            return m_name.ToString();
-        }
-
-        public override int GetHashCode()
-        {
-            return m_name.GetHashCode();
-        }
-
-        public override bool Equals(object obj)
-        {
-            if (obj == null) return false;
-            else if (!(obj is BacnetPipeTransport)) return false;
-            BacnetPipeTransport a = (BacnetPipeTransport)obj;
-            return m_name.Equals(a.m_name);
-        }
-
-        public void Open()
-        {
-            if (m_conn != null) Close();
-
-            if (!m_is_server)
+            StringBuilder sb = new StringBuilder();
+            lock (ForeignDevices)
             {
-                m_conn = new System.IO.Pipes.NamedPipeClientStream(".", m_name, System.IO.Pipes.PipeDirection.InOut, System.IO.Pipes.PipeOptions.Asynchronous);
-                ((System.IO.Pipes.NamedPipeClientStream)m_conn).Connect(3000);
-            }
-            else
-            {
-                m_conn = new System.IO.Pipes.NamedPipeServerStream(m_name, Pipes.PipeDirection.InOut, 20, Pipes.PipeTransmissionMode.Byte, Pipes.PipeOptions.Asynchronous);
-            }
-        }
+                // remove oldest Device entries (Time expiration > TTL + 30s delay)
+                ForeignDevices.Remove(ForeignDevices.Find(item => DateTime.Now > item.Value));
 
-        public void Write(byte[] buffer, int offset, int length)
-        {
-            if (!m_conn.IsConnected) return;
-            try
-            {
-                //doing syncronous writes (to an Asynchronous pipe) seems to be a bad thing
-                m_conn.BeginWrite(buffer, offset, length, (r) => { m_conn.EndWrite(r); }, null);
-            }
-            catch (System.IO.IOException)
-            {
-                Disconnect();
-            }
-        }
-
-        private void Disconnect()
-        {
-            if (m_conn is System.IO.Pipes.NamedPipeServerStream)
-            {
-                try
+                foreach (KeyValuePair<System.Net.IPEndPoint, DateTime> client in ForeignDevices)
                 {
-                    ((System.IO.Pipes.NamedPipeServerStream)m_conn).Disconnect();
-                }
-                catch
-                {
-                }
-                m_current_connect = null;
-            }
-            m_current_read = null;
-        }
-
-        private bool WaitForConnection(int timeout_ms)
-        {
-            if (m_conn.IsConnected) return true;
-            if (m_conn is System.IO.Pipes.NamedPipeServerStream)
-            {
-                System.IO.Pipes.NamedPipeServerStream server = (System.IO.Pipes.NamedPipeServerStream)m_conn;
-                if (m_current_connect == null)
-                {
-                    try
-                    {
-                        m_current_connect = server.BeginWaitForConnection(null, null);
-                    }
-                    catch (System.IO.IOException)
-                    {
-                        Disconnect();
-                        m_current_connect = server.BeginWaitForConnection(null, null);
-                    }
-                }
-
-                if (m_current_connect.IsCompleted || m_current_connect.AsyncWaitHandle.WaitOne(timeout_ms))
-                {
-                    try
-                    {
-                        server.EndWaitForConnection(m_current_connect);
-                    }
-                    catch (System.IO.IOException)
-                    {
-                        Disconnect();
-                    }
-                    m_current_connect = null;
-                }
-                return m_conn.IsConnected;
-            }
-            else
-                return true;
-        }
-
-        public int Read(byte[] buffer, int offset, int length, int timeout_ms)
-        {
-            if (!WaitForConnection(timeout_ms)) return -BacnetMstpProtocolTransport.ETIMEDOUT;
-
-            if (m_current_read == null)
-            {
-                try
-                {
-                    m_current_read = m_conn.BeginRead(buffer, offset, length, null, null);
-                }
-                catch (Exception)
-                {
-                    Disconnect();
-                    return -1;
+                    sb.Append(client.Key.Address);
+                    sb.Append(":");
+                    sb.Append(client.Key.Port);
+                    sb.Append(";");
                 }
             }
+            return sb.ToString();
+        }
 
-            if (m_current_read.IsCompleted || m_current_read.AsyncWaitHandle.WaitOne(timeout_ms))
+        public void AddFDRAutorisationRule(Regex IpRule)
+        {
+            AutorizedFDR.Add(IpRule);
+        }
+
+        // Used to initiate the BBMD & FD behaviour, if BBMD is null it start the FD activity only
+        public void AddBBMDPeer(Net.IPEndPoint BBMD, Net.IPAddress Mask)
+        {
+            BBMD_FD_ServiceActivated = true;
+
+            if (BBMD != null)
+                lock (BBMDs)
+                    BBMDs.Add(new KeyValuePair<System.Net.IPEndPoint, System.Net.IPAddress>(BBMD, Mask));
+        }
+
+        // Add a FD to the table or renew it
+        private void RegisterForeignDevice(System.Net.IPEndPoint sender, int TTL)
+        {
+            lock (ForeignDevices)
             {
-                try
+                // remove it, if any
+                ForeignDevices.Remove(ForeignDevices.Find(item => item.Key.Equals(sender)));
+                // TTL + 30s grace period
+                DateTime Expiration = DateTime.Now.AddSeconds(TTL + 30);
+                // add it
+                if (AutorizedFDR.Count == 0) // No rules, accept all
                 {
-                    int rx = m_conn.EndRead(m_current_read);
-                    m_current_read = null;
-                    return rx;
-                }
-                catch (Exception)
-                {
-                    Disconnect();
-                    return -1;
-                }
-            }
-            else
-                return -BacnetMstpProtocolTransport.ETIMEDOUT;
-        }
-
-        public void Close()
-        {
-            if (m_conn == null) return;
-            m_conn.Close();
-            m_conn = null;
-        }
-
-        public int BytesToRead
-        {
-            get
-            {
-                return PeekPipe();
-            }
-        }
-
-        public static string[] AvailablePorts
-        {
-            get
-            {
-                try
-                {
-                    String[] listOfPipes = System.IO.Directory.GetFiles(@"\\.\pipe\");
-                    if (listOfPipes == null) return new string[0];
-                    else
-                    {
-                        for (int i = 0; i < listOfPipes.Length; i++)
-                            listOfPipes[i] = listOfPipes[i].Replace(@"\\.\pipe\", "");
-                        return listOfPipes;
-                    }
-                }
-                catch (Exception ex)
-                {
-                    Trace.TraceWarning("Exception in AvailablePorts: " + ex.Message);
-                    return InteropAvailablePorts;
-                }
-            }
-        }
-
-        #region " Interop Get Pipe Names "
-
-        [System.Runtime.InteropServices.StructLayout(System.Runtime.InteropServices.LayoutKind.Sequential)]
-        private struct FILETIME
-        {
-            public uint dwLowDateTime;
-            public uint dwHighDateTime;
-        }
-
-        [System.Runtime.InteropServices.StructLayout(System.Runtime.InteropServices.LayoutKind.Sequential, CharSet = System.Runtime.InteropServices.CharSet.Unicode)]
-        private struct WIN32_FIND_DATA
-        {
-            public uint dwFileAttributes;
-            public FILETIME ftCreationTime;
-            public FILETIME ftLastAccessTime;
-            public FILETIME ftLastWriteTime;
-            public uint nFileSizeHigh;
-            public uint nFileSizeLow;
-            public uint dwReserved0;
-            public uint dwReserved1;
-            [System.Runtime.InteropServices.MarshalAs(System.Runtime.InteropServices.UnmanagedType.ByValTStr, SizeConst = 260)]
-            public string cFileName;
-            [System.Runtime.InteropServices.MarshalAs(System.Runtime.InteropServices.UnmanagedType.ByValTStr, SizeConst = 14)]
-            public string cAlternateFileName;
-        }
-
-        [System.Runtime.InteropServices.DllImport("kernel32.dll", CharSet = System.Runtime.InteropServices.CharSet.Unicode)]
-        private static extern IntPtr FindFirstFile(string lpFileName, out WIN32_FIND_DATA lpFindFileData);
-        [System.Runtime.InteropServices.DllImport("kernel32.dll", CharSet = System.Runtime.InteropServices.CharSet.Unicode)]
-        private static extern int FindNextFile(IntPtr hFindFile, out WIN32_FIND_DATA lpFindFileData);
-        [System.Runtime.InteropServices.DllImport("kernel32.dll")]
-        private static extern bool FindClose(IntPtr hFindFile);
-
-        /// <summary>
-        /// The built-in functions for pipe enumeration isn't perfect, I'm afraid. Hence this messy interop.
-        /// </summary>
-        static string[] InteropAvailablePorts
-        {
-            get
-            {
-                List<string> ret = new List<string>();
-                WIN32_FIND_DATA data;
-                IntPtr handle = FindFirstFile(@"\\.\pipe\*", out data);
-                if (handle != new IntPtr(-1))
-                {
-                    do
-                        ret.Add(data.cFileName);
-                    while (FindNextFile(handle, out data) != 0);
-                    FindClose(handle);
-                }
-                return ret.ToArray();
-            }
-        }
-        #endregion
-
-        public void Dispose()
-        {
-            Close();
-        }
-    }
-
-    /// <summary>
-    /// This is the standard BACNet PTP transport
-    /// </summary>
-    public class BacnetPtpProtocolTransport : IBacnetTransport, IDisposable
-    {
-        private IBacnetSerialTransport m_port;
-        private System.Threading.Thread m_thread;
-        private bool m_is_server;
-        private bool m_is_connected = false;
-        private bool m_sequence_counter = false;
-        private System.Threading.ManualResetEvent m_may_send = new Threading.ManualResetEvent(false);
-        private string m_password;
-
-        public event MessageRecievedHandler MessageRecieved;
-        public BacnetAddressTypes Type { get { return BacnetAddressTypes.PTP; } }
-        public int HeaderLength { get { return PTP.PTP_HEADER_LENGTH; } }
-        public int MaxBufferLength { get { return 502; } }
-        public BacnetMaxAdpu MaxAdpuLength { get { return PTP.PTP_MAX_APDU; } }
-        public byte MaxInfoFrames { get { return 0xff; } set { /* ignore */ } }     //the PTP doesn't have max info frames
-        public string Password { get { return m_password; } set { m_password = value; } }
-        public bool StateLogging { get; set; }
-
-        public const int T_HEARTBEAT = 15000;
-        public const int T_FRAME_ABORT = 2000;
-
-        public BacnetPtpProtocolTransport(IBacnetSerialTransport transport, bool is_server)
-        {
-            m_port = transport;
-            m_is_server = is_server;
-        }
-
-        public BacnetPtpProtocolTransport(string port_name, int baud_rate, bool is_server)
-            : this(new BacnetSerialPortTransport(port_name, baud_rate), is_server)
-        {
-        }
-
-        public override bool Equals(object obj)
-        {
-            if (!(obj is BacnetPtpProtocolTransport)) return false;
-            BacnetPtpProtocolTransport a = (BacnetPtpProtocolTransport)obj;
-            return m_port.Equals(a.m_port);
-        }
-
-        public override int GetHashCode()
-        {
-            return m_port.GetHashCode();
-        }
-
-        public override string ToString()
-        {
-            return m_port.ToString();
-        }
-
-        public int Send(byte[] buffer, int offset, int data_length, BacnetAddress address, bool wait_for_transmission, int timeout)
-        {
-            BacnetPtpFrameTypes frame_type = BacnetPtpFrameTypes.FRAME_TYPE_DATA0;
-            if (m_sequence_counter) frame_type = BacnetPtpFrameTypes.FRAME_TYPE_DATA1;
-            m_sequence_counter = !m_sequence_counter; 
-            
-            //add header
-            int full_length = PTP.Encode(buffer, offset - PTP.PTP_HEADER_LENGTH, frame_type, data_length);
-
-            //wait for send allowed
-            if (!m_may_send.WaitOne(timeout))
-                return -BacnetMstpProtocolTransport.ETIMEDOUT;
-
-            //debug
-            if (StateLogging)
-                Trace.WriteLine("         " + frame_type, null);
-
-            //send
-            SendWithXonXoff(buffer, offset - HeaderLength, full_length);
-            return data_length;
-        }
-
-        public bool WaitForAllTransmits(int timeout)
-        {
-            return true;        //PTP got no send queue
-        }
-
-        public BacnetAddress GetBroadcastAddress()
-        {
-            return new BacnetAddress(BacnetAddressTypes.PTP, 0xFFFF, new byte[0]);
-        }
-
-        public void Start()
-        {
-            if (m_port == null) return;
-
-            m_thread = new Threading.Thread(new Threading.ThreadStart(ptp_thread));
-            m_thread.Name = "PTP Read";
-            m_thread.IsBackground = true;
-            m_thread.Start();
-        }
-
-        private void SendGreeting()
-        {
-            if (StateLogging)
-                Trace.WriteLine("Sending Greeting", null);
-            byte[] greeting = { PTP.PTP_GREETING_PREAMBLE1, PTP.PTP_GREETING_PREAMBLE2, 0x43, 0x6E, 0x65, 0x74, 0x0D };        //BACnet\n
-            m_port.Write(greeting, 0, greeting.Length);
-        }
-
-        private bool IsGreeting(byte[] buffer, int offset, int max_offset)
-        {
-            byte[] greeting = { PTP.PTP_GREETING_PREAMBLE1, PTP.PTP_GREETING_PREAMBLE2, 0x43, 0x6E, 0x65, 0x74, 0x0D };        //BACnet\n
-            max_offset = Math.Min(offset + greeting.Length, max_offset);
-            for (int i = offset; i < max_offset; i++)
-                if (buffer[i] != greeting[i - offset]) 
-                    return false;
-            return true;
-        }
-
-        private void RemoveGreetingGarbage(byte[] buffer, ref int max_offset)
-        {
-            while (max_offset > 0)
-            {
-                while (max_offset > 0 && buffer[0] != 0x42)
-                {
-                    if (max_offset > 1)
-                        Array.Copy(buffer, 1, buffer, 0, max_offset - 1);
-                    max_offset--;
-                }
-                if (max_offset > 1 && buffer[1] != 0x41)
-                    buffer[0] = 0xFF;
-                else if (max_offset > 2 && buffer[2] != 0x43)
-                    buffer[0] = 0xFF;
-                else if (max_offset > 3 && buffer[3] != 0x6E)
-                    buffer[0] = 0xFF;
-                else if (max_offset > 4 && buffer[4] != 0x65)
-                    buffer[0] = 0xFF;
-                else if (max_offset > 5 && buffer[5] != 0x74)
-                    buffer[0] = 0xFF;
-                else if (max_offset > 6 && buffer[6] != 0x0D)
-                    buffer[0] = 0xFF;
-                else
-                    break;
-            }
-        }
-
-        private bool WaitForGreeting(int timeout)
-        {
-            if (m_port == null) return false;
-            byte[] buffer = new byte[7];
-            int offset = 0;
-            int current_timeout;
-            while (offset < 7)
-            {
-                if (offset == 0) current_timeout = timeout;
-                else current_timeout = T_FRAME_ABORT;
-                int rx = m_port.Read(buffer, offset, 7 - offset, current_timeout);
-                if (rx <= 0) return false;
-                offset += rx;
-
-                //remove garbage
-                RemoveGreetingGarbage(buffer, ref offset);
-            }
-            return true;
-        }
-
-        private bool Reconnect()
-        {
-            m_is_connected = false;
-            m_may_send.Reset();
-            if (m_port == null) return false;
-            try
-            {
-                m_port.Close();
-            }
-            catch
-            {
-            }
-
-            try
-            {
-                m_port.Open();
-            }
-            catch
-            {
-                return false;
-            }
-
-            //connect procedure
-            if (m_is_server)
-            {
-                ////wait for greeting
-                //if (!WaitForGreeting(-1))
-                //{
-                //    Trace.WriteLine("Garbage Greeting", null);
-                //    return false;
-                //}
-                //if (StateLogging)
-                //    Trace.WriteLine("Got Greeting", null);
-
-                ////request connection
-                //SendFrame(BacnetPtpFrameTypes.FRAME_TYPE_CONNECT_REQUEST);
-            }
-            else
-            {
-                //send greeting
-                SendGreeting();
-            }
-
-            m_is_connected = true;
-            return true;
-        }
-
-        private void RemoveGarbage(byte[] buffer, ref int length)
-        {
-            //scan for preambles
-            for (int i = 0; i < (length - 1); i++)
-            {
-                if ((buffer[i] == PTP.PTP_PREAMBLE1 && buffer[i + 1] == PTP.PTP_PREAMBLE2) || IsGreeting(buffer, i, length))
-                {
-                    if (i > 0)
-                    {
-                        //move back
-                        Array.Copy(buffer, i, buffer, 0, length - i);
-                        length -= i;
-                        Trace.WriteLine("Garbage", null);
-                    }
+                    ForeignDevices.Add(new KeyValuePair<System.Net.IPEndPoint, DateTime>(sender, Expiration));
                     return;
                 }
-            }
-
-            //one preamble?
-            if (length > 0 && (buffer[length - 1] == PTP.PTP_PREAMBLE1 || buffer[length - 1] == PTP.PTP_GREETING_PREAMBLE1))
-            {
-                buffer[0] = buffer[length - 1];
-                length = 1;
-                Trace.WriteLine("Garbage", null);
-                return;
-            }
-
-            //no preamble?
-            if (length > 0)
-            {
-                length = 0;
-                Trace.WriteLine("Garbage", null);
-            }
-        }
-
-        private void RemoveXonOff(byte[] buffer, int offset, ref int max_offset, ref bool compliment_next)
-        {
-            //X'10' (DLE)  => X'10' X'90' 
-            //X'11' (XON)  => X'10' X'91' 
-            //X'13' (XOFF) => X'10' X'93'
-
-            for (int i = offset; i < max_offset; i++)
-            {
-                if (compliment_next)
-                {
-                    buffer[i] &= 0x7F;
-                    compliment_next = false;
-                }
-                else if (buffer[i] == 0x11 || buffer[i] == 0x13 || buffer[i] == 0x10)
-                {
-                    if (buffer[i] == 0x10) compliment_next = true;
-                    if ((max_offset - i) > 0)
-                        Array.Copy(buffer, i + 1, buffer, i, max_offset - i);
-                    max_offset--;
-                    i--;
-                }
-            }
-        }
-
-        private void SendWithXonXoff(byte[] buffer, int offset, int length)
-        {
-            byte[] escape = new byte[1] { 0x10 };
-            int max_offset = length + offset;
-
-            //scan
-            for (int i = offset; i < max_offset; i++)
-            {
-                if (buffer[i] == 0x10 || buffer[i] == 0x11 || buffer[i] == 0x13)
-                {
-                    m_port.Write(buffer, offset, i - offset);
-                    m_port.Write(escape, 0, 1);
-                    buffer[i] |= 0x80;
-                    offset = i;
-                }
-            }
-
-            //leftover
-            m_port.Write(buffer, offset, max_offset - offset);
-        }
-
-        private void SendFrame(BacnetPtpFrameTypes frame_type, byte[] buffer = null, int msg_length = 0)
-        {
-            if (m_port == null) return;
-            int full_length = PTP.PTP_HEADER_LENGTH + msg_length + (msg_length > 0 ? 2 : 0);
-            if(buffer == null) buffer = new byte[full_length];
-            PTP.Encode(buffer, 0, frame_type, msg_length);
-
-            //debug
-            if (StateLogging)
-                Trace.WriteLine("         " + frame_type, null);
-
-            //send
-            SendWithXonXoff(buffer, 0, full_length);
-        }
-
-        private void SendDisconnect(BacnetPtpFrameTypes bacnetPtpFrameTypes, BacnetPtpDisconnectReasons bacnetPtpDisconnectReasons)
-        {
-            byte[] buffer = new byte[PTP.PTP_HEADER_LENGTH + 1 + 2];
-            buffer[PTP.PTP_HEADER_LENGTH] = (byte)bacnetPtpDisconnectReasons;
-            SendFrame(BacnetPtpFrameTypes.FRAME_TYPE_DISCONNECT_REQUEST, buffer, 1);
-        }
-
-        private BacnetMstpProtocolTransport.GetMessageStatus ProcessRxStatus(byte[] buffer, ref int offset, int rx)
-        {
-            if (rx == -BacnetMstpProtocolTransport.ETIMEDOUT)
-            {
-                //drop message
-                BacnetMstpProtocolTransport.GetMessageStatus status = offset == 0 ? BacnetMstpProtocolTransport.GetMessageStatus.Timeout : BacnetMstpProtocolTransport.GetMessageStatus.SubTimeout;
-                buffer[0] = 0xFF;
-                RemoveGarbage(buffer, ref offset);
-                return status;
-            }
-            else if (rx < 0)
-            {
-                //drop message
-                buffer[0] = 0xFF;
-                RemoveGarbage(buffer, ref offset);
-                return BacnetMstpProtocolTransport.GetMessageStatus.ConnectionError;
-            }
-            else if (rx == 0)
-            {
-                //drop message
-                buffer[0] = 0xFF;
-                RemoveGarbage(buffer, ref offset);
-                return BacnetMstpProtocolTransport.GetMessageStatus.ConnectionClose;
-            }
-            return BacnetMstpProtocolTransport.GetMessageStatus.Good;
-        }
-
-        private BacnetMstpProtocolTransport.GetMessageStatus GetNextMessage(byte[]buffer, ref int offset, int timeout_ms, out BacnetPtpFrameTypes frame_type, out int msg_length)
-        {
-            BacnetMstpProtocolTransport.GetMessageStatus status;
-            int timeout = timeout_ms;
-
-            frame_type = BacnetPtpFrameTypes.FRAME_TYPE_HEARTBEAT_XOFF;
-            msg_length = 0;
-            bool compliment_next = false;
-
-            //fetch header
-            while (offset < PTP.PTP_HEADER_LENGTH)
-            {
-                if (m_port == null) return BacnetMstpProtocolTransport.GetMessageStatus.ConnectionClose;
-
-                if (offset > 0)
-                    timeout = T_FRAME_ABORT;    //set sub timeout
                 else
-                    timeout = timeout_ms;       //set big silence timeout
-
-                //read 
-                int rx = m_port.Read(buffer, offset, PTP.PTP_HEADER_LENGTH - offset, timeout);
-                status = ProcessRxStatus(buffer, ref offset, rx);
-                if (status != BacnetMstpProtocolTransport.GetMessageStatus.Good) return status;
-
-                //remove XON/XOFF
-                int new_offset = offset + rx;
-                RemoveXonOff(buffer, offset, ref new_offset, ref compliment_next);
-                offset = new_offset;
-
-                //remove garbage
-                RemoveGarbage(buffer, ref offset);
+                    foreach (Regex r in AutorizedFDR)
+                    {
+                        if (r.Match(sender.Address.ToString()).Success)
+                        {
+                            ForeignDevices.Add(new KeyValuePair<System.Net.IPEndPoint, DateTime>(sender, Expiration));
+                            return;
+                        }
+                    }
+                System.Diagnostics.Trace.TraceInformation("Rejected FDR registration, IP : " + sender.Address.ToString());
             }
-
-            //greeting
-            if (IsGreeting(buffer, 0, offset))
-            {
-                //get last byte
-                int rx = m_port.Read(buffer, offset, 1, timeout);
-                status = ProcessRxStatus(buffer, ref offset, rx);
-                if (status != BacnetMstpProtocolTransport.GetMessageStatus.Good) return status;
-                offset += 1;
-                if (IsGreeting(buffer, 0, offset))
-                {
-                    frame_type = BacnetPtpFrameTypes.FRAME_TYPE_GREETING;
-                    if (StateLogging) Trace.WriteLine(frame_type, null);
-                    return BacnetMstpProtocolTransport.GetMessageStatus.Good;
-                }
-                else
-                {
-                    //drop message
-                    buffer[0] = 0xFF;
-                    RemoveGarbage(buffer, ref offset);
-                    return BacnetMstpProtocolTransport.GetMessageStatus.DecodeError;
-                }
-            }
-
-            //decode
-            if (PTP.Decode(buffer, 0, offset, out frame_type, out msg_length) < 0)
-            {
-                //drop message
-                buffer[0] = 0xFF;
-                RemoveGarbage(buffer, ref offset);
-                return BacnetMstpProtocolTransport.GetMessageStatus.DecodeError;
-            }
-
-            //valid length?
-            int full_msg_length = msg_length + PTP.PTP_HEADER_LENGTH + (msg_length > 0 ? 2 : 0);
-            if (msg_length > MaxBufferLength)
-            {
-                //drop message
-                buffer[0] = 0xFF;
-                RemoveGarbage(buffer, ref offset);
-                return BacnetMstpProtocolTransport.GetMessageStatus.DecodeError;
-            }
-
-            //fetch data
-            if (msg_length > 0)
-            {
-                timeout = T_FRAME_ABORT;    //set sub timeout
-                while (offset < full_msg_length)
-                {
-                    //read 
-                    int rx = m_port.Read(buffer, offset, full_msg_length - offset, timeout);
-                    status = ProcessRxStatus(buffer, ref offset, rx);
-                    if (status != BacnetMstpProtocolTransport.GetMessageStatus.Good) return status;
-
-                    //remove XON/XOFF
-                    int new_offset = offset + rx;
-                    RemoveXonOff(buffer, offset, ref new_offset, ref compliment_next);
-                    offset = new_offset;
-                }
-
-                //verify data crc
-                if (PTP.Decode(buffer, 0, offset, out frame_type, out msg_length) < 0)
-                {
-                    //drop message
-                    buffer[0] = 0xFF;
-                    RemoveGarbage(buffer, ref offset);
-                    return BacnetMstpProtocolTransport.GetMessageStatus.DecodeError;
-                }
-            }
-
-            //debug
-            if (StateLogging)
-                Trace.WriteLine(frame_type, null);
-
-            //done
-            return BacnetMstpProtocolTransport.GetMessageStatus.Good;
         }
 
-        private void ptp_thread()
+        // Send a Frame to each registered foreign devices, except the original sender
+        private void SendToFDs(byte[] buffer, int msg_length, Net.IPEndPoint EPsender = null)
         {
-            byte[] buffer = new byte[MaxBufferLength];
-            try
+            lock (ForeignDevices)
             {
-                while (m_port != null)
+                // remove oldest Device entries (Time expiration > TTL + 30s delay)
+                ForeignDevices.Remove(ForeignDevices.Find(item => DateTime.Now > item.Value));
+                // Send to all others, except the original sender
+                foreach (KeyValuePair<System.Net.IPEndPoint, DateTime> client in ForeignDevices)
                 {
-                    //connect if needed
-                    if (!m_is_connected)
+                    if (!(client.Key.Equals(EPsender)))
+                        MyBBMDTransport.Send(buffer, msg_length, client.Key);
+                }
+            }
+        }
+
+        private System.Net.IPEndPoint BBMDSentAdd(Net.IPEndPoint BBMD, Net.IPAddress Mask)
+        {
+            byte[] bm = Mask.GetAddressBytes();
+            byte[] bip = BBMD.Address.GetAddressBytes();
+
+            /* annotation in Steve Karg bacnet stack :
+         
+            The B/IP address to which the Forwarded-NPDU message is
+            sent is formed by inverting the broadcast distribution
+            mask in the BDT entry and logically ORing it with the
+            BBMD address of the same entry. This process
+            produces either the directed broadcast address of the remote
+            subnet or the unicast address of the BBMD on that subnet
+            depending on the contents of the broadcast distribution
+            mask. 
+             
+            remark from me :
+               for instance remote BBMD 192.168.0.1 - mask 255.255.255.255
+                    messages are forward directly to 192.168.0.1
+               remote BBMD 192.168.0.1 - mask 255.255.255.0
+                    messages are forward to 192.168.0.255, ie certainly the local broadcast
+                    address, but these datagrams are generaly destroy by the final IP router
+             */
+
+            for (int i = 0; i < bm.Length; i++)
+                bip[i] = (byte)(bip[i] | (~bm[i]));
+
+            return new System.Net.IPEndPoint(new System.Net.IPAddress(bip), BBMD.Port);
+        }
+
+        // Send a Frame to each registered BBMD except the original sender
+        private void SendToBBMDs(byte[] buffer, int msg_length)
+        {
+            lock (BBMDs)
+            {
+                foreach (KeyValuePair<System.Net.IPEndPoint, System.Net.IPAddress> e in BBMDs)
+                {
+                    System.Net.IPEndPoint endpoint = BBMDSentAdd(e.Key, e.Value);
+                    MyBBMDTransport.Send(buffer, msg_length, endpoint);
+                }
+            }
+        }
+
+        private void First4BytesHeaderEncode(byte[] b, BacnetBvlcFunctions function, int msg_length)
+        {
+            b[0] = BVLL_TYPE_BACNET_IP;
+            b[1] = (byte)function;
+            b[2] = (byte)(((msg_length) & 0xFF00) >> 8);
+            b[3] = (byte)(((msg_length) & 0x00FF) >> 0);
+        }
+
+        private void Forward_NPDU(byte[] buffer, int msg_length, bool ToGlobalBroadcast, Net.IPEndPoint EPsender)
+        {
+            // Forms the forwarded NPDU from the original one, and send it to all
+            // orignal     - 4 bytes BVLC -  NPDU  - APDU
+            // change to   -  10 bytes BVLC  -  NPDU  - APDU
+
+            // copy, 6 bytes shifted
+            byte[] b = new byte[msg_length + 6];    // normaly only 'small' frames are present here, so no need to check if it's to big for Udp
+            Array.Copy(buffer, 0, b, 6, msg_length);
+
+            // 10 bytes for the BVLC Header, with the embedded 6 bytes IP:Port of the original sender
+            First4BytesHeaderEncode(b, BacnetBvlcFunctions.BVLC_FORWARDED_NPDU, msg_length + 6);
+            BacnetAddress BacSender;
+            BacnetIpUdpProtocolTransport.Convert(EPsender, out BacSender); // to embbed in the forward BVLC header
+            for (int i = 0; i < BacSender.adr.Length; i++)
+                b[4 + i] = BacSender.adr[i];
+
+            // To BBMD
+            SendToBBMDs(b, msg_length + 6);
+            // To FD, except the sender
+            SendToFDs(b, msg_length + 6, EPsender);
+            // Broadcast if required
+            if (ToGlobalBroadcast == true)
+                MyBBMDTransport.Send(b, msg_length + 6, new Net.IPEndPoint(Net.IPAddress.Parse(BroadcastAdd), MyBBMDTransport.SharedPort));
+        }
+
+        // Send ack or nack
+        private void SendResult(System.Net.IPEndPoint sender, BacnetBvlcResults ResultCode)
+        {
+            byte[] b = new byte[6];
+            First4BytesHeaderEncode(b, BacnetBvlcFunctions.BVLC_RESULT, 6);
+            b[4] = (byte)(((ushort)ResultCode & 0xFF00) >> 8);
+            b[5] = (byte)((ushort)ResultCode & 0xFF);
+
+            MyBBMDTransport.Send(b, 6, sender);
+        }
+
+        public void SendRegisterAsForeignDevice(System.Net.IPEndPoint BBMD, short TTL)
+        {
+            byte[] b = new byte[6];
+            First4BytesHeaderEncode(b, BacnetBvlcFunctions.BVLC_REGISTER_FOREIGN_DEVICE, 6);
+            b[4] = (byte)((TTL & 0xFF00) >> 8);
+            b[5] = (byte)(TTL & 0xFF);
+            MyBBMDTransport.Send(b, 6, BBMD);
+        }
+
+        public void SendReadBroadCastTable(System.Net.IPEndPoint BBMD)
+        {
+            byte[] b = new byte[4];
+            First4BytesHeaderEncode(b, BacnetBvlcFunctions.BVLC_READ_BROADCAST_DIST_TABLE, 4);
+            MyBBMDTransport.Send(b, 4, BBMD);
+        }
+
+        public void SendReadFDRTable(System.Net.IPEndPoint BBMD)
+        {
+            byte[] b = new byte[4];
+            First4BytesHeaderEncode(b, BacnetBvlcFunctions.BVLC_READ_FOREIGN_DEVICE_TABLE, 4);
+            MyBBMDTransport.Send(b, 4, BBMD);
+        }
+
+        public void SendWriteBroadCastTable(System.Net.IPEndPoint BBMD, List<Tuple<IPEndPoint, IPAddress>> Entries)
+        {
+            byte[] b = new byte[4 + 10 * Entries.Count];
+            First4BytesHeaderEncode(b, BacnetBvlcFunctions.BVLC_WRITE_BROADCAST_DISTRIBUTION_TABLE, 4 + 10 * Entries.Count);
+
+            for (int i = 0; i < Entries.Count; i++)
+            {
+                Array.Copy(Entries[i].Item1.Address.GetAddressBytes(), 0, b, 4 + i * 10, 4);
+                b[8 + i * 10] = (byte)(Entries[i].Item1.Port >> 8);
+                b[9 + i * 10] = (byte)(Entries[i].Item1.Port & 0xFF);
+                Array.Copy(Entries[i].Item2.GetAddressBytes(), 0, b, 10 + i * 10, 4);
+            }
+
+            MyBBMDTransport.Send(b, 4 + 10 * Entries.Count, BBMD);
+        }
+
+        public void SendDeleteForeignDeviceEntry(System.Net.IPEndPoint BBMD, IPEndPoint Fdevice)
+        {
+            byte[] b = new byte[4 + 6];
+            First4BytesHeaderEncode(b, BacnetBvlcFunctions.BVLC_READ_FOREIGN_DEVICE_TABLE, 4 + 6);
+            Array.Copy(Fdevice.Address.GetAddressBytes(), 0, b, 4, 4);
+            b[8] = (byte)(Fdevice.Port >> 8);
+            b[9] = (byte)(Fdevice.Port & 0xFF);
+            MyBBMDTransport.Send(b, 4 + 6, BBMD);
+        }
+
+        public void SendRemoteWhois(byte[] buffer, System.Net.IPEndPoint BBMD, int msg_length)
+        {
+            Encode(buffer, 0, BacnetBvlcFunctions.BVLC_DISTRIBUTE_BROADCAST_TO_NETWORK, msg_length);
+            MyBBMDTransport.Send(buffer, msg_length, BBMD);
+
+        }
+        // Encode is called by internal services if the BBMD is also an active device
+        public int Encode(byte[] buffer, int offset, BacnetBvlcFunctions function, int msg_length)
+        {
+            // offset always 0, we are the first after udp
+
+            // do the job
+            First4BytesHeaderEncode(buffer, function, msg_length);
+
+            // optional BBMD service
+            if ((BBMD_FD_ServiceActivated == true) && (function == BacnetBvlcFunctions.BVLC_ORIGINAL_BROADCAST_NPDU))
+            {
+                Net.IPEndPoint me = MyBBMDTransport.LocalEndPoint;
+                // just sometime working, enable to get the local ep, always 0.0.0.0 if the socket is open with
+                // System.Net.IPAddress.Any
+                // So in this case don't send a bad message
+                if ((me.Address.ToString() != "0.0.0.0"))
+                    Forward_NPDU(buffer, msg_length, false, me);   // send to all BBMDs and FDs
+            }
+            return 4; // ready to send
+        }
+
+        // Decode is called each time an Udp Frame is received
+        public int Decode(byte[] buffer, int offset, out BacnetBvlcFunctions function, out int msg_length, System.Net.IPEndPoint sender)
+        {
+
+            // offset always 0, we are the first after udp
+            // and a previous test by the caller guaranteed at least 4 bytes into the buffer
+
+            function = (BacnetBvlcFunctions)buffer[1];
+            msg_length = (buffer[2] << 8) | (buffer[3] << 0);
+            if ((buffer[0] != BVLL_TYPE_BACNET_IP) || (buffer.Length != msg_length)) return -1;
+
+            switch (function)
+            {
+                case BacnetBvlcFunctions.BVLC_RESULT:
+                    int ResultCode = (buffer[4] << 8) + buffer[5];
+                    if (MessageReceived != null)
+                        MessageReceived(sender, function, (BacnetBvlcResults)ResultCode, null);
+                    return 0;   // not for the upper layers
+
+                case BacnetBvlcFunctions.BVLC_ORIGINAL_UNICAST_NPDU:
+                    return 4;   // only for the upper layers
+
+                case BacnetBvlcFunctions.BVLC_ORIGINAL_BROADCAST_NPDU: // Normaly received in an IP local or global broadcast packet
+                    // Send to FDs & BBMDs, not broadcast or it will be made twice !
+                    if (BBMD_FD_ServiceActivated == true)
+                        Forward_NPDU(buffer, msg_length, false, sender);
+                    return 4;   // also for the upper layers
+
+                case BacnetBvlcFunctions.BVLC_FORWARDED_NPDU:   // Sent only by a BBMD, broadcast on it network, or broadcast demand by one of it's FDs
+                    if ((BBMD_FD_ServiceActivated == true) && (msg_length >= 10))
                     {
-                        if (!Reconnect())
+                        bool ret;
+                        lock (BBMDs)
+                            ret = BBMDs.Exists(items => items.Key.Address.Equals(sender.Address));    // verify sender (@ not Port!) presence in the table
+
+                        if (ret)    // message from a know BBMD address, sent to all FDs and broadcast
                         {
-                            System.Threading.Thread.Sleep(1000);
-                            continue;
+                            SendToFDs(buffer, msg_length);  // send without modification
+
+                            // Assume all BVLC_FORWARDED_NPDU are directly sent to me in the 
+                            // unicast mode and not by the way of the local broadcast address
+                            // ie my mask must be 255.255.255.255 in the others BBMD tables
+                            // If not, it's not really a big problem, devices on the local net will 
+                            // receive two times the message (after all it's just WhoIs, Iam, ...)
+                            MyBBMDTransport.Send(buffer, msg_length, new Net.IPEndPoint(Net.IPAddress.Parse(BroadcastAdd), MyBBMDTransport.SharedPort));
                         }
                     }
 
-                    //read message
-                    int offset = 0;
-                    BacnetPtpFrameTypes frame_type;
-                    int msg_length;
-                    BacnetMstpProtocolTransport.GetMessageStatus status = GetNextMessage(buffer, ref offset, T_HEARTBEAT, out frame_type, out msg_length);
+                    return 10;  // also for the upper layers
 
-                    //action
-                    switch (status)
+                case BacnetBvlcFunctions.BVLC_DISTRIBUTE_BROADCAST_TO_NETWORK:  // Sent by a Foreign Device, not a BBMD
+                    if (BBMD_FD_ServiceActivated == true)
                     {
-                        case BacnetMstpProtocolTransport.GetMessageStatus.ConnectionClose:
-                        case BacnetMstpProtocolTransport.GetMessageStatus.ConnectionError:
-                            Trace.TraceWarning("Connection disturbance");
-                            Reconnect();
-                            break;
-                        case BacnetMstpProtocolTransport.GetMessageStatus.DecodeError:
-                            Trace.TraceWarning("PTP decode error");
-                            break;
-                        case BacnetMstpProtocolTransport.GetMessageStatus.SubTimeout:
-                            Trace.TraceWarning("PTP frame abort");
-                            break;
-                        case BacnetMstpProtocolTransport.GetMessageStatus.Timeout:
-                            SendFrame(BacnetPtpFrameTypes.FRAME_TYPE_HEARTBEAT_XON);    //both server and client will send this
-                            break;
-                        case BacnetMstpProtocolTransport.GetMessageStatus.Good:
-
-                            //action
-                            switch (frame_type)
-                            {
-                                case BacnetPtpFrameTypes.FRAME_TYPE_GREETING:
-                                    //request connection
-                                    SendFrame(BacnetPtpFrameTypes.FRAME_TYPE_CONNECT_REQUEST);
-                                    break;
-                                case BacnetPtpFrameTypes.FRAME_TYPE_HEARTBEAT_XON:
-                                    m_may_send.Set();
-                                    break;
-                                case BacnetPtpFrameTypes.FRAME_TYPE_HEARTBEAT_XOFF:
-                                    m_may_send.Reset();
-                                    break;
-                                case BacnetPtpFrameTypes.FRAME_TYPE_DATA0:
-                                    //send confirm
-                                    SendFrame(BacnetPtpFrameTypes.FRAME_TYPE_DATA_ACK0_XON);
-
-                                    //notify the sky!
-                                    if (MessageRecieved != null)
-                                        MessageRecieved(this, buffer, PTP.PTP_HEADER_LENGTH, msg_length, GetBroadcastAddress());
-                                    break;
-                                case BacnetPtpFrameTypes.FRAME_TYPE_DATA1:
-                                    //send confirm
-                                    SendFrame(BacnetPtpFrameTypes.FRAME_TYPE_DATA_ACK1_XON);
-
-                                    //notify the sky!
-                                    if (MessageRecieved != null)
-                                        MessageRecieved(this, buffer, PTP.PTP_HEADER_LENGTH, msg_length, GetBroadcastAddress());
-                                    break;
-                                case BacnetPtpFrameTypes.FRAME_TYPE_DATA_ACK0_XOFF:
-                                case BacnetPtpFrameTypes.FRAME_TYPE_DATA_ACK1_XOFF:
-                                    //so, the other one got the message, eh?
-                                    m_may_send.Reset();
-                                    break;
-                                case BacnetPtpFrameTypes.FRAME_TYPE_DATA_ACK0_XON:
-                                case BacnetPtpFrameTypes.FRAME_TYPE_DATA_ACK1_XON:
-                                    //so, the other one got the message, eh?
-                                    m_may_send.Set();
-                                    break;
-                                case BacnetPtpFrameTypes.FRAME_TYPE_DATA_NAK0_XOFF:
-                                case BacnetPtpFrameTypes.FRAME_TYPE_DATA_NAK1_XOFF:
-                                    m_may_send.Reset();
-                                    //denial, eh?
-                                    break;
-                                case BacnetPtpFrameTypes.FRAME_TYPE_DATA_NAK0_XON:
-                                case BacnetPtpFrameTypes.FRAME_TYPE_DATA_NAK1_XON:
-                                    m_may_send.Set();
-                                    //denial, eh?
-                                    break;
-                                case BacnetPtpFrameTypes.FRAME_TYPE_CONNECT_REQUEST:
-                                    //also send a password perhaps?
-                                    if (!string.IsNullOrEmpty(m_password))
-                                    {
-                                        byte[] pass = System.Text.ASCIIEncoding.ASCII.GetBytes(m_password);
-                                        byte[] tmp_buffer = new byte[PTP.PTP_HEADER_LENGTH + pass.Length + 2];
-                                        Array.Copy(pass, 0, tmp_buffer, PTP.PTP_HEADER_LENGTH, pass.Length);
-                                        SendFrame(BacnetPtpFrameTypes.FRAME_TYPE_CONNECT_RESPONSE, tmp_buffer, pass.Length);
-                                    }
-                                    else 
-                                        SendFrame(BacnetPtpFrameTypes.FRAME_TYPE_CONNECT_RESPONSE);
-
-                                    //we're ready
-                                    SendFrame(BacnetPtpFrameTypes.FRAME_TYPE_HEARTBEAT_XON);
-                                    break;
-                                case BacnetPtpFrameTypes.FRAME_TYPE_CONNECT_RESPONSE:
-                                    if (msg_length > 0 && !string.IsNullOrEmpty(m_password))
-                                    {
-                                        string password = System.Text.ASCIIEncoding.ASCII.GetString(buffer, PTP.PTP_HEADER_LENGTH, msg_length);
-                                        if (password != m_password)
-                                            SendDisconnect(BacnetPtpFrameTypes.FRAME_TYPE_DISCONNECT_REQUEST, BacnetPtpDisconnectReasons.PTP_DISCONNECT_INVALID_PASSWORD);
-                                        else
-                                            SendFrame(BacnetPtpFrameTypes.FRAME_TYPE_HEARTBEAT_XON);    //we're ready
-                                    }
-                                    else
-                                    {
-                                        //we're ready
-                                        SendFrame(BacnetPtpFrameTypes.FRAME_TYPE_HEARTBEAT_XON);
-                                    }
-                                    break;
-                                case BacnetPtpFrameTypes.FRAME_TYPE_DISCONNECT_REQUEST:
-                                    BacnetPtpDisconnectReasons reason = BacnetPtpDisconnectReasons.PTP_DISCONNECT_OTHER;
-                                    if (msg_length > 0)
-                                        reason = (BacnetPtpDisconnectReasons)buffer[PTP.PTP_HEADER_LENGTH];
-                                    SendFrame(BacnetPtpFrameTypes.FRAME_TYPE_DISCONNECT_RESPONSE);
-                                    Trace.WriteLine("Disconnect requested: " + reason.ToString(), null);
-                                    Reconnect();
-                                    break;
-                                case BacnetPtpFrameTypes.FRAME_TYPE_DISCONNECT_RESPONSE:
-                                    m_may_send.Reset();
-                                    //hopefully we'll be closing down now
-                                    break;
-                                case BacnetPtpFrameTypes.FRAME_TYPE_TEST_REQUEST:
-                                    SendFrame(BacnetPtpFrameTypes.FRAME_TYPE_TEST_RESPONSE, buffer, msg_length);
-                                    break;
-                                case BacnetPtpFrameTypes.FRAME_TYPE_TEST_RESPONSE:
-                                    //good
-                                    break;
-                            }
-
-                            break;
-                    }
-                }
-                Trace.WriteLine("PTP thread is closing down", null);
-            }
-            catch (Exception ex)
-            {
-                Trace.TraceError("Exception in PTP thread: " + ex.Message);
-            }
-        }
-
-        public void Dispose()
-        {
-            if (m_port != null)
-            {
-                try
-                {
-                    m_port.Close();
-                }
-                catch
-                {
-                }
-                m_port = null;
-            }
-        }
-    }
-
-    /// <summary>
-    /// This is the standard BACNet MSTP transport
-    /// </summary>
-    public class BacnetMstpProtocolTransport : IBacnetTransport, IDisposable
-    {
-        private IBacnetSerialTransport m_port;
-        private short m_TS;             //"This Station," the MAC address of this node. TS is generally read from a hardware DIP switch, or from nonvolatile memory. Valid values for TS are 0 to 254. The value 255 is used to denote broadcast when used as a destination address but is not allowed as a value for TS.
-        private byte m_NS;              //"Next Station," the MAC address of the node to which This Station passes the token. If the Next Station is unknown, NS shall be equal to TS
-        private byte m_PS;              //"Poll Station," the MAC address of the node to which This Station last sent a Poll For Master. This is used during token maintenance
-        private byte m_max_master;
-        private byte m_max_info_frames;
-        private byte[] m_local_buffer;
-        private int m_local_offset;
-        private System.Threading.Thread m_transmit_thread;
-        private byte m_frame_count = 0;
-        private byte m_token_count = 0;
-        private byte m_max_poll = 50;                //The number of tokens received or used before a Poll For Master cycle is executed
-        private bool m_sole_master = false;
-        private byte m_retry_token = 1;
-        private byte m_reply_source;
-        private bool m_is_running = true;
-        private System.Threading.ManualResetEvent m_reply_mutex = new Threading.ManualResetEvent(false);
-        private MessageFrame m_reply = null;
-        private LinkedList<MessageFrame> m_send_queue = new LinkedList<MessageFrame>();
-
-        public const int T_FRAME_ABORT = 80;        //ms    The minimum time without a DataAvailable or ReceiveError event within a frame before a receiving node may discard the frame
-        public const int T_NO_TOKEN = 500;          //ms    The time without a DataAvailable or ReceiveError event before declaration of loss of token
-        public const int T_REPLY_TIMEOUT = 295;     //ms    The minimum time without a DataAvailable or ReceiveError event that a node must wait for a station to begin replying to a confirmed request
-        public const int T_USAGE_TIMEOUT = 95;      //ms    The minimum time without a DataAvailable or ReceiveError event that a node must wait for a remote node to begin using a token or replying to a Poll For Master frame:
-        public const int T_REPLY_DELAY = 250;       //ms    The maximum time a node may wait after reception of a frame that expects a reply before sending the first octet of a reply or Reply Postponed frame
-        public const int ETIMEDOUT = 110;
-
-        public BacnetAddressTypes Type { get { return BacnetAddressTypes.MSTP; } }
-        public short SourceAddress { get { return m_TS; } set { m_TS = value; } }
-        public byte MaxMaster { get { return m_max_master; } set { m_max_master = value; } }
-        public byte MaxInfoFrames { get { return m_max_info_frames; } set { m_max_info_frames = value; } }
-        public bool StateLogging { get; set; }
-
-        public bool IsRunning { get { return m_is_running; }}
-
-        public int HeaderLength { get { return MSTP.MSTP_HEADER_LENGTH; } }
-        public int MaxBufferLength { get { return 502; } }
-        public BacnetMaxAdpu MaxAdpuLength { get { return MSTP.MSTP_MAX_APDU; } }
-
-        public delegate void FrameRecievedHandler(BacnetMstpProtocolTransport sender, BacnetMstpFrameTypes frame_type, byte destination_address, byte source_address, int msg_length);
-        public event MessageRecievedHandler MessageRecieved;
-        public event FrameRecievedHandler FrameRecieved;
-
-        #region " Sniffer mode "
-
-        // Used in Sniffer only mode
-        public delegate void RawMessageReceivedHandler(byte[] buffer, int offset, int lenght);
-        public event RawMessageReceivedHandler RawMessageRecieved;
-
-        public void Start_SpyMode()
-        {
-            if (m_port == null) return;
-            m_port.Open();
-
-            Threading.Thread th = new Threading.Thread(mstp_thread_sniffer);
-            th.IsBackground = true;
-            th.Start();
-
-        }
-
-        // Just Sniffer mode, no Bacnet activity generated here
-        // Modif FC
-        private void mstp_thread_sniffer()
-        {
-            for (; ; )
-            {
-                BacnetMstpFrameTypes frame_type;
-                byte destination_address;
-                byte source_address;
-                int msg_length;
-
-                try
-                {
-                    GetMessageStatus status = GetNextMessage(T_NO_TOKEN, out  frame_type, out  destination_address, out  source_address, out  msg_length);
-
-                    if (status == GetMessageStatus.ConnectionClose)
-                    {
-                        m_port = null;
-                        return;
-                    }
-                    else if (status == GetMessageStatus.Good)
-                    {
-                        // frame event client ?
-                        if (RawMessageRecieved != null)
+                        // Send to FDs except the sender, BBMDs and broadcast
+                        lock (ForeignDevices)
                         {
-
-                            int length = msg_length + MSTP.MSTP_HEADER_LENGTH + (msg_length > 0 ? 2 : 0);
-
-                            // Array copy
-                            // after that it could be put asynchronously another time in the Main message loop
-                            // without any problem
-                            byte[] packet = new byte[length];
-                            Array.Copy(m_local_buffer, 0, packet, 0, length);
-
-                            // No need to use the thread pool, if the pipe is too slow
-                            // frames task list will grow infinitly
-                            RawMessageRecieved(packet, 0, length);
-                        }
-
-                        RemoveCurrentMessage(msg_length);
-                    }
-                }
-                catch
-                {
-                    m_port = null;
-                }
-            }
-        }
-
-
-        #endregion
-
-        public BacnetMstpProtocolTransport(IBacnetSerialTransport transport, short source_address = -1, byte max_master = 127, byte max_info_frames = 1)
-        {
-            m_max_info_frames = max_info_frames;
-            m_TS = source_address;
-            m_max_master = max_master;
-            m_local_buffer = new byte[MaxBufferLength];
-            m_port = transport;
-        }
-
-        public BacnetMstpProtocolTransport(string port_name, int baud_rate, short source_address = -1, byte max_master = 127, byte max_info_frames = 1)
-            : this(new BacnetSerialPortTransport(port_name, baud_rate), source_address, max_master, max_info_frames)
-        {
-        }
-
-        public override bool Equals(object obj)
-        {
-            if (obj == null) return false;
-            else if (!(obj is BacnetMstpProtocolTransport)) return false;
-            BacnetMstpProtocolTransport a = (BacnetMstpProtocolTransport)obj;
-            return m_port.Equals(a.m_port);
-        }
-
-        public override int GetHashCode()
-        {
-            return m_port.GetHashCode();
-        }
-
-        public override string ToString()
-        {
-            return m_port.ToString();
-        }
-
-        public void Start()
-        {
-            if (m_port == null) return;
-            m_port.Open();
-
-            m_transmit_thread = new Threading.Thread(new Threading.ThreadStart(mstp_thread));
-            m_transmit_thread.IsBackground = true;
-            m_transmit_thread.Name = "MSTP Thread";
-            m_transmit_thread.Priority = Threading.ThreadPriority.Highest;
-            m_transmit_thread.Start();
-        }
-
-        private class MessageFrame
-        {
-            public BacnetMstpFrameTypes frame_type;
-            public byte destination_address;
-            public byte[] data;
-            public int data_length;
-            public System.Threading.ManualResetEvent send_mutex;
-            public MessageFrame(BacnetMstpFrameTypes frame_type, byte destination_address, byte[] data, int data_length)
-            {
-                this.frame_type = frame_type;
-                this.destination_address = destination_address;
-                this.data = data;
-                this.data_length = data_length;
-                send_mutex = new Threading.ManualResetEvent(false);
-            }
-        }
-
-        private void QueueFrame(BacnetMstpFrameTypes frame_type, byte destination_address)
-        {
-            lock(m_send_queue)
-                m_send_queue.AddLast(new MessageFrame(frame_type, destination_address, null, 0));
-        }
-
-        private void SendFrame(BacnetMstpFrameTypes frame_type, byte destination_address)
-        {
-            SendFrame(new MessageFrame(frame_type, destination_address, null, 0));
-        }
-
-        private void SendFrame(MessageFrame frame)
-        {
-            if (m_TS == -1 || m_port == null) return;
-            int tx;
-            if (frame.data == null || frame.data.Length == 0)
-            {
-                byte[] tmp_transmit_buffer = new byte[MSTP.MSTP_HEADER_LENGTH];
-                tx = MSTP.Encode(tmp_transmit_buffer, 0, frame.frame_type, frame.destination_address, (byte)m_TS, 0);
-                m_port.Write(tmp_transmit_buffer, 0, tx);
-            }
-            else
-            {
-                tx = MSTP.Encode(frame.data, 0, frame.frame_type, frame.destination_address, (byte)m_TS, frame.data_length);
-                m_port.Write(frame.data, 0, tx);
-            }
-            frame.send_mutex.Set();
-
-            //debug
-            if (StateLogging) Trace.WriteLine("         " + frame.frame_type + " " + frame.destination_address.ToString("X2") + " ");
-        }
-
-        private void RemoveCurrentMessage(int msg_length)
-        {
-            int full_msg_length = MSTP.MSTP_HEADER_LENGTH + msg_length + (msg_length > 0 ? 2 : 0);
-            if (m_local_offset > full_msg_length)
-                Array.Copy(m_local_buffer, full_msg_length, m_local_buffer, 0, m_local_offset - full_msg_length);
-            m_local_offset -= full_msg_length;
-        }
-
-        private enum StateChanges
-        {
-            /* Initializing */
-            Reset,
-            DoneInitializing,
-
-            /* Idle, NoToken */
-            GenerateToken,
-            ReceivedDataNeedingReply,
-            ReceivedToken,
-
-            /* PollForMaster */
-            ReceivedUnexpectedFrame,        //also from WaitForReply
-            DoneWithPFM,
-            ReceivedReplyToPFM,
-            SoleMaster,                     //also from DoneWithToken
-            DeclareSoleMaster,
-
-            /* UseToken */
-            SendAndWait,
-            NothingToSend,
-            SendNoWait,
-
-            /* DoneWithToken */
-            SendToken,
-            ResetMaintenancePFM,
-            SendMaintenancePFM,
-            SoleMasterRestartMaintenancePFM,
-            SendAnotherFrame,
-            NextStationUnknown,
-
-            /* WaitForReply */
-            ReplyTimeOut,
-            InvalidFrame,
-            ReceivedReply,
-            ReceivedPostpone,
-
-            /* PassToken */
-            FindNewSuccessor,
-            SawTokenUser,
-
-            /* AnswerDataRequest */
-            Reply,
-            DeferredReply,
-        }
-
-        private StateChanges PollForMaster()
-        {
-            BacnetMstpFrameTypes frame_type;
-            byte destination_address;
-            byte source_address;
-            int msg_length;
-
-            while (true)
-            {
-                //send
-                SendFrame(BacnetMstpFrameTypes.FRAME_TYPE_POLL_FOR_MASTER, m_PS);
-
-                //wait
-                GetMessageStatus status = GetNextMessage(T_USAGE_TIMEOUT, out frame_type, out destination_address, out source_address, out msg_length);
-
-                if (status == GetMessageStatus.Good)
-                {
-                    try
-                    {
-                        if (frame_type == BacnetMstpFrameTypes.FRAME_TYPE_REPLY_TO_POLL_FOR_MASTER && destination_address == m_TS)
-                        {
-                            m_sole_master = false;
-                            m_NS = source_address;
-                            m_PS = (byte)m_TS;
-                            m_token_count = 0;
-                            return StateChanges.ReceivedReplyToPFM;
-                        }
-                        else
-                            return StateChanges.ReceivedUnexpectedFrame;
-                    }
-                    finally
-                    {
-                        RemoveCurrentMessage(msg_length);
-                    }
-                }
-                else
-                {
-                    if (m_sole_master)
-                    {
-                        /* SoleMaster */
-                        m_frame_count = 0;
-                        return StateChanges.SoleMaster;
-                    }
-                    else
-                    {
-                        if (m_NS != m_TS)
-                        {
-                            /* DoneWithPFM */
-                            return StateChanges.DoneWithPFM;
-                        }
-                        else
-                        {
-                            if ((m_PS + 1) % (m_max_master + 1) != m_TS)
-                            {
-                                /* SendNextPFM */
-                                m_PS = (byte)((m_PS + 1) % (m_max_master + 1));
-                                continue;
-                            }
+                            if (ForeignDevices.Exists(item => item.Key.Equals(sender))) // verify previous registration
+                                Forward_NPDU(buffer, msg_length, true, sender);
                             else
-                            {
-                                /* DeclareSoleMaster */
-                                m_sole_master = true;
-                                m_frame_count = 0;
-                                return StateChanges.DeclareSoleMaster;
-                            }
+                                SendResult(sender, BacnetBvlcResults.BVLC_RESULT_DISTRIBUTE_BROADCAST_TO_NETWORK_NAK);
                         }
                     }
-                }
-            }
-        }
+                    return 0;   // anot for the upper layers
 
-        private StateChanges DoneWithToken()
-        {
-            if (m_frame_count < m_max_info_frames)
-            {
-                /* SendAnotherFrame */
-                return StateChanges.SendAnotherFrame;
-            }
-            else if (!m_sole_master && m_NS == m_TS)
-            {
-                /* NextStationUnknown */
-                m_PS = (byte)((m_TS + 1) % (m_max_master + 1));
-                return StateChanges.NextStationUnknown;
-            }
-            else if (m_token_count < (m_max_poll - 1))
-            {
-                m_token_count++;
-                if (m_sole_master && m_NS != ((m_TS+1)%(m_max_master+1)))
-                {
-                    /* SoleMaster */
-                    m_frame_count = 0;
-                    return StateChanges.SoleMaster;
-                }
-                else
-                {
-                    /* SendToken */
-                    return StateChanges.SendToken;
-                }
-            }
-            else if ((m_PS + 1) % (m_max_master + 1) == m_NS)
-            {
-                if (!m_sole_master)
-                {
-                    /* ResetMaintenancePFM */
-                    m_PS = (byte)m_TS;
-                    m_token_count = 1;
-                    return StateChanges.ResetMaintenancePFM;
-                }
-                else
-                {
-                    /* SoleMasterRestartMaintenancePFM */
-                    m_PS = (byte)((m_NS + 1) % (m_max_master + 1));
-                    m_NS = (byte)m_TS;
-                    m_token_count = 1;
-                    return StateChanges.SoleMasterRestartMaintenancePFM;
-                }
-            }
-            else
-            {
-                /* SendMaintenancePFM */
-                m_PS = (byte)((m_PS + 1) % (m_max_master + 1));
-                return StateChanges.SendMaintenancePFM;
-            }
-        }
-
-        private StateChanges WaitForReply()
-        {
-            BacnetMstpFrameTypes frame_type;
-            byte destination_address;
-            byte source_address;
-            int msg_length;
-
-            //fetch message
-            GetMessageStatus status = GetNextMessage(T_REPLY_TIMEOUT, out frame_type, out destination_address, out source_address, out msg_length);
-
-            if (status == GetMessageStatus.Good)
-            {
-                try
-                {
-                    if (destination_address == (byte)m_TS && (frame_type == BacnetMstpFrameTypes.FRAME_TYPE_TEST_RESPONSE || frame_type == BacnetMstpFrameTypes.FRAME_TYPE_BACNET_DATA_NOT_EXPECTING_REPLY))
+                case BacnetBvlcFunctions.BVLC_REGISTER_FOREIGN_DEVICE:
+                    if ((BBMD_FD_ServiceActivated == true) && (msg_length == 6))
                     {
-                        //signal upper layer
-                        if (MessageRecieved != null && frame_type != BacnetMstpFrameTypes.FRAME_TYPE_TEST_RESPONSE)
+                        int TTL = (buffer[4] << 8) + buffer[5]; // unit is second
+                        RegisterForeignDevice(sender, TTL);
+                        SendResult(sender, BacnetBvlcResults.BVLC_RESULT_SUCCESSFUL_COMPLETION);  // ack
+                    }
+                    return 0;  // not for the upper layers
+
+                // We don't care about Read/Write operation in the BBMD/FDR tables (who realy use it ?)
+                case BacnetBvlcFunctions.BVLC_READ_FOREIGN_DEVICE_TABLE:
+                    SendResult(sender, BacnetBvlcResults.BVLC_RESULT_READ_FOREIGN_DEVICE_TABLE_NAK);
+                    return 0;
+                case BacnetBvlcFunctions.BVLC_DELETE_FOREIGN_DEVICE_TABLE_ENTRY:
+                    SendResult(sender, BacnetBvlcResults.BVLC_RESULT_DELETE_FOREIGN_DEVICE_TABLE_ENTRY_NAK);
+                    return 0;
+                case BacnetBvlcFunctions.BVLC_READ_BROADCAST_DIST_TABLE:
+                    SendResult(sender, BacnetBvlcResults.BVLC_RESULT_READ_BROADCAST_DISTRIBUTION_TABLE_NAK);
+                    return 0;
+
+                case BacnetBvlcFunctions.BVLC_WRITE_BROADCAST_DISTRIBUTION_TABLE:
+                case BacnetBvlcFunctions.BVLC_READ_BROADCAST_DIST_TABLE_ACK:
+                    {
+                        int NbEntries = (msg_length - 4) / 10;
+                        List<Tuple<IPEndPoint, IPAddress>> Entries = new List<Tuple<IPEndPoint, IPAddress>>();
+
+                        for (int i = 0; i < NbEntries; i++)
                         {
-                            BacnetAddress remote_address = new BacnetAddress(BacnetAddressTypes.MSTP, 0, new byte[] { source_address });
-                            try
-                            {
-                                MessageRecieved(this, m_local_buffer, MSTP.MSTP_HEADER_LENGTH, msg_length, remote_address);
-                            }
-                            catch (Exception ex)
-                            {
-                                Trace.TraceError("Exception in MessageRecieved event: " + ex.Message);
-                            }
+                            long add = BitConverter.ToInt32(buffer, 4 + i * 10);
+
+                            Array.Reverse(buffer, 8 + i * 10, 2);
+                            ushort port = BitConverter.ToUInt16(buffer, 8 + i * 10);
+
+                            // new IPAddress(long) with 255.255.255.255 (ie -1) not OK
+                            byte[] Mask = new byte[4];
+                            Array.Copy(buffer, 10 + i * 10, Mask, 0, 4);
+
+                            Tuple<IPEndPoint, IPAddress> entry = new Tuple<IPEndPoint, IPAddress>(new IPEndPoint(new IPAddress(add), port), new IPAddress(Mask));
+                            Entries.Add(entry);
                         }
 
-                        /* ReceivedReply */
-                        return StateChanges.ReceivedReply;
+                        if ((MessageReceived != null) && (function == BacnetBvlcFunctions.BVLC_READ_BROADCAST_DIST_TABLE_ACK))
+                            MessageReceived(sender, function, BacnetBvlcResults.BVLC_RESULT_SUCCESSFUL_COMPLETION, Entries);
+
+                        // Today we don't accept it
+                        if (function == BacnetBvlcFunctions.BVLC_WRITE_BROADCAST_DISTRIBUTION_TABLE)
+                            SendResult(sender, BacnetBvlcResults.BVLC_RESULT_WRITE_BROADCAST_DISTRIBUTION_TABLE_NAK);
+
+                        return 0;
                     }
-                    else if (frame_type == BacnetMstpFrameTypes.FRAME_TYPE_REPLY_POSTPONED)
+
+                case BacnetBvlcFunctions.BVLC_READ_FOREIGN_DEVICE_TABLE_ACK:
                     {
-                        /* ReceivedPostpone */
-                        return StateChanges.ReceivedPostpone;
-                    }
-                    else
-                    {
-                        /* ReceivedUnexpectedFrame */
-                        return StateChanges.ReceivedUnexpectedFrame;
-                    }
-                }
-                finally
-                {
-                    RemoveCurrentMessage(msg_length);
-                }
-            }
-            else if (status == GetMessageStatus.Timeout)
-            {
-                /* ReplyTimeout */
-                m_frame_count = m_max_info_frames;
-                return StateChanges.ReplyTimeOut;
-            }
-            else
-            {
-                /* InvalidFrame */
-                return StateChanges.InvalidFrame;
-            }
-        }
+                        int NbEntries = (msg_length - 4) / 10;
+                        List<Tuple<IPEndPoint, ushort, ushort>> Entries = new List<Tuple<IPEndPoint, ushort, ushort>>();
 
-        private StateChanges UseToken()
-        {
-            if (m_send_queue.Count == 0)
-            {
-                /* NothingToSend */
-                m_frame_count = m_max_info_frames;
-                return StateChanges.NothingToSend;
-            }
-            else
-            {
-                /* SendNoWait / SendAndWait */
-                MessageFrame message_frame;
-                lock (m_send_queue)
-                {
-                    message_frame = m_send_queue.First.Value;
-                    m_send_queue.RemoveFirst();
-                }
-                SendFrame(message_frame);
-                m_frame_count++;
-                if (message_frame.frame_type == BacnetMstpFrameTypes.FRAME_TYPE_BACNET_DATA_EXPECTING_REPLY || message_frame.frame_type == BacnetMstpFrameTypes.FRAME_TYPE_TEST_REQUEST)
-                    return StateChanges.SendAndWait;
-                else
-                    return StateChanges.SendNoWait;
-            }
-        }
-
-        private StateChanges PassToken()
-        {
-            BacnetMstpFrameTypes frame_type;
-            byte destination_address;
-            byte source_address;
-            int msg_length;
-
-            for (int i = 0; i <= m_retry_token; i++)
-            {
-                //send 
-                SendFrame(BacnetMstpFrameTypes.FRAME_TYPE_TOKEN, m_NS);
-
-                //wait for it to be used
-                GetMessageStatus status = GetNextMessage(T_USAGE_TIMEOUT, out frame_type, out destination_address, out source_address, out msg_length);
-                if (status == GetMessageStatus.Good || status == GetMessageStatus.DecodeError)
-                    return StateChanges.SawTokenUser;   //don't remove current message
-            }
-
-            //give up
-            m_PS = (byte)((m_NS + 1) % (m_max_master + 1));
-            m_NS = (byte)m_TS;
-            m_token_count = 0;
-            return StateChanges.FindNewSuccessor;
-        }
-
-        private StateChanges Idle()
-        {
-            int no_token_timeout = T_NO_TOKEN + 10 * m_TS;
-            BacnetMstpFrameTypes frame_type;
-            byte destination_address;
-            byte source_address;
-            int msg_length;
-
-            while (m_port != null)
-            {
-                //get message
-                GetMessageStatus status = GetNextMessage(no_token_timeout, out frame_type, out destination_address, out source_address, out msg_length);
-
-                if (status == GetMessageStatus.Good)
-                {
-                    try
-                    {
-                        if (destination_address == m_TS || destination_address == 0xFF)
+                        for (int i = 0; i < NbEntries; i++)
                         {
-                            switch (frame_type)
-                            {
-                                case BacnetMstpFrameTypes.FRAME_TYPE_POLL_FOR_MASTER:
-                                    if (destination_address == 0xFF)
-                                        QueueFrame(BacnetMstpFrameTypes.FRAME_TYPE_REPLY_TO_POLL_FOR_MASTER, source_address);
-                                    else
-                                    {
-                                        //respond to PFM
-                                        SendFrame(BacnetMstpFrameTypes.FRAME_TYPE_REPLY_TO_POLL_FOR_MASTER, source_address);
-                                    }
-                                    break;
-                                case BacnetMstpFrameTypes.FRAME_TYPE_TOKEN:
-                                    if (destination_address != 0xFF)
-                                    {
-                                        m_frame_count = 0;
-                                        m_sole_master = false;
-                                        return StateChanges.ReceivedToken;
-                                    }
-                                    break;
-                                case BacnetMstpFrameTypes.FRAME_TYPE_TEST_REQUEST:
-                                    if (destination_address == 0xFF)
-                                        QueueFrame(BacnetMstpFrameTypes.FRAME_TYPE_TEST_RESPONSE, source_address);
-                                    else
-                                    {
-                                        //respond to test
-                                        SendFrame(BacnetMstpFrameTypes.FRAME_TYPE_TEST_RESPONSE, source_address);
-                                    }
-                                    break;
-                                case BacnetMstpFrameTypes.FRAME_TYPE_BACNET_DATA_NOT_EXPECTING_REPLY:
-                                case BacnetMstpFrameTypes.FRAME_TYPE_BACNET_DATA_EXPECTING_REPLY:
-                                    //signal upper layer
-                                    if (MessageRecieved != null)
-                                    {
-                                        BacnetAddress remote_address = new BacnetAddress(BacnetAddressTypes.MSTP, 0, new byte[] { source_address });
-                                        try
-                                        {
-                                            MessageRecieved(this, m_local_buffer, MSTP.MSTP_HEADER_LENGTH, msg_length, remote_address);
-                                        }
-                                        catch (Exception ex)
-                                        {
-                                            Trace.TraceError("Exception in MessageRecieved event: " + ex.Message);
-                                        }
-                                    }
-                                    if (frame_type == BacnetMstpFrameTypes.FRAME_TYPE_BACNET_DATA_EXPECTING_REPLY)
-                                    {
-                                        m_reply_source = source_address;
-                                        m_reply = null;
-                                        m_reply_mutex.Reset();
-                                        return StateChanges.ReceivedDataNeedingReply;
-                                    }
-                                    break;
-                            }
+                            long add = BitConverter.ToInt32(buffer, 4 + i * 10);
+
+                            Array.Reverse(buffer, 8 + i * 10, 2);
+                            ushort port = BitConverter.ToUInt16(buffer, 8 + i * 10);
+
+                            Array.Reverse(buffer, 10 + i * 10, 2);
+                            ushort TTL = BitConverter.ToUInt16(buffer, 10 + i * 10);
+                            Array.Reverse(buffer, 12 + i * 10, 2);
+                            ushort RemainTTL = BitConverter.ToUInt16(buffer, 12 + i * 10);
+
+                            Tuple<IPEndPoint, ushort, ushort> entry = new Tuple<IPEndPoint, ushort, ushort>(new IPEndPoint(new IPAddress(add), port), TTL, RemainTTL);
+                            Entries.Add(entry);
                         }
+
+                        if (MessageReceived != null)
+                            MessageReceived(sender, function, BacnetBvlcResults.BVLC_RESULT_SUCCESSFUL_COMPLETION, Entries);
+
+                        return 0;
                     }
-                    finally
-                    {
-                        RemoveCurrentMessage(msg_length);
-                    }
-                }
-                else if (status == GetMessageStatus.Timeout)
-                {
-                    /* GenerateToken */
-                    m_PS = (byte)((m_TS + 1) % (m_max_master + 1));
-                    m_NS = (byte)m_TS;
-                    m_token_count = 0;
-                    return StateChanges.GenerateToken;
-                }
-                else if (status == GetMessageStatus.ConnectionClose)
-                {
-                    Trace.WriteLine("No connection", null);
-                }
-                else if (status == GetMessageStatus.ConnectionError)
-                {
-                    Trace.WriteLine("Connection Error", null);
-                }
-                else
-                {
-                    Trace.WriteLine("Garbage", null);
-                }
-            }
-
-            return StateChanges.Reset;
-        }
-
-        private StateChanges AnswerDataRequest()
-        {
-            if (m_reply_mutex.WaitOne(T_REPLY_DELAY))
-            {
-                SendFrame(m_reply);
-                lock (m_send_queue)
-                    m_send_queue.Remove(m_reply);
-                return StateChanges.Reply;
-            }
-            else
-            {
-                SendFrame(BacnetMstpFrameTypes.FRAME_TYPE_REPLY_POSTPONED, m_reply_source);
-                return StateChanges.DeferredReply;
-            }
-        }
-
-        private StateChanges Initialize()
-        {
-            m_token_count = m_max_poll;     /* cause a Poll For Master to be sent when this node first receives the token */
-            m_frame_count = 0;
-            m_sole_master = false;
-            m_NS = (byte)m_TS;
-            m_PS = (byte)m_TS;
-            return StateChanges.DoneInitializing;
-        }
-
-        private void mstp_thread()
-        {
-            try
-            {
-                StateChanges state_change = StateChanges.Reset;
-
-                while (m_port != null)
-                {
-                    if (StateLogging) Trace.WriteLine(state_change.ToString(), null);
-                    switch (state_change)
-                    {
-                        case StateChanges.Reset:
-                            state_change = Initialize();
-                            break;
-                        case StateChanges.DoneInitializing:
-                        case StateChanges.ReceivedUnexpectedFrame:
-                        case StateChanges.Reply:
-                        case StateChanges.DeferredReply:
-                        case StateChanges.SawTokenUser:
-                            state_change = Idle();
-                            break;
-                        case StateChanges.GenerateToken:
-                        case StateChanges.FindNewSuccessor:
-                        case StateChanges.SendMaintenancePFM:
-                        case StateChanges.SoleMasterRestartMaintenancePFM:
-                        case StateChanges.NextStationUnknown:
-                            state_change = PollForMaster();
-                            break;
-                        case StateChanges.DoneWithPFM:
-                        case StateChanges.ResetMaintenancePFM:
-                        case StateChanges.ReceivedReplyToPFM:
-                        case StateChanges.SendToken:
-                            state_change = PassToken();
-                            break;
-                        case StateChanges.ReceivedDataNeedingReply:
-                            state_change = AnswerDataRequest();
-                            break;
-                        case StateChanges.ReceivedToken:
-                        case StateChanges.SoleMaster:
-                        case StateChanges.DeclareSoleMaster:
-                        case StateChanges.SendAnotherFrame:
-                            state_change = UseToken();
-                            break;
-                        case StateChanges.NothingToSend:
-                        case StateChanges.SendNoWait:
-                        case StateChanges.ReplyTimeOut:
-                        case StateChanges.InvalidFrame:
-                        case StateChanges.ReceivedReply:
-                        case StateChanges.ReceivedPostpone:
-                            state_change = DoneWithToken();
-                            break;
-                        case StateChanges.SendAndWait:
-                            state_change = WaitForReply();
-                            break;
-                    }
-                }
-                Trace.WriteLine("MSTP thread is closing down", null);
-            }
-            catch (Exception ex)
-            {
-                Trace.TraceError("Exception in MSTP thread: " + ex.Message);
-            }
-
-            m_is_running = false;
-        }
-
-        private void RemoveGarbage()
-        {
-            //scan for preambles
-            for (int i = 0; i < (m_local_offset - 1); i++)
-            {
-                if (m_local_buffer[i] == MSTP.MSTP_PREAMBLE1 && m_local_buffer[i + 1] == MSTP.MSTP_PREAMBLE2)
-                {
-                    if (i > 0)
-                    {
-                        //move back
-                        Array.Copy(m_local_buffer, i, m_local_buffer, 0, m_local_offset - i);
-                        m_local_offset -= i;
-                        Trace.WriteLine("Garbage", null);
-                    }
-                    return;
-                }
-            }
-
-            //one preamble?
-            if (m_local_offset > 0 && m_local_buffer[m_local_offset - 1] == MSTP.MSTP_PREAMBLE1)
-            {
-                if (m_local_offset != 1)
-                {
-                    m_local_buffer[0] = MSTP.MSTP_PREAMBLE1;
-                    m_local_offset = 1;
-                    Trace.WriteLine("Garbage", null);
-                }
-                return;
-            }
-
-            //no preamble?
-            if (m_local_offset > 0)
-            {
-                m_local_offset = 0;
-                Trace.WriteLine("Garbage", null);
-            }
-        }
-
-        public enum GetMessageStatus
-        {
-            Good,
-            Timeout,
-            SubTimeout,
-            ConnectionClose,
-            ConnectionError,
-            DecodeError,
-        }
-
-        private GetMessageStatus GetNextMessage(int timeout_ms, out BacnetMstpFrameTypes frame_type, out byte destination_address, out byte source_address, out int msg_length)
-        {
-            int timeout;
-
-            frame_type = BacnetMstpFrameTypes.FRAME_TYPE_TOKEN;
-            destination_address = 0;
-            source_address = 0;
-            msg_length = 0;
-
-            //fetch header
-            while (m_local_offset < MSTP.MSTP_HEADER_LENGTH)
-            {
-                if (m_port == null) return GetMessageStatus.ConnectionClose;
-
-                if (m_local_offset > 0)
-                    timeout = T_FRAME_ABORT;    //set sub timeout
-                else
-                    timeout = timeout_ms;       //set big silence timeout
-
-                //read 
-                int rx = m_port.Read(m_local_buffer, m_local_offset, MSTP.MSTP_HEADER_LENGTH - m_local_offset, timeout);
-                if (rx == -ETIMEDOUT)
-                {
-                    //drop message
-                    GetMessageStatus status = m_local_offset == 0 ? GetMessageStatus.Timeout : GetMessageStatus.SubTimeout;
-                    m_local_buffer[0] = 0xFF;
-                    RemoveGarbage();
-                    return status;
-                }
-                else if (rx < 0)
-                {
-                    //drop message
-                    m_local_buffer[0] = 0xFF;
-                    RemoveGarbage();
-                    return GetMessageStatus.ConnectionError;
-                }
-                else if (rx == 0)
-                {
-                    //drop message
-                    m_local_buffer[0] = 0xFF;
-                    RemoveGarbage();
-                    return GetMessageStatus.ConnectionClose;
-                }
-                m_local_offset += rx;
-
-                //remove paddings & garbage
-                RemoveGarbage();
-            }
-
-            //decode
-            if (MSTP.Decode(m_local_buffer, 0, m_local_offset, out frame_type, out destination_address, out source_address, out msg_length) < 0)
-            {
-                //drop message
-                m_local_buffer[0] = 0xFF;
-                RemoveGarbage();
-                return GetMessageStatus.DecodeError;
-            }
-
-            //valid length?
-            int full_msg_length = msg_length + MSTP.MSTP_HEADER_LENGTH + (msg_length > 0 ? 2 : 0);
-            if (msg_length > MaxBufferLength)
-            {
-                //drop message
-                m_local_buffer[0] = 0xFF;
-                RemoveGarbage();
-                return GetMessageStatus.DecodeError;
-            }
-
-            //fetch data
-            if (msg_length > 0)
-            {
-                timeout = T_FRAME_ABORT;    //set sub timeout
-                while (m_local_offset < full_msg_length)
-                {
-                    //read 
-                    int rx = m_port.Read(m_local_buffer, m_local_offset, full_msg_length - m_local_offset, timeout);
-                    if (rx == -ETIMEDOUT)
-                    {
-                        //drop message
-                        GetMessageStatus status = m_local_offset == 0 ? GetMessageStatus.Timeout : GetMessageStatus.SubTimeout;
-                        m_local_buffer[0] = 0xFF;
-                        RemoveGarbage();
-                        return status;
-                    }
-                    else if (rx < 0)
-                    {
-                        //drop message
-                        m_local_buffer[0] = 0xFF;
-                        RemoveGarbage();
-                        return GetMessageStatus.ConnectionError;
-                    }
-                    else if (rx == 0)
-                    {
-                        //drop message
-                        m_local_buffer[0] = 0xFF;
-                        RemoveGarbage();
-                        return GetMessageStatus.ConnectionClose;
-                    }
-                    m_local_offset += rx;
-                }
-
-                //verify data crc
-                if (MSTP.Decode(m_local_buffer, 0, m_local_offset, out frame_type, out destination_address, out source_address, out msg_length) < 0)
-                {
-                    //drop message
-                    m_local_buffer[0] = 0xFF;
-                    RemoveGarbage();
-                    return GetMessageStatus.DecodeError;
-                }
-            }
-
-            //signal frame event
-            if (FrameRecieved != null)
-            {
-                BacnetMstpFrameTypes _frame_type = frame_type;
-                byte _destination_address = destination_address;
-                byte _source_address = source_address;
-                int _msg_length = msg_length;
-                System.Threading.ThreadPool.QueueUserWorkItem((o) => { FrameRecieved(this, _frame_type, _destination_address, _source_address, _msg_length); }, null);
-            }
-
-            if(StateLogging) Trace.WriteLine("" + frame_type + " " + destination_address.ToString("X2") + " ");
-
-            //done
-            return GetMessageStatus.Good;
-        }
-
-        public int Send(byte[] buffer, int offset, int data_length, BacnetAddress address, bool wait_for_transmission, int timeout)
-        {
-            if (m_TS == -1) throw new Exception("Source address must be set up before sending messages");
-
-            //add to queue
-            BacnetNpduControls function = NPDU.DecodeFunction(buffer, offset);
-            BacnetMstpFrameTypes frame_type = (function & BacnetNpduControls.ExpectingReply) == BacnetNpduControls.ExpectingReply ? BacnetMstpFrameTypes.FRAME_TYPE_BACNET_DATA_EXPECTING_REPLY : BacnetMstpFrameTypes.FRAME_TYPE_BACNET_DATA_NOT_EXPECTING_REPLY;
-            byte[] copy = new byte[data_length + MSTP.MSTP_HEADER_LENGTH + 2];
-            Array.Copy(buffer, offset, copy, MSTP.MSTP_HEADER_LENGTH, data_length);
-            MessageFrame f = new MessageFrame(frame_type, address.adr[0], copy, data_length);
-            lock (m_send_queue)
-                m_send_queue.AddLast(f);
-            if (m_reply == null)
-            {
-                m_reply = f;
-                m_reply_mutex.Set();
-            }
-
-            //wait for message to be sent
-            if (wait_for_transmission) 
-                if (!f.send_mutex.WaitOne(timeout))
-                    return -ETIMEDOUT;
-
-            return data_length;
-        }
-
-        public bool WaitForAllTransmits(int timeout)
-        {
-            while (m_send_queue.Count > 0)
-            {
-                System.Threading.ManualResetEvent ev;
-                lock (m_send_queue) 
-                    ev = m_send_queue.First.Value.send_mutex;
-
-                if (ev.WaitOne(timeout))
-                    return false;
-            }
-            return true;
-        }
-
-        public BacnetAddress GetBroadcastAddress()
-        {
-            return new BacnetAddress(BacnetAddressTypes.MSTP, 0xFFFF, new byte[] { 0xFF });
-        }
-
-        public void Dispose()
-        {
-            if (m_port != null)
-            {
-                try
-                {
-                    m_port.Close();
-                }
-                catch
-                {
-                }
-                m_port = null;
+                // error encoding function or experimental one
+                default:
+                    return -1;
             }
         }
     }
-
-#endif
 }

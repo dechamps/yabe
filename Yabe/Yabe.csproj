@@ -94,6 +94,7 @@
     <Compile Include="BACnetTransport.cs" />
     <Compile Include="BacnetTransportEthernet.cs" />
     <Compile Include="BACnetTransportIPv6.cs" />
+    <Compile Include="BacnetTransportSerial.cs" />
     <Compile Include="BBMDEditor.cs">
       <SubType>Form</SubType>
     </Compile>
