@@ -24,22 +24,31 @@ namespace AndroidVeryBasic
 			// Set our view from the "main" layout resource
 			SetContentView (Resource.Layout.Main);
 
+            tv = FindViewById<TextView>(Resource.Id.textView1);
+
 			StartActivity ();
 
-			tv= FindViewById<TextView> (Resource.Id.textView1);
-
 		}
+
+        protected override void OnStart()
+        {
+            tv.Text = "";
+            bacnet_client.WhoIs();
+
+        }
 
 		void StartActivity()
 		{
 			// Bacnet on UDP/IP/Ethernet
-			bacnet_client = new BacnetClient(new BacnetIpUdpProtocolTransport(0xBAC0, false));     
+			// using one exclusive Udp socket (0xBAC0, true) - Two sockets technic is not working
+			// on all platform (SDK ? Android version ?)
+			bacnet_client = new BacnetClient(new BacnetIpUdpProtocolTransport(0xBAC0, true));     
 
 			bacnet_client.Start();    // go
 
 			// Send WhoIs in order to get back all the Iam responses :  
 			bacnet_client.OnIam += new BacnetClient.IamHandler(handler_OnIam);    
-			bacnet_client.WhoIs();
+			
 		}
 
 		void handler_OnIam(BacnetClient sender, BacnetAddress adr, uint device_id, uint max_apdu, BacnetSegmentations segmentation, ushort vendor_id)
