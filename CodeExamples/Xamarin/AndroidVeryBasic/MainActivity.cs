@@ -40,9 +40,7 @@ namespace AndroidVeryBasic
 		void StartActivity()
 		{
 			// Bacnet on UDP/IP/Ethernet
-			// using one exclusive Udp socket (0xBAC0, true) - Two sockets technic is not working
-			// on all platform (SDK ? Android version ?)
-			bacnet_client = new BacnetClient(new BacnetIpUdpProtocolTransport(0xBAC0, true));     
+			bacnet_client = new BacnetClient(new BacnetIpUdpProtocolTransport(0xBAC0, false));     
 
 			bacnet_client.Start();    // go
 
