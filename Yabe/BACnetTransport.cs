@@ -146,6 +146,7 @@ namespace System.IO.BACnet
                     m_exclusive_conn = new Net.Sockets.UdpClient((Net.IPEndPoint)ep);
 
                     m_exclusive_conn.DontFragment = m_dont_fragment;
+                    m_exclusive_conn.EnableBroadcast = true;
                 }
             }
             else
