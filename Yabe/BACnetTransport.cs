@@ -308,19 +308,13 @@ namespace System.IO.BACnet
             return ret;
         }
 
-        // Modif FC : used for BBMD communication
         public int Send(byte[] buffer, int data_length, System.Net.IPEndPoint ep)
         {
-            try
-            {
-                // return m_exclusive_conn.Send(buffer, data_length, ep);
-                System.Threading.ThreadPool.QueueUserWorkItem((o) => m_exclusive_conn.Send(buffer, data_length, ep), null);
-                return data_length;
-            }
-            catch
-            {
-                return 0;
-            }
+
+            // return m_exclusive_conn.Send(buffer, data_length, ep);
+            System.Threading.ThreadPool.QueueUserWorkItem((o) => { try { m_exclusive_conn.Send(buffer, data_length, ep); } catch { } }, null);
+            return data_length;
+
         }
 
         public int Send(byte[] buffer, int offset, int data_length, BacnetAddress address, bool wait_for_transmission, int timeout)
