@@ -32,6 +32,7 @@ namespace AndroidVeryBasic
 
         protected override void OnStart()
         {
+            base.OnStart();
             tv.Text = "";
             bacnet_client.WhoIs();
 
