@@ -897,6 +897,7 @@
             // m_DataGrid
             // 
             this.m_DataGrid.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.m_DataGrid.LineColor = System.Drawing.SystemColors.ControlDark;
             this.m_DataGrid.Location = new System.Drawing.Point(0, 13);
             this.m_DataGrid.Name = "m_DataGrid";
             this.m_DataGrid.Size = new System.Drawing.Size(191, 399);

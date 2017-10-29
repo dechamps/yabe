@@ -503,7 +503,7 @@
           <Value></Value>
         </Property>
         <Property Id="PROP_RELINQUISH_DEFAULT" Tag="BACNET_APPLICATION_TAG_UNSIGNED_INT">
-          <Value>1</Value>
+          <Value>2</Value>
         </Property>
         <Property Id="PROP_STATUS_FLAGS" Tag="BACNET_APPLICATION_TAG_BIT_STRING">
           <Value>0000</Value>

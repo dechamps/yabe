@@ -1374,6 +1374,8 @@ namespace Utilities
                         return new BacnetEnumValueConverter(new BacnetReasonForHalt());
                     case BacnetPropertyIds.PROP_BACKUP_AND_RESTORE_STATE:
                         return new BacnetEnumValueConverter(new BACnetBackupState());
+                    case BacnetPropertyIds.PROP_FILE_ACCESS_METHOD:
+                        return new BacnetEnumValueConverter(new BacnetFileAccessMethod());
                     default:
                         return base.Converter;
                 }
@@ -1433,6 +1435,8 @@ namespace Utilities
                     return new BacnetEditPriorityArray();
                 case BacnetPropertyIds.PROP_BACKUP_AND_RESTORE_STATE:
                     return new BacnetEnumValueDisplay(new BACnetBackupState());
+                case BacnetPropertyIds.PROP_FILE_ACCESS_METHOD:
+                    return new BacnetEnumValueDisplay(new BacnetFileAccessMethod());
 
                 default :
                     return base.GetEditor(editorBaseType);

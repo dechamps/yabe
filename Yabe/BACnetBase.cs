@@ -988,6 +988,13 @@ namespace System.IO.BACnet
         LOWEST_AND_DEFAULT=16
     }
 
+
+    public enum BacnetFileAccessMethod
+    {
+        RECORD_ACCESS=0,
+        STREAM_ACCESS=1
+    }
+
     public enum BacnetCharacterStringEncodings
     {
         CHARACTER_ANSI_X34 = 0,  /* deprecated : Addendum 135-2008k  */
