@@ -7066,8 +7066,7 @@ namespace System.IO.BACnet.Serialize
                         {
                             len += ASN1.decode_application_date(buffer, offset + len, out dt1);
                             len += ASN1.decode_application_time(buffer, offset + len, out dt2);
-                            // oh ... a strange way to do that !
-                            DateTime dt = Convert.ToDateTime(dt1.ToString().Split(' ')[0] + " " + dt2.ToString().Split(' ')[1]);
+                            DateTime dt = new DateTime(dt1.Year, dt1.Month, dt1.Day, dt2.Hour, dt2.Minute, dt2.Second, dt2.Millisecond);
                             value.eventTimeStamps[i] = new BacnetGenericTime(dt, BacnetTimestampTags.TIME_STAMP_DATETIME);
                             len++; // closing tag
                         }

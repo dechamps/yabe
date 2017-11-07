@@ -43,7 +43,7 @@ namespace Yabe
         BacnetClient comm; BacnetAddress adr; BacnetObjectId schedule_id;
         // Default value type here if no values are already present
         // Could be choosen somewhere by the user
-        BacnetApplicationTags ScheduleType = BacnetApplicationTags.BACNET_APPLICATION_TAG_REAL;
+        BacnetApplicationTags ScheduleType = BacnetApplicationTags.BACNET_APPLICATION_TAG_DOUBLE;
 
         TreeNode mySelectedScheduleNode;
 
@@ -61,10 +61,14 @@ namespace Yabe
                 IList<BacnetValue> value;
                 comm.ReadPropertyRequest(adr, object_id, BacnetPropertyIds.PROP_PRESENT_VALUE, out value);
 
-                if ((value != null) && (value.Count != 0))
+                if ((value != null) && (value.Count != 0) && (value[0].Tag != BacnetApplicationTags.BACNET_APPLICATION_TAG_NULL))
                     ScheduleType = value[0].Tag;
             }
             catch { }
+
+
+            for (int i = 1; i < 12; i++)
+                ScheduleDataType.Items.Add(GetNiceName((BacnetApplicationTags)i));
 
             ReadEffectivePeriod();
             ReadEffectiveWeeklySchedule();
@@ -78,7 +82,10 @@ namespace Yabe
             t2.SetToolTip(TxtEndDate, "A wrong value set this to Always");
 
             // get the ImageList from MainDialog
-            listReferences.SmallImageList = img_List; 
+            listReferences.SmallImageList = img_List;
+
+            ScheduleDataType.Text = GetNiceName(ScheduleType);
+
         }
 
         // Read start and stop dates validity for the schedule
@@ -201,6 +208,17 @@ namespace Yabe
         // no test here if buffer is to small
         private void WriteEffectiveWeeklySchedule()
         {
+            ScheduleType = (BacnetApplicationTags)(ScheduleDataType.SelectedIndex + 1);
+
+            // Write Default Schedule First
+            try
+            {
+                BacnetValue[] bv=new BacnetValue[1];
+                bv[0]= Property.DeserializeValue(TxtScheduleDefault.Text,ScheduleType);
+                comm.WritePropertyRequest(adr, schedule_id, BacnetPropertyIds.PROP_SCHEDULE_DEFAULT, bv);
+            }
+            catch { }
+
             // Manual ASN.1/BER encoding
             EncodeBuffer b = comm.GetEncodeBuffer(0);
             ASN1.encode_opening_tag(b, 3);
@@ -252,6 +270,16 @@ namespace Yabe
 
             try
             {
+                // first gets the PROP_SCHEDULE_DEFAULT
+                IList<BacnetValue> valuedefault;
+                comm.ReadPropertyRequest(adr, schedule_id, BacnetPropertyIds.PROP_SCHEDULE_DEFAULT, out valuedefault);
+                if ((valuedefault != null) && (valuedefault.Count != 0) && (valuedefault[0].Tag != BacnetApplicationTags.BACNET_APPLICATION_TAG_NULL))
+                {
+                    ScheduleType = valuedefault[0].Tag;
+                    TxtScheduleDefault.Text = valuedefault[0].Value.ToString();
+                }
+
+
                 if (comm.RawEncodedDecodedPropertyConfirmedRequest(adr, schedule_id, BacnetPropertyIds.PROP_WEEKLY_SCHEDULE, BacnetConfirmedServices.SERVICE_CONFIRMED_READ_PROPERTY, ref InOutBuffer))
                 {
                     int offset = 0;
@@ -326,6 +354,9 @@ namespace Yabe
             ReadEffectivePeriod();
             ReadEffectiveWeeklySchedule();
             ReadObjectsPropertiesReferences();
+
+            ScheduleDataType.Text = GetNiceName(ScheduleType);
+
         }
 
         private void Schedule_MouseDown(object sender, MouseEventArgs e)
@@ -531,6 +562,16 @@ namespace Yabe
             if (e.KeyChar == 13)
                 TxtDate_Validated(sender, null);
         }
+
+        private static string GetNiceName(BacnetApplicationTags DataType)
+        {
+            string name = DataType.ToString();
+            name = name.Substring(23);
+            name = name.Replace('_', ' ');
+            name = System.Threading.Thread.CurrentThread.CurrentCulture.TextInfo.ToTitleCase(name.ToLower());
+            return name;
+        }
+
 
     }
 

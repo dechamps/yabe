@@ -47,6 +47,10 @@
             this.label4 = new System.Windows.Forms.Label();
             this.listReferences = new System.Windows.Forms.ListView();
             this.label5 = new System.Windows.Forms.Label();
+            this.TxtScheduleDefault = new System.Windows.Forms.TextBox();
+            this.label6 = new System.Windows.Forms.Label();
+            this.ScheduleDataType = new System.Windows.Forms.ComboBox();
+            this.label7 = new System.Windows.Forms.Label();
             this.contextMenuStrip.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -89,7 +93,7 @@
             // label3
             // 
             this.label3.AutoSize = true;
-            this.label3.Location = new System.Drawing.Point(19, 72);
+            this.label3.Location = new System.Drawing.Point(19, 132);
             this.label3.Name = "label3";
             this.label3.Size = new System.Drawing.Size(96, 13);
             this.label3.TabIndex = 6;
@@ -100,7 +104,7 @@
             this.Schedule.ContextMenuStrip = this.contextMenuStrip;
             this.Schedule.ImageIndex = 0;
             this.Schedule.ImageList = this.imageList;
-            this.Schedule.Location = new System.Drawing.Point(22, 88);
+            this.Schedule.Location = new System.Drawing.Point(21, 148);
             this.Schedule.Name = "Schedule";
             this.Schedule.SelectedImageIndex = 0;
             this.Schedule.Size = new System.Drawing.Size(340, 269);
@@ -148,7 +152,7 @@
             // UpdateButton
             // 
             this.UpdateButton.AutoSize = true;
-            this.UpdateButton.Location = new System.Drawing.Point(234, 486);
+            this.UpdateButton.Location = new System.Drawing.Point(233, 546);
             this.UpdateButton.Name = "UpdateButton";
             this.UpdateButton.Size = new System.Drawing.Size(128, 28);
             this.UpdateButton.TabIndex = 8;
@@ -181,7 +185,7 @@
             // label4
             // 
             this.label4.AutoSize = true;
-            this.label4.Location = new System.Drawing.Point(0, 522);
+            this.label4.Location = new System.Drawing.Point(-1, 582);
             this.label4.Name = "label4";
             this.label4.Size = new System.Drawing.Size(224, 13);
             this.label4.TabIndex = 11;
@@ -190,7 +194,7 @@
             // listReferences
             // 
             this.listReferences.ContextMenuStrip = this.contextMenuStrip;
-            this.listReferences.Location = new System.Drawing.Point(22, 394);
+            this.listReferences.Location = new System.Drawing.Point(21, 454);
             this.listReferences.Name = "listReferences";
             this.listReferences.Size = new System.Drawing.Size(340, 75);
             this.listReferences.TabIndex = 12;
@@ -201,17 +205,55 @@
             // label5
             // 
             this.label5.AutoSize = true;
-            this.label5.Location = new System.Drawing.Point(19, 378);
+            this.label5.Location = new System.Drawing.Point(18, 438);
             this.label5.Name = "label5";
             this.label5.Size = new System.Drawing.Size(145, 13);
             this.label5.TabIndex = 13;
             this.label5.Text = "Objects properties references";
             // 
+            // TxtScheduleDefault
+            // 
+            this.TxtScheduleDefault.Location = new System.Drawing.Point(22, 85);
+            this.TxtScheduleDefault.Name = "TxtScheduleDefault";
+            this.TxtScheduleDefault.Size = new System.Drawing.Size(100, 20);
+            this.TxtScheduleDefault.TabIndex = 14;
+            // 
+            // label6
+            // 
+            this.label6.AutoSize = true;
+            this.label6.Location = new System.Drawing.Point(19, 69);
+            this.label6.Name = "label6";
+            this.label6.Size = new System.Drawing.Size(118, 13);
+            this.label6.TabIndex = 15;
+            this.label6.Text = "Schedule Default value";
+            // 
+            // ScheduleDataType
+            // 
+            this.ScheduleDataType.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.ScheduleDataType.FormattingEnabled = true;
+            this.ScheduleDataType.Location = new System.Drawing.Point(230, 85);
+            this.ScheduleDataType.Name = "ScheduleDataType";
+            this.ScheduleDataType.Size = new System.Drawing.Size(98, 21);
+            this.ScheduleDataType.TabIndex = 16;
+            // 
+            // label7
+            // 
+            this.label7.AutoSize = true;
+            this.label7.Location = new System.Drawing.Point(226, 69);
+            this.label7.Name = "label7";
+            this.label7.Size = new System.Drawing.Size(57, 13);
+            this.label7.TabIndex = 17;
+            this.label7.Text = "Data Type";
+            // 
             // ScheduleDisplay
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(386, 536);
+            this.ClientSize = new System.Drawing.Size(386, 604);
+            this.Controls.Add(this.label7);
+            this.Controls.Add(this.ScheduleDataType);
+            this.Controls.Add(this.label6);
+            this.Controls.Add(this.TxtScheduleDefault);
             this.Controls.Add(this.label5);
             this.Controls.Add(this.listReferences);
             this.Controls.Add(this.label4);
@@ -252,5 +294,9 @@
         private System.Windows.Forms.ImageList imageList;
         private System.Windows.Forms.ListView listReferences;
         private System.Windows.Forms.Label label5;
+        private System.Windows.Forms.TextBox TxtScheduleDefault;
+        private System.Windows.Forms.Label label6;
+        private System.Windows.Forms.ComboBox ScheduleDataType;
+        private System.Windows.Forms.Label label7;
     }
 }
