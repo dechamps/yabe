@@ -208,8 +208,6 @@ namespace Yabe
         // no test here if buffer is to small
         private void WriteEffectiveWeeklySchedule()
         {
-            ScheduleType = (BacnetApplicationTags)(ScheduleDataType.SelectedIndex + 1);
-
             // Write Default Schedule First
             try
             {
@@ -570,6 +568,11 @@ namespace Yabe
             name = name.Replace('_', ' ');
             name = System.Threading.Thread.CurrentThread.CurrentCulture.TextInfo.ToTitleCase(name.ToLower());
             return name;
+        }
+
+        private void ScheduleDataType_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            ScheduleType = (BacnetApplicationTags)(ScheduleDataType.SelectedIndex + 1);
         }
 
 

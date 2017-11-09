@@ -235,6 +235,7 @@
             this.ScheduleDataType.Name = "ScheduleDataType";
             this.ScheduleDataType.Size = new System.Drawing.Size(98, 21);
             this.ScheduleDataType.TabIndex = 16;
+            this.ScheduleDataType.SelectedIndexChanged += new System.EventHandler(this.ScheduleDataType_SelectedIndexChanged);
             // 
             // label7
             // 

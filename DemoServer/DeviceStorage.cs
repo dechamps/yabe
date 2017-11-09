@@ -520,7 +520,8 @@ namespace System.IO.BACnet.Storage
                     else
                         return new BacnetValue(value);
                 case BacnetApplicationTags.BACNET_APPLICATION_TAG_BOOLEAN:
-                    if (value.Length == 1) return new BacnetValue(type, (value != "0")); // allows 0 and 1 to be used
+                    int vint;
+                    if (int.TryParse(value, out vint)) return new BacnetValue(type, (vint != 0)); // allows 0 and 1 to be used
                     return new BacnetValue(type, bool.Parse(value));
                 case BacnetApplicationTags.BACNET_APPLICATION_TAG_UNSIGNED_INT:
                     return new BacnetValue(type, uint.Parse(value));

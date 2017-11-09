@@ -369,7 +369,7 @@ namespace System.IO.BACnet
             foreach (System.Net.NetworkInformation.NetworkInterface adapter in System.Net.NetworkInformation.NetworkInterface.GetAllNetworkInterfaces())
                 if (adapter.OperationalStatus == System.Net.NetworkInformation.OperationalStatus.Up)
                     if (adapter.NetworkInterfaceType != System.Net.NetworkInformation.NetworkInterfaceType.Loopback)
-                        if (!(adapter.Name.Contains("VirtualBox") || adapter.Name.Contains("VMware")))
+                        if (!(adapter.Description.Contains("VirtualBox") || adapter.Description.Contains("VMware")))
                             foreach (System.Net.NetworkInformation.UnicastIPAddressInformation ip in adapter.GetIPProperties().UnicastAddresses)
                             {
                                 if (ip.Address.AddressFamily == Net.Sockets.AddressFamily.InterNetwork)
