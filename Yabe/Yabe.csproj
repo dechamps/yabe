@@ -154,6 +154,7 @@
     <Compile Include="ScheduleDisplay.Designer.cs">
       <DependentUpon>ScheduleDisplay.cs</DependentUpon>
     </Compile>
+    <Compile Include="TreeView.cs" />
     <Compile Include="TrendLogDisplay.cs">
       <SubType>Form</SubType>
     </Compile>

@@ -59,6 +59,7 @@ Source: "..\..\Yabe\bin\Debug\README.Txt"; DestDir: "{app}"; Flags: ignoreversio
 Source: "..\..\Docs\history.txt"; DestDir: "{app}"; Flags: ignoreversion
 Source: "..\..\Docs\MIT_license.txt"; DestDir: "{app}"; Flags: ignoreversion
 Source: "..\..\Docs\ZedGraph Calendar SharpPcap License-LGPL.txt"; DestDir: "{app}"; Flags: ignoreversion
+Source: "..\..\Docs\Treeview_license.txt"; DestDir: "{app}"; Flags: ignoreversion
 
 Source: "..\..\Yabe\bin\Debug\ReadSinglePropDescr.Xml"; DestDir: "{app}"; Flags: ignoreversion
 

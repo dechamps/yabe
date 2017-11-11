@@ -1,9 +1,16 @@
 -------------------------------------------------------------------------------
                    YABE - YET ANOTHER BACNET EXPLORER
 -------------------------------------------------------------------------------
-1.1.6 -
+Roadmap
+ - Yabe for Android, maybe ?
+
+1.1.6 - 20171111
  - Devices treeview sorted by deviceId
  - Try Reading PROP_LIST if ReadPropertyMultiple is reject
+ - Data type can be chosen in the Schedule editor
+ - Serial Bacnet code split in a separated file : simpler for Android/IOs Xamarin
+ - Multi-selection in the Address Space : allows multi COV advise
+ - Some bug removal
  
 1.1.5 - 20170531
  - Remote BBMD tables edition : read & write

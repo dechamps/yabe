@@ -518,7 +518,8 @@ namespace Yabe
                 "\nhttp://www.famfamfam.com/"+
                 "\nhttp://sourceforge.net/projects/zedgraph/"+
                 "\nhttp://www.codeproject.com/Articles/38699/A-Professional-Calendar-Agenda-View-That-You-Will"+
-                "\nhttps://github.com/chmorgan/sharppcap"
+                "\nhttps://github.com/chmorgan/sharppcap"+
+                "\nhttps://sourceforge.net/projects/mstreeview"
                 
                 , "About", MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
@@ -1204,6 +1205,7 @@ namespace Yabe
                     objectsDescriptionExternal = (List<BacnetObjectDescription>)xs.Deserialize(sr);
                 }
                 catch { }
+
             }
 
             value_list = null;
@@ -1212,42 +1214,16 @@ namespace Yabe
 
             int old_retries = comm.Retries;
             comm.Retries = 1;       //we don't want to spend too much time on non existing properties
-
-            // Three mandatory common properties to all objects : PROP_OBJECT_IDENTIFIER,PROP_OBJECT_TYPE, PROP_OBJECT_NAME
-
-            // ReadProperty(comm, adr, object_id, BacnetPropertyIds.PROP_OBJECT_IDENTIFIER, ref values)
-            // No need to query it, known value
-            BacnetPropertyValue new_entry = new BacnetPropertyValue();
-            new_entry.property = new BacnetPropertyReference((uint)BacnetPropertyIds.PROP_OBJECT_IDENTIFIER, System.IO.BACnet.Serialize.ASN1.BACNET_ARRAY_ALL);
-            new_entry.value = new BacnetValue[] { new BacnetValue(object_id) };
-            values.Add(new_entry);
-
-            // ReadProperty(comm, adr, object_id, BacnetPropertyIds.PROP_OBJECT_TYPE, ref values);
-            // No need to query it, known value
-            new_entry = new BacnetPropertyValue();
-            new_entry.property = new BacnetPropertyReference((uint)BacnetPropertyIds.PROP_OBJECT_TYPE, System.IO.BACnet.Serialize.ASN1.BACNET_ARRAY_ALL);
-            new_entry.value = new BacnetValue[] { new BacnetValue(BacnetApplicationTags.BACNET_APPLICATION_TAG_ENUMERATED, (uint)object_id.type) };
-            values.Add(new_entry);
-
-            // We do not know the value here
-            ReadProperty(comm, adr, object_id, BacnetPropertyIds.PROP_OBJECT_NAME, ref values);
-
             try
             {
                 // PROP_LIST was added as an addendum to 135-2010
-                // Object_Name, Object_Type, Object_Identifier, and Property_List properties are not included in the list
                 // Test to see if it is supported, otherwise fall back to the the predefined delault property list.
-                IList<BacnetPropertyValue> valuesList = new List<BacnetPropertyValue>();
-
-                bool objectDidSupplyPropertyList = ReadProperty(comm, adr, object_id, BacnetPropertyIds.PROP_PROPERTY_LIST, ref valuesList);
+                bool objectDidSupplyPropertyList = ReadProperty(comm, adr, object_id, BacnetPropertyIds.PROP_PROPERTY_LIST, ref values);
 
                 //Used the supplied list of supported Properties, otherwise fall back to using the list of default properties.
                 if (objectDidSupplyPropertyList)
-                {                    
-                    var proplist = valuesList.Last();
-
-                    values.Add(proplist); // Add the PROP_LIST to the list of properties
-
+                {
+                    var proplist = values.Last();
                     foreach (var enumeratedValue in proplist.value)
                     {
                         BacnetPropertyIds bpi = (BacnetPropertyIds)(uint)enumeratedValue.Value;
@@ -1257,7 +1233,26 @@ namespace Yabe
                 }
                 else
                 {
-                    // the properties list is comming from the internal or external XML file
+                    // Three mandatory common properties to all objects : PROP_OBJECT_IDENTIFIER,PROP_OBJECT_TYPE, PROP_OBJECT_NAME
+
+                    // ReadProperty(comm, adr, object_id, BacnetPropertyIds.PROP_OBJECT_IDENTIFIER, ref values)
+                    // No need to query it, known value
+                    BacnetPropertyValue new_entry = new BacnetPropertyValue();
+                    new_entry.property = new BacnetPropertyReference((uint)BacnetPropertyIds.PROP_OBJECT_IDENTIFIER, System.IO.BACnet.Serialize.ASN1.BACNET_ARRAY_ALL);
+                    new_entry.value = new BacnetValue[] { new BacnetValue(object_id) };
+                    values.Add(new_entry);
+
+                    // ReadProperty(comm, adr, object_id, BacnetPropertyIds.PROP_OBJECT_TYPE, ref values);
+                    // No need to query it, known value
+                    new_entry = new BacnetPropertyValue();
+                    new_entry.property = new BacnetPropertyReference((uint)BacnetPropertyIds.PROP_OBJECT_TYPE, System.IO.BACnet.Serialize.ASN1.BACNET_ARRAY_ALL);
+                    new_entry.value = new BacnetValue[] { new BacnetValue(BacnetApplicationTags.BACNET_APPLICATION_TAG_ENUMERATED, (uint)object_id.type) };
+                    values.Add(new_entry);
+
+                    // We do not know the value here
+                    ReadProperty(comm, adr, object_id, BacnetPropertyIds.PROP_OBJECT_NAME, ref values);
+
+                    // for all other properties, the list is comming from the internal or external XML file
 
                     BacnetObjectDescription objDescr = new BacnetObjectDescription(); ;
 
@@ -1270,7 +1265,7 @@ namespace Yabe
                         objDescr = objectsDescriptionExternal[Idx];
                     else
                     {
-                        // try to find from the embedded resource
+                        // try to find from the embedded resoruce
                         Idx = objectsDescriptionDefault.FindIndex(o => o.typeId == object_id.type);
                         if (Idx != -1)
                             objDescr = objectsDescriptionDefault[Idx];
@@ -1419,10 +1414,10 @@ namespace Yabe
         // Fixed a small problem when a right click is down in a Treeview
         private void TreeView_MouseDown(object sender, MouseEventArgs e)
         {
-            if (e.Button != MouseButtons.Right)
-                return;
+            //if (e.Button != MouseButtons.Right)
+            //    return;
             // Store the selected node (can deselect a node).
-            (sender as TreeView).SelectedNode = (sender as TreeView).GetNodeAt(e.X, e.Y);
+            //(sender as TreeView).SelectedNode = (sender as TreeView).GetNodeAt(e.X, e.Y);
         }
 
         private void m_AddressSpaceTree_AfterSelect(object sender, TreeViewEventArgs e)
@@ -1925,7 +1920,7 @@ namespace Yabe
             }
         }
 
-        private void CreateSubscription(BacnetClient comm, BacnetAddress adr, uint device_id, BacnetObjectId object_id)
+        private bool CreateSubscription(BacnetClient comm, BacnetAddress adr, uint device_id, BacnetObjectId object_id)
         {
             this.Cursor = Cursors.WaitCursor;
             try
@@ -1966,7 +1961,7 @@ namespace Yabe
 
                 if (SubscribeOK == false) // echec : launch period acquisiton in the ThreadPool
                 {
-                    sub.is_active_subscription = false;                   
+                    sub.is_active_subscription = false;
                     var Qst = new GenericInputBox<NumericUpDown>("Error during subscribe", "Polling period replacement (s)",
                               (o) =>
                               {
@@ -1978,15 +1973,22 @@ namespace Yabe
                     {
                         int period = (int)Qst.genericInput.Value;
                         Properties.Settings.Default.Subscriptions_ReplacementPollingPeriod = (uint)period;
-                        ThreadPool.QueueUserWorkItem(a => ReadPropertyPoolingRemplacementToCOV(sub, period)); 
+                        ThreadPool.QueueUserWorkItem(a => ReadPropertyPoolingRemplacementToCOV(sub, period));
                     }
-                    return;
+
+                    return false; // COV is not done
                 }
+            }
+            catch
+            {
+                return false;
             }
             finally
             {
-                this.Cursor = Cursors.Default;
+                this.Cursor = Cursors.Default;                
             }
+
+            return true;
         }
 
         // COV echec, PROP_PRESENT_VALUE read replacement method
@@ -2012,7 +2014,7 @@ namespace Yabe
 
         private void m_SubscriptionView_DragDrop(object sender, DragEventArgs e)
         {
-            if (e.Data.GetDataPresent("System.Windows.Forms.TreeNode", false))
+            if (e.Data.GetDataPresent("CodersLab.Windows.Controls.NodesCollection", false))
             {
                 //fetch end point
                 if (m_DeviceTree.SelectedNode == null) return;
@@ -2028,12 +2030,18 @@ namespace Yabe
                     comm = (BacnetClient)m_DeviceTree.SelectedNode.Parent.Parent.Tag;
 
                 //fetch object_id
-                TreeNode node = (TreeNode)e.Data.GetData("System.Windows.Forms.TreeNode");
-                if (node.Tag == null || !(node.Tag is BacnetObjectId)) return;
-                BacnetObjectId object_id = (BacnetObjectId)node.Tag;
+                var nodes = (CodersLab.Windows.Controls.NodesCollection)e.Data.GetData("CodersLab.Windows.Controls.NodesCollection");
+                //node[0]
 
-                //create
-                CreateSubscription(comm, adr, entry.Value, object_id);
+                for (int i = 0; i < nodes.Count; i++)
+                {
+                    if (nodes[i].Tag == null || !(nodes[i].Tag is BacnetObjectId)) return;
+                    BacnetObjectId object_id = (BacnetObjectId)nodes[i].Tag;
+
+                    //create
+                    if (CreateSubscription(comm, adr, entry.Value, object_id) == false)
+                        break;
+                }
             }
         }
 
@@ -2068,34 +2076,39 @@ namespace Yabe
         {
             if (e.KeyCode != Keys.Delete) return;
 
-            if (m_SubscriptionView.SelectedItems.Count == 1)
+            if (m_SubscriptionView.SelectedItems.Count >= 1)
             {
-                ListViewItem itm = m_SubscriptionView.SelectedItems[0];
-                if (itm.Tag is Subscription)    // It's a subscription or not (Event/Alarm)
+                foreach (ListViewItem itm in m_SubscriptionView.SelectedItems)
                 {
-                    Subscription sub = (Subscription)itm.Tag;
-                    if (m_subscription_list.ContainsKey(sub.sub_key))
+                    //ListViewItem itm = m_SubscriptionView.SelectedItems[0];
+                    if (itm.Tag is Subscription)    // It's a subscription or not (Event/Alarm)
                     {
-                        //remove from device
-                        try
+                        Subscription sub = (Subscription)itm.Tag;
+                        if (m_subscription_list.ContainsKey(sub.sub_key))
                         {
-                            if (sub.is_active_subscription)
-                                if (!sub.comm.SubscribeCOVRequest(sub.adr, sub.object_id, sub.subscribe_id, true, false, 0))
-                                {
-                                    MessageBox.Show(this, "Couldn't unsubscribe", "Communication Error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                                }
+                            //remove from device
+                            try
+                            {
+                                if (sub.is_active_subscription)
+                                    if (!sub.comm.SubscribeCOVRequest(sub.adr, sub.object_id, sub.subscribe_id, true, false, 0))
+                                    {
+                                        MessageBox.Show(this, "Couldn't unsubscribe", "Communication Error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                                        return;
+                                    }
+                            }
+                            catch (Exception ex)
+                            {
+                                MessageBox.Show(this, "Couldn't delete subscription: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                                return;
+                            }
                         }
-                        catch (Exception ex)
-                        {
-                            MessageBox.Show(this, "Couldn't delete subscription: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                        }
+                        //remove from interface
+                        m_SubscriptionView.Items.Remove(itm);
+                        lock (m_subscription_list)
+                            m_subscription_list.Remove(sub.sub_key);
                     }
-                    //remove from interface
                     m_SubscriptionView.Items.Remove(itm);
-                    lock (m_subscription_list)
-                        m_subscription_list.Remove(sub.sub_key);
                 }
-                m_SubscriptionView.Items.Remove(itm);
             }
         }
 
@@ -2280,7 +2293,7 @@ namespace Yabe
                 comm = (BacnetClient)m_DeviceTree.SelectedNode.Parent.Parent.Tag; // When device is under a Router
             uint device_id = entry.Value;
 
-            //fetch object_id
+            //test object_id with the last selected node
             if (
                 m_AddressSpaceTree.SelectedNode == null ||
                 !(m_AddressSpaceTree.SelectedNode.Tag is BacnetObjectId))
@@ -2288,10 +2301,14 @@ namespace Yabe
                 MessageBox.Show(this, "The marked object is not an object", "Not an object", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
                 return;
             }
-            BacnetObjectId object_id = (BacnetObjectId)m_AddressSpaceTree.SelectedNode.Tag;
-
-            //create 
-            CreateSubscription(comm, adr, device_id, object_id);
+            // advise all selected nodes, stop at the first COV reject (even if a period polling is done)
+            foreach (TreeNode t in m_AddressSpaceTree.SelectedNodes)
+            {
+                BacnetObjectId object_id = (BacnetObjectId)t.Tag;
+                //create 
+                if (CreateSubscription(comm, adr, device_id, object_id) == false)
+                    return;
+            }
         }
 
         private void m_subscriptionRenewTimer_Tick(object sender, EventArgs e)

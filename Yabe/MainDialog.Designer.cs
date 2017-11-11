@@ -86,7 +86,7 @@
             this.readPropertiesNameToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.createObjectToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.label2 = new System.Windows.Forms.Label();
-            this.m_AddressSpaceTree = new System.Windows.Forms.TreeView();
+            this.m_AddressSpaceTree = new CodersLab.Windows.Controls.TreeView();
             this.m_AddressSpaceMenuStrip = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.subscribeToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.downloadFileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -698,6 +698,8 @@
             this.m_AddressSpaceTree.Location = new System.Drawing.Point(0, 13);
             this.m_AddressSpaceTree.Name = "m_AddressSpaceTree";
             this.m_AddressSpaceTree.SelectedImageIndex = 0;
+            this.m_AddressSpaceTree.SelectionBackColor = System.Drawing.SystemColors.Highlight;
+            this.m_AddressSpaceTree.SelectionMode = CodersLab.Windows.Controls.TreeViewSelectionMode.MultiSelectSameLevel;
             this.m_AddressSpaceTree.ShowNodeToolTips = true;
             this.m_AddressSpaceTree.Size = new System.Drawing.Size(164, 208);
             this.m_AddressSpaceTree.TabIndex = 0;
@@ -1055,7 +1057,7 @@
         private System.Windows.Forms.ToolStripMenuItem showScheduleToolStripMenuItem1;
         private System.Windows.Forms.ToolStripMenuItem showNotificationToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem showNotificationToolStripMenuItem1;
-        private System.Windows.Forms.TreeView m_AddressSpaceTree;
+        private CodersLab.Windows.Controls.TreeView m_AddressSpaceTree;
         private System.Windows.Forms.ToolStripMenuItem showCalendarToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem showCalendarToolStripMenuItem1;
         private System.Windows.Forms.ToolStripMenuItem alarmSummaryToolStripMenuItem1;
