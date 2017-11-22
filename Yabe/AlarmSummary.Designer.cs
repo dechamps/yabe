@@ -29,7 +29,7 @@
         private void InitializeComponent()
         {
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(AlarmSummary));
-            this.TAlarmList = new System.Windows.Forms.TreeView();
+            this.TAlarmList = new CodersLab.Windows.Controls.TreeView();
             this.AckText = new System.Windows.Forms.TextBox();
             this.LblInfo = new System.Windows.Forms.Label();
             this.AckBt = new System.Windows.Forms.Button();
@@ -39,6 +39,8 @@
             // 
             this.TAlarmList.Location = new System.Drawing.Point(12, 12);
             this.TAlarmList.Name = "TAlarmList";
+            this.TAlarmList.SelectionBackColor = System.Drawing.SystemColors.Highlight;
+            this.TAlarmList.SelectionMode = CodersLab.Windows.Controls.TreeViewSelectionMode.MultiSelect;
             this.TAlarmList.ShowNodeToolTips = true;
             this.TAlarmList.Size = new System.Drawing.Size(350, 357);
             this.TAlarmList.TabIndex = 1;
@@ -70,7 +72,7 @@
             this.AckBt.Name = "AckBt";
             this.AckBt.Size = new System.Drawing.Size(145, 23);
             this.AckBt.TabIndex = 4;
-            this.AckBt.Text = "Ack selected alarm";
+            this.AckBt.Text = "Ack selected alarm(s)";
             this.AckBt.UseVisualStyleBackColor = true;
             this.AckBt.Click += new System.EventHandler(this.AckBt_Click);
             // 
@@ -97,7 +99,7 @@
 
         #endregion
 
-        private System.Windows.Forms.TreeView TAlarmList;
+        private CodersLab.Windows.Controls.TreeView TAlarmList;
         private System.Windows.Forms.TextBox AckText;
         private System.Windows.Forms.Label LblInfo;
         private System.Windows.Forms.Button AckBt;

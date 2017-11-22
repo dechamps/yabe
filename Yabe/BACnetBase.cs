@@ -1900,6 +1900,15 @@ namespace System.IO.BACnet
         public bool IssueConfirmedNotifications;
         public uint TimeRemaining; 
         public float COVIncrement;
+
+        // For Yabe PropertyGrid
+        public override string ToString()
+        {
+            string name = monitoredObjectIdentifier.ToString();
+            if (name.StartsWith("OBJECT_")) name = name.Substring(7);
+
+            return name + " by " + Recipient.ToString() + ", remain " + TimeRemaining + "s";
+        }
     }
 
     public struct BacnetError
@@ -5778,7 +5787,7 @@ namespace System.IO.BACnet.Serialize
                 return -1;
             len += decode_unsigned(buffer, offset + len, len_value_type, out value.TimeRemaining);
 
-            if ((len < apdu_len) && IS_OPENING_TAG(buffer[offset + len]))
+            if ((len < apdu_len) && (!IS_CLOSING_TAG(buffer[offset + len])))
             {
                 decode_tag_number_and_value(buffer, offset + len, out tag_number, out len_value_type);
                 if (tag_number != 4)

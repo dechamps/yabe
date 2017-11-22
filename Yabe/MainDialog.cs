@@ -2033,13 +2033,19 @@ namespace Yabe
                 var nodes = (CodersLab.Windows.Controls.NodesCollection)e.Data.GetData("CodersLab.Windows.Controls.NodesCollection");
                 //node[0]
 
+                // Nodes are in a non controlable order, so puts the objectIds in order
+                List<BacnetObjectId> Bobjs = new List<BacnetObjectId>();
                 for (int i = 0; i < nodes.Count; i++)
                 {
-                    if (nodes[i].Tag == null || !(nodes[i].Tag is BacnetObjectId)) return;
-                    BacnetObjectId object_id = (BacnetObjectId)nodes[i].Tag;
+                    if ((nodes[i].Tag != null) && (nodes[i].Tag is BacnetObjectId))
+                        Bobjs.Add((BacnetObjectId)nodes[i].Tag);
+                }
 
-                    //create
-                    if (CreateSubscription(comm, adr, entry.Value, object_id) == false)
+                Bobjs.Sort();
+
+                for (int i = 0; i < Bobjs.Count; i++)
+                {
+                    if (CreateSubscription(comm, adr, entry.Value, Bobjs[i]) == false)
                         break;
                 }
             }

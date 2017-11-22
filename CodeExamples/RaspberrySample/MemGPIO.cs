@@ -36,7 +36,7 @@ using System.IO;
 // static class MyInputsOutputs
 // {
 //      static public bool Button { get { return MemGPIO.InputPin(14); } }
-//      static public void Led { set { MemGPIO.OutputPin(7, value); }}
+//      static public bool Led { set { MemGPIO.OutputPin(7, value); }}
 // }
 //
 // another much complex/complete solution could be found at 

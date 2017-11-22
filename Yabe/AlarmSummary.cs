@@ -211,14 +211,8 @@ namespace Yabe
             }
         }
 
-        private void AckBt_Click(object sender, EventArgs e)
-        {            
-            TreeNode tn = TAlarmList.SelectedNode;
-            if (tn == null) return;
-            while (tn.Parent!=null) tn=tn.Parent;  // go up
-   
-            BacnetGetEventInformationData alarm = (BacnetGetEventInformationData)tn.Tag; // the alam content
-
+        private bool AcqAlarm(BacnetGetEventInformationData alarm)
+        {
             bool SomeChanges = false;
             for (int i = 0; i < 3; i++) // 3 transitions maybe to be ack To_Normal, To_OfNormal, To_Fault
             {
@@ -235,7 +229,7 @@ namespace Yabe
                         if (comm.ReadPropertyRequest(adr, alarm.objectIdentifier, BacnetPropertyIds.PROP_EVENT_TIME_STAMPS, out values, 0, (uint)i) == false)
                         {
                             Trace.TraceWarning("Error reading PROP_EVENT_TIME_STAMPS");
-                            return;
+                            return false;
                         }
                         String s1 = ((BacnetValue[])(values[0].Value))[0].ToString(); // Date & 00:00:00 for Hour
                         String s2 = ((BacnetValue[])(values[0].Value))[1].ToString(); // 00:00:00 & Time
@@ -253,10 +247,30 @@ namespace Yabe
                         SomeChanges = true;
                     }
                 }
-
-                if (SomeChanges)
-                    FillTreeNode();
             }
+
+            return SomeChanges;
+        }
+
+        private void AckBt_Click(object sender, EventArgs e)
+        {
+            List<TreeNode> listacq = new List<TreeNode>();
+
+            foreach (TreeNode t in TAlarmList.SelectedNodes)
+            {
+                TreeNode t2 = t;
+                while (t2.Parent != null) t2 = t2.Parent;  // go to the root element
+                if (!listacq.Exists((o) => o == t2))
+                    listacq.Add(t2);
+            }
+
+            foreach (TreeNode t in listacq)
+            {
+                BacnetGetEventInformationData alarm = (BacnetGetEventInformationData)t.Tag; // the alam content
+                AcqAlarm(alarm);
+            }
+      
+            FillTreeNode();
         }
 
         // Used if the Read without retries has fail

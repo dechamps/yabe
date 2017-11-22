@@ -635,11 +635,11 @@ namespace Yabe
                 if (Reference_Device.Text != "")
                     device = new BacnetObjectId(BacnetObjectTypes.OBJECT_DEVICE, Convert.ToUInt16(Reference_Device.Text));
                 if (Reference_Array.Text != "")
-                    ArrayIdx = Convert.ToUInt16(Reference_Array.Text);
+                    ArrayIdx = Convert.ToUInt32(Reference_Array.Text);
 
 
                 BacnetDeviceObjectPropertyReference newref = new BacnetDeviceObjectPropertyReference(
-                    new BacnetObjectId((BacnetObjectTypes)(Reference_ObjType.SelectedItem as Enumcombo).enumValue, Convert.ToUInt16(Reference_ObjId.Text)),
+                    new BacnetObjectId((BacnetObjectTypes)(Reference_ObjType.SelectedItem as Enumcombo).enumValue, Convert.ToUInt32(Reference_ObjId.Text)),
                     (BacnetPropertyIds)(Reference_Prop.SelectedItem as Enumcombo).enumValue, device, ArrayIdx);
 
                 if (!ObjRef.Equals(newref))
