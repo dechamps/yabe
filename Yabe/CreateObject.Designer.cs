@@ -56,7 +56,7 @@
             // 
             // Cancel
             // 
-            this.Cancel.Location = new System.Drawing.Point(228, 68);
+            this.Cancel.Location = new System.Drawing.Point(240, 68);
             this.Cancel.Name = "Cancel";
             this.Cancel.Size = new System.Drawing.Size(75, 23);
             this.Cancel.TabIndex = 2;
@@ -68,12 +68,12 @@
             // 
             this.ObjectId.Location = new System.Drawing.Point(251, 25);
             this.ObjectId.Maximum = new decimal(new int[] {
-            32000,
+            4194303,
             0,
             0,
             0});
             this.ObjectId.Name = "ObjectId";
-            this.ObjectId.Size = new System.Drawing.Size(52, 20);
+            this.ObjectId.Size = new System.Drawing.Size(64, 20);
             this.ObjectId.TabIndex = 3;
             // 
             // CreateObject
