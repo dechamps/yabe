@@ -54,7 +54,12 @@ namespace BaCSharp
                     if (CalenarEntry.Entries == null)
                         CalenarEntry.Entries = new List<object>();
                 }
-                catch { }
+                catch 
+                {
+                    // empty calendar
+                    CalenarEntry = new BACnetCalendarEntry();
+                    CalenarEntry.Entries = new List<object>();
+                }
 
                 DayChanged(tmrId); 
             }

@@ -68,6 +68,10 @@ namespace AnotherStorageImplementation
 
         static void Main(string[] args)
         {
+            // First param could be DeviceId
+            if (args.Length == 1)
+                UInt32.TryParse(args[0], out deviceId);
+
             InitDeviceObjects();
             // Force the JIT compiler to make some job before network access
             device.Cli2Native();
