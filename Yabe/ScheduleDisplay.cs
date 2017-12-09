@@ -456,27 +456,32 @@ namespace Yabe
             }
         }
 
+        private void AddScheduleNode(String Content)
+        {
+            if (mySelectedScheduleNode != null)
+            {
+                TreeNode T = new TreeNode(Content, 1, 1);
+
+                if (mySelectedScheduleNode.Parent == null)
+                {
+                    mySelectedScheduleNode.Nodes.Add(T);
+                    mySelectedScheduleNode.Expand();    // sometimes neeeded
+                }
+                else
+                    mySelectedScheduleNode.Parent.Nodes.Add(T);
+
+                // Modify mode
+                mySelectedScheduleNode = T;
+                modifyToolStripMenuItem_Click(null, null);
+            }
+        }
+
         // Add a new entry at the right place
         private void addToolStripMenuItem_Click(object sender, EventArgs e)
         {
             if (this.ActiveControl == Schedule)   // In the Schedule List
             {
-                if (mySelectedScheduleNode != null)
-                {
-                    TreeNode T = new TreeNode("00:00:00 = 0", 1, 1);
-
-                    if (mySelectedScheduleNode.Parent == null)
-                    {
-                        mySelectedScheduleNode.Nodes.Add(T);
-                        mySelectedScheduleNode.Expand();    // sometimes neeeded
-                    }
-                    else
-                        mySelectedScheduleNode.Parent.Nodes.Add(T);
-
-                    // Modify mode
-                    mySelectedScheduleNode = T;
-                    modifyToolStripMenuItem_Click(null, null);
-                }
+                AddScheduleNode("00:00:00 = 0");             
             }
             else
             {
@@ -485,9 +490,38 @@ namespace Yabe
                 EditPropertyObjectReference form = new EditPropertyObjectReference(newobj);
                 form.ShowDialog();
 
-
                 if (form.OutOK == true)
                     AddPropertyRefentry(form.ObjRef, -1);
+            }
+        }
+
+        String StrScheduleCopy;
+        ListViewItem PropertyReferenceCopy;
+
+        private void copyToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (this.ActiveControl == Schedule)   // In the Schedule List
+            {
+                if ((mySelectedScheduleNode != null) && (mySelectedScheduleNode.Parent != null))
+                    StrScheduleCopy = mySelectedScheduleNode.Text;
+            }
+            else if ((listReferences.SelectedItems.Count!=0))
+                PropertyReferenceCopy = listReferences.SelectedItems[0];
+
+        }
+        private void pasteToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (this.ActiveControl == Schedule)   // In the Schedule List
+            {
+                if (StrScheduleCopy != null)
+                    AddScheduleNode(StrScheduleCopy);
+            }
+            else
+            {
+                if (PropertyReferenceCopy!=null)
+                {
+                    AddPropertyRefentry((BacnetDeviceObjectPropertyReference)PropertyReferenceCopy.Tag,-1);
+                 }
             }
         }
 
@@ -575,6 +609,10 @@ namespace Yabe
             ScheduleType = (BacnetApplicationTags)(ScheduleDataType.SelectedIndex + 1);
         }
 
+        private void modifyToolStripMenuItem_Click(object sender, MouseEventArgs e)
+        {
+
+        }
 
     }
 
@@ -635,11 +673,11 @@ namespace Yabe
                 if (Reference_Device.Text != "")
                     device = new BacnetObjectId(BacnetObjectTypes.OBJECT_DEVICE, Convert.ToUInt16(Reference_Device.Text));
                 if (Reference_Array.Text != "")
-                    ArrayIdx = Convert.ToUInt32(Reference_Array.Text);
+                    ArrayIdx = Convert.ToUInt16(Reference_Array.Text);
 
 
                 BacnetDeviceObjectPropertyReference newref = new BacnetDeviceObjectPropertyReference(
-                    new BacnetObjectId((BacnetObjectTypes)(Reference_ObjType.SelectedItem as Enumcombo).enumValue, Convert.ToUInt32(Reference_ObjId.Text)),
+                    new BacnetObjectId((BacnetObjectTypes)(Reference_ObjType.SelectedItem as Enumcombo).enumValue, Convert.ToUInt16(Reference_ObjId.Text)),
                     (BacnetPropertyIds)(Reference_Prop.SelectedItem as Enumcombo).enumValue, device, ArrayIdx);
 
                 if (!ObjRef.Equals(newref))
