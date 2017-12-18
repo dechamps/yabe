@@ -35,7 +35,7 @@
             this.label2 = new System.Windows.Forms.Label();
             this.TxtEndDate = new System.Windows.Forms.TextBox();
             this.label3 = new System.Windows.Forms.Label();
-            this.Schedule = new System.Windows.Forms.TreeView();
+            this.Schedule = new CodersLab.Windows.Controls.TreeView();
             this.contextMenuStrip = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.modifyToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.deleteToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -109,6 +109,8 @@
             this.Schedule.Location = new System.Drawing.Point(21, 148);
             this.Schedule.Name = "Schedule";
             this.Schedule.SelectedImageIndex = 0;
+            this.Schedule.SelectionBackColor = System.Drawing.SystemColors.Highlight;
+            this.Schedule.SelectionMode = CodersLab.Windows.Controls.TreeViewSelectionMode.MultiSelect;
             this.Schedule.Size = new System.Drawing.Size(340, 269);
             this.Schedule.TabIndex = 7;
             this.Schedule.AfterLabelEdit += new System.Windows.Forms.NodeLabelEditEventHandler(this.Schedule_AfterLabelEdit);
@@ -309,7 +311,7 @@
         private System.Windows.Forms.Label label2;
         private System.Windows.Forms.TextBox TxtEndDate;
         private System.Windows.Forms.Label label3;
-        private System.Windows.Forms.TreeView Schedule;
+        private CodersLab.Windows.Controls.TreeView Schedule;
         private System.Windows.Forms.Button UpdateButton;
         private System.Windows.Forms.ContextMenuStrip contextMenuStrip;
         private System.Windows.Forms.ToolStripMenuItem modifyToolStripMenuItem;

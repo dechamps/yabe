@@ -440,6 +440,7 @@ namespace Yabe
 
         private void deleteToolStripMenuItem_Click(object sender, EventArgs e)
         {
+
             if (this.ActiveControl == Schedule)   // In the Schedule List
             {
                 // Do not delete A day entry, only a time schedule entry
@@ -458,22 +459,36 @@ namespace Yabe
 
         private void AddScheduleNode(String Content)
         {
-            if (mySelectedScheduleNode != null)
+            HashSet<TreeNode> selectedTreeNodes = new HashSet<TreeNode>();
+            // Get the list of top level Treenodes
+            foreach (TreeNode t in Schedule.SelectedNodes)
             {
-                TreeNode T = new TreeNode(Content, 1, 1);
-
-                if (mySelectedScheduleNode.Parent == null)
+                try
                 {
-                    mySelectedScheduleNode.Nodes.Add(T);
-                    mySelectedScheduleNode.Expand();    // sometimes neeeded
+                    if (t.Parent != null)
+                        selectedTreeNodes.Add(t.Parent);
+                    else
+                        selectedTreeNodes.Add(t);
                 }
-                else
-                    mySelectedScheduleNode.Parent.Nodes.Add(T);
+                catch { }
+            }
 
-                // Modify mode
+            TreeNode T=null;
+            foreach (TreeNode t in selectedTreeNodes)
+            {
+                T = new TreeNode(Content, 1, 1);
+                t.Nodes.Add(T);
+            }
+
+            Schedule.ExpandAll();
+
+            // Modify mode
+            if (selectedTreeNodes.Count == 1)
+            {
                 mySelectedScheduleNode = T;
                 modifyToolStripMenuItem_Click(null, null);
             }
+               
         }
 
         // Add a new entry at the right place
@@ -607,11 +622,6 @@ namespace Yabe
         private void ScheduleDataType_SelectedIndexChanged(object sender, EventArgs e)
         {
             ScheduleType = (BacnetApplicationTags)(ScheduleDataType.SelectedIndex + 1);
-        }
-
-        private void modifyToolStripMenuItem_Click(object sender, MouseEventArgs e)
-        {
-
         }
 
     }
