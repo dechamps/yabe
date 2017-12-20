@@ -457,8 +457,10 @@ namespace Yabe
             }
         }
 
-        private void AddScheduleNode(String Content)
+        private void AddScheduleNode(IList<String> Content)
         {
+            if ((Content == null) || (Content.Count == 0)) return;
+
             HashSet<TreeNode> selectedTreeNodes = new HashSet<TreeNode>();
             // Get the list of top level Treenodes
             foreach (TreeNode t in Schedule.SelectedNodes)
@@ -476,8 +478,11 @@ namespace Yabe
             TreeNode T=null;
             foreach (TreeNode t in selectedTreeNodes)
             {
-                T = new TreeNode(Content, 1, 1);
-                t.Nodes.Add(T);
+                foreach (String s in Content)
+                {
+                    T = new TreeNode(s, 1, 1);
+                    t.Nodes.Add(T);
+                }
             }
 
             Schedule.ExpandAll();
@@ -496,7 +501,7 @@ namespace Yabe
         {
             if (this.ActiveControl == Schedule)   // In the Schedule List
             {
-                AddScheduleNode("00:00:00 = 0");             
+                AddScheduleNode(new String[] {"00:00:00 = 0"});             
             }
             else
             {
@@ -510,15 +515,18 @@ namespace Yabe
             }
         }
 
-        String StrScheduleCopy;
+        List<String> StrScheduleCopy;
         ListViewItem PropertyReferenceCopy;
 
         private void copyToolStripMenuItem_Click(object sender, EventArgs e)
         {
             if (this.ActiveControl == Schedule)   // In the Schedule List
             {
-                if ((mySelectedScheduleNode != null) && (mySelectedScheduleNode.Parent != null))
-                    StrScheduleCopy = mySelectedScheduleNode.Text;
+                StrScheduleCopy = new List<String>();
+
+                foreach (TreeNode t in Schedule.SelectedNodes)
+                if  (t.Parent != null)
+                    StrScheduleCopy.Add(t.Text);
             }
             else if ((listReferences.SelectedItems.Count!=0))
                 PropertyReferenceCopy = listReferences.SelectedItems[0];
