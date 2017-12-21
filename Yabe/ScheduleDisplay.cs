@@ -745,7 +745,7 @@ namespace Yabe
             // label1
             // 
             this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(131, 27);
+            this.label1.Location = new System.Drawing.Point(161, 27);
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(53, 13);
             this.label1.TabIndex = 0;
@@ -754,7 +754,7 @@ namespace Yabe
             // label2
             // 
             this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(11, 27);
+            this.label2.Location = new System.Drawing.Point(31, 27);
             this.label2.Name = "label2";
             this.label2.Size = new System.Drawing.Size(85, 13);
             this.label2.TabIndex = 1;
@@ -765,7 +765,7 @@ namespace Yabe
             this.Reference_ObjType.FormattingEnabled = true;
             this.Reference_ObjType.Location = new System.Drawing.Point(29, 29);
             this.Reference_ObjType.Name = "Reference_ObjType";
-            this.Reference_ObjType.Size = new System.Drawing.Size(154, 21);
+            this.Reference_ObjType.Size = new System.Drawing.Size(190, 21);
             this.Reference_ObjType.Sorted = true;
             this.Reference_ObjType.TabIndex = 2;
             // 
@@ -792,26 +792,26 @@ namespace Yabe
             this.Reference_Prop.FormattingEnabled = true;
             this.Reference_Prop.Location = new System.Drawing.Point(29, 80);
             this.Reference_Prop.Name = "Reference_Prop";
-            this.Reference_Prop.Size = new System.Drawing.Size(210, 21);
+            this.Reference_Prop.Size = new System.Drawing.Size(270, 21);
             this.Reference_Prop.TabIndex = 5;
             // 
             // Reference_Array
             // 
-            this.Reference_Array.Location = new System.Drawing.Point(33, 44);
+            this.Reference_Array.Location = new System.Drawing.Point(53, 44);
             this.Reference_Array.Name = "Reference_Array";
             this.Reference_Array.Size = new System.Drawing.Size(47, 20);
             this.Reference_Array.TabIndex = 6;
             // 
             // Reference_Device
             // 
-            this.Reference_Device.Location = new System.Drawing.Point(134, 44);
+            this.Reference_Device.Location = new System.Drawing.Point(164, 44);
             this.Reference_Device.Name = "Reference_Device";
-            this.Reference_Device.Size = new System.Drawing.Size(42, 20);
+            this.Reference_Device.Size = new System.Drawing.Size(47, 20);
             this.Reference_Device.TabIndex = 7;
             // 
             // button1
             // 
-            this.button1.Location = new System.Drawing.Point(78, 227);
+            this.button1.Location = new System.Drawing.Point(100, 227);
             this.button1.Name = "button1";
             this.button1.Size = new System.Drawing.Size(121, 31);
             this.button1.TabIndex = 8;
@@ -821,17 +821,17 @@ namespace Yabe
             // 
             // Reference_ObjId
             // 
-            this.Reference_ObjId.Location = new System.Drawing.Point(205, 29);
+            this.Reference_ObjId.Location = new System.Drawing.Point(248, 29);
             this.Reference_ObjId.Name = "Reference_ObjId";
-            this.Reference_ObjId.Size = new System.Drawing.Size(34, 20);
+            this.Reference_ObjId.Size = new System.Drawing.Size(50, 20);
             this.Reference_ObjId.TabIndex = 9;
             // 
             // label5
             // 
             this.label5.AutoSize = true;
-            this.label5.Location = new System.Drawing.Point(189, 32);
+            this.label5.Location = new System.Drawing.Point(230, 32);
             this.label5.Name = "label5";
-            this.label5.Size = new System.Drawing.Size(10, 13);
+            this.label5.Size = new System.Drawing.Size(5, 13);
             this.label5.TabIndex = 10;
             this.label5.Text = ":";
             // 
@@ -843,7 +843,7 @@ namespace Yabe
             this.groupBox1.Controls.Add(this.label1);
             this.groupBox1.Location = new System.Drawing.Point(29, 125);
             this.groupBox1.Name = "groupBox1";
-            this.groupBox1.Size = new System.Drawing.Size(210, 84);
+            this.groupBox1.Size = new System.Drawing.Size(270, 84);
             this.groupBox1.TabIndex = 11;
             this.groupBox1.TabStop = false;
             this.groupBox1.Text = "Optional";
@@ -852,7 +852,7 @@ namespace Yabe
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(267, 271);
+            this.ClientSize = new System.Drawing.Size(330, 271);
             this.Controls.Add(this.groupBox1);
             this.Controls.Add(this.label5);
             this.Controls.Add(this.Reference_ObjId);
