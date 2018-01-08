@@ -813,7 +813,7 @@ namespace Utilities
           }
 
         public override object ConvertFrom(ITypeDescriptorContext context,
-                      CultureInfo culture, object value)
+                              CultureInfo culture, object value)
         {
             if (value is string)
             {
@@ -821,13 +821,21 @@ namespace Utilities
                 {
                     // A realy hidden service !!!
                     // and remember that PRESENT_VALUE = 85
-                    // entry like OBJECT_ANALOG_INPUT:0:85
+                    // entry like OBJECT_ANALOG_INPUT:0:85 or OBJECT_ANALOG_INPUT:0:85:478 for device 478
                     //
                     string[] s = (value as String).Split(':');
-                    return new BacnetDeviceObjectPropertyReference(
-                            new BacnetObjectId((BacnetObjectTypes)Enum.Parse(typeof(BacnetObjectTypes), s[0]), Convert.ToUInt16(s[1])), 
-                            (BacnetPropertyIds)Convert.ToUInt16(s[2])
-                    );
+                    if (s.Length == 4)
+                        return new BacnetDeviceObjectPropertyReference(
+                                new BacnetObjectId((BacnetObjectTypes)Enum.Parse(typeof(BacnetObjectTypes), s[0]), Convert.ToUInt16(s[1])),
+                                (BacnetPropertyIds)Convert.ToUInt16(s[2]), new BacnetObjectId(BacnetObjectTypes.OBJECT_DEVICE, Convert.ToUInt32(s[3]))
+
+                        );
+                    if (s.Length == 3)
+                        return new BacnetDeviceObjectPropertyReference(
+                                new BacnetObjectId((BacnetObjectTypes)Enum.Parse(typeof(BacnetObjectTypes), s[0]), Convert.ToUInt16(s[1])),
+                                (BacnetPropertyIds)Convert.ToUInt16(s[2])
+                        );
+                    return null;
                 }
                 catch { return null; }
             }

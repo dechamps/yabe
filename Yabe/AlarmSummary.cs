@@ -41,7 +41,7 @@ namespace Yabe
     {
         BacnetClient comm; BacnetAddress adr;
 
-        Dictionary<Tuple<String, BacnetObjectId>, String> DevicesObjectsName = new Dictionary<Tuple<String, BacnetObjectId>, String>();
+        Dictionary<Tuple<String, BacnetObjectId>, String> DevicesObjectsName;
 
         IList<BacnetGetEventInformationData> Alarms=new List<BacnetGetEventInformationData>();
 
@@ -102,25 +102,23 @@ namespace Yabe
 
         private void FillTreeNode()
         {
-            bool EmptyList = (TAlarmList.Nodes.Count == 0);
             int icon;
 
+            TAlarmList.Nodes.Clear();
+                    
             TAlarmList.BeginUpdate();
 
             // Only one network read request to get the object name
             int _retries = comm.Retries;
             comm.Retries = 1;
 
-            int Idx = 0;
-
             // fill the Treenode
             foreach (BacnetGetEventInformationData alarm in Alarms)
             {
-                TreeNode currentTn;
-
-                // get or set the Node
-                if (EmptyList == true)
+                if ((alarm.acknowledgedTransitions.ToString() != "111")||(alarm.eventState!=BacnetEventNotificationData.BacnetEventStates.EVENT_STATE_NORMAL))
                 {
+                    TreeNode currentTn;
+
                     String nameStr = null;
 
                     lock (DevicesObjectsName)
@@ -139,9 +137,9 @@ namespace Yabe
                                 DevicesObjectsName.Add(new Tuple<String, BacnetObjectId>(adr.FullHashString(), alarm.objectIdentifier), nameStr);
                         }
                     }
-                    
+
                     icon = MainDialog.GetIconNum(alarm.objectIdentifier.type);
-                    if (nameStr!=null)
+                    if (nameStr != null)
                     {
                         currentTn = new TreeNode(nameStr, icon, icon);
                         currentTn.ToolTipText = alarm.objectIdentifier.ToString();
@@ -151,50 +149,44 @@ namespace Yabe
 
                     currentTn.Tag = alarm;
                     TAlarmList.Nodes.Add(currentTn);
-                }
-                else
-                {
-                    currentTn = TAlarmList.Nodes[Idx++];
-                    currentTn.Nodes.Clear();
-                }
 
-                if (Properties.Settings.Default.DescriptionInAlarmSummary)
-                {
-                    String Descr = "";
-                    try
+                    if (Properties.Settings.Default.DescriptionInAlarmSummary)
                     {
-                        // Get the Description, network activity, time consuming
-                        IList<BacnetValue> name;
-                        bool retcode = comm.ReadPropertyRequest(adr, alarm.objectIdentifier, BacnetPropertyIds.PROP_DESCRIPTION, out name);
+                        String Descr = "";
+                        try
+                        {
+                            // Get the Description, network activity, time consuming
+                            IList<BacnetValue> name;
+                            bool retcode = comm.ReadPropertyRequest(adr, alarm.objectIdentifier, BacnetPropertyIds.PROP_DESCRIPTION, out name);
 
-                        if (retcode)
-                            Descr = name[0].Value.ToString();
+                            if (retcode)
+                                Descr = name[0].Value.ToString();
+                        }
+                        catch { }
+
+                        currentTn.Nodes.Add(new TreeNode("Description : " + Descr, Int32.MaxValue, Int32.MaxValue));
                     }
-                    catch { }
 
-                    currentTn.Nodes.Add(new TreeNode("Description : " + Descr, Int32.MaxValue, Int32.MaxValue));
-                }
+                    icon = Int32.MaxValue; // out bound
+                    currentTn.Nodes.Add(new TreeNode("Alarm state : " + GetEventStateNiceName(alarm.eventState.ToString()), icon, icon));
 
-                icon = Int32.MaxValue; // out bound
-                currentTn.Nodes.Add(new TreeNode("Alarm state : " + GetEventStateNiceName(alarm.eventState.ToString()), icon, icon));
 
-                bool SomeTodo = false;
-
-                TreeNode tn2 = new TreeNode("Ack Required :", icon, icon);               
-                for (int i = 0; i < 3; i++)
-                {
-                    if (alarm.acknowledgedTransitions.ToString()[i] == '0')
+                    TreeNode tn2 = new TreeNode("Ack Required :", icon, icon);
+                    bool ackrequired = false;
+                    for (int i = 0; i < 3; i++)
                     {
-                        BacnetEventNotificationData.BacnetEventEnable bee = (BacnetEventNotificationData.BacnetEventEnable)(1 << i);
-                        String text = GetEventEnableNiceName(bee.ToString()) + " since " + alarm.eventTimeStamps[i].Time.ToString();
-                        tn2.Nodes.Add(new TreeNode(text, icon, icon));
-                        SomeTodo = true;
+                        if (alarm.acknowledgedTransitions.ToString()[i] == '0')
+                        {
+                            BacnetEventNotificationData.BacnetEventEnable bee = (BacnetEventNotificationData.BacnetEventEnable)(1 << i);
+                            String text = GetEventEnableNiceName(bee.ToString()) + " since " + alarm.eventTimeStamps[i].Time.ToString();
+                            tn2.Nodes.Add(new TreeNode(text, icon, icon));
+                            ackrequired = true;
+                        }
                     }
+
+                    if (!ackrequired) tn2 = new TreeNode("No Ack Required, already done", icon, icon);
+                    currentTn.Nodes.Add(tn2);
                 }
-
-                if (SomeTodo == false) tn2 = new TreeNode("No Ack Required, already done", icon, icon); 
-                currentTn.Nodes.Add(tn2);
-
             }
 
             // set back the request retries number
@@ -204,7 +196,7 @@ namespace Yabe
 
             TAlarmList.ExpandAll();
 
-            if (Alarms.Count == 0)
+            if (TAlarmList.Nodes.Count == 0)
             {
                 LblInfo.Visible = true;
                 LblInfo.Text = "Empty event list ... all is OK";
