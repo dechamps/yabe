@@ -33,9 +33,6 @@ BasicServer
 	OBJECT_ANALOG_INPUT_0.PRESENT_VALUE change continously :
 		PRESENT_VALUE = OBJECT_ANALOG_VALUE_0.PRESENT_VALUE * Sin (w.t);
 
-Ths_BTLServer
-	Work in progress, based on DemoServer, by Thamer Al-Salek to comply with BTL tests.
-
 BBMDDemo
 	BBMD services on a simple device server with only one Device Object.
 	Foreign devices accepted.
