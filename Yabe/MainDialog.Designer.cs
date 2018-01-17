@@ -96,7 +96,7 @@
             this.showNotificationToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.showCalendarToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.deleteObjectToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.label3 = new System.Windows.Forms.Label();
+            this.AddSpaceLabel = new System.Windows.Forms.Label();
             this.m_SplitContainerRight = new System.Windows.Forms.SplitContainer();
             this.tabControl1 = new System.Windows.Forms.TabControl();
             this.tabPage1 = new System.Windows.Forms.TabPage();
@@ -555,7 +555,7 @@
             // splitContainer4.Panel2
             // 
             this.splitContainer4.Panel2.Controls.Add(this.m_AddressSpaceTree);
-            this.splitContainer4.Panel2.Controls.Add(this.label3);
+            this.splitContainer4.Panel2.Controls.Add(this.AddSpaceLabel);
             this.splitContainer4.Size = new System.Drawing.Size(164, 412);
             this.splitContainer4.SplitterDistance = 187;
             this.splitContainer4.TabIndex = 0;
@@ -785,15 +785,15 @@
             this.deleteObjectToolStripMenuItem.Text = "DeleteObject";
             this.deleteObjectToolStripMenuItem.Click += new System.EventHandler(this.deleteObjectToolStripMenuItem_Click);
             // 
-            // label3
+            // AddSpaceLabel
             // 
-            this.label3.AutoSize = true;
-            this.label3.Dock = System.Windows.Forms.DockStyle.Top;
-            this.label3.Location = new System.Drawing.Point(0, 0);
-            this.label3.Name = "label3";
-            this.label3.Size = new System.Drawing.Size(79, 13);
-            this.label3.TabIndex = 3;
-            this.label3.Text = "Address Space";
+            this.AddSpaceLabel.AutoSize = true;
+            this.AddSpaceLabel.Dock = System.Windows.Forms.DockStyle.Top;
+            this.AddSpaceLabel.Location = new System.Drawing.Point(0, 0);
+            this.AddSpaceLabel.Name = "AddSpaceLabel";
+            this.AddSpaceLabel.Size = new System.Drawing.Size(79, 13);
+            this.AddSpaceLabel.TabIndex = 3;
+            this.AddSpaceLabel.Text = "Address Space";
             // 
             // m_SplitContainerRight
             // 
@@ -1007,7 +1007,7 @@
         private System.Windows.Forms.TabPage tabPage1;
         private System.Windows.Forms.PropertyGrid m_DataGrid;
         private System.Windows.Forms.Label label2;
-        private System.Windows.Forms.Label label3;
+        private System.Windows.Forms.Label AddSpaceLabel;
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.Label label4;
         private System.Windows.Forms.ToolStripMenuItem searchToolStripMenuItem;

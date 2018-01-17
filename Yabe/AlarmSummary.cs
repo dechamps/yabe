@@ -141,7 +141,11 @@ namespace Yabe
                     icon = MainDialog.GetIconNum(alarm.objectIdentifier.type);
                     if (nameStr != null)
                     {
-                        currentTn = new TreeNode(nameStr, icon, icon);
+                        if (!Properties.Settings.Default.DisplayIdWithName)
+                            currentTn = new TreeNode(nameStr, icon, icon);
+                        else
+                            currentTn = new TreeNode(nameStr + " (" + System.Threading.Thread.CurrentThread.CurrentCulture.TextInfo.ToTitleCase(alarm.objectIdentifier.ToString()) + ")", icon, icon);
+
                         currentTn.ToolTipText = alarm.objectIdentifier.ToString();
                     }
                     else
@@ -277,9 +281,13 @@ namespace Yabe
                 IList<BacnetValue> name;
 
                 comm.ReadPropertyRequest(adr, alarm.objectIdentifier, BacnetPropertyIds.PROP_OBJECT_NAME, out name);
-
+                
                 tn.ToolTipText = tn.Text;
-                tn.Text = name[0].Value.ToString();
+
+                if (Properties.Settings.Default.DisplayIdWithName)
+                    tn.Text = name[0].Value.ToString() + " (" + System.Threading.Thread.CurrentThread.CurrentCulture.TextInfo.ToTitleCase(tn.ToolTipText) + ")";
+                else
+                    tn.Text = name[0].Value.ToString();
 
             }
 

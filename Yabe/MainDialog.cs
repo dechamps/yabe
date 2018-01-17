@@ -125,6 +125,17 @@ namespace Yabe
             }
         }
 
+        private void ChangeTreeNodePropertyName(TreeNode tn, String Name)
+        {
+            // Tooltip not set is not null, strange !
+            if (tn.ToolTipText=="")
+                tn.ToolTipText = tn.Text;
+            if (Properties.Settings.Default.DisplayIdWithName)
+                tn.Text = Name + " (" + System.Threading.Thread.CurrentThread.CurrentCulture.TextInfo.ToTitleCase(tn.ToolTipText.ToLower())+")";
+            else
+                tn.Text = Name;
+        }
+
         private void SetSubscriptionStatus(ListViewItem itm, string status)
         {
             if (itm.SubItems[5].Text == status) return;
@@ -849,8 +860,7 @@ namespace Yabe
             lock(DevicesObjectsName)
                 if (DevicesObjectsName.TryGetValue(new Tuple<String, BacnetObjectId>(adr.FullHashString(), object_id), out PropName) == true)
                 {
-                    node.ToolTipText = node.Text;
-                    node.Text = PropName;
+                    ChangeTreeNodePropertyName(node, PropName);;
                 }
            
             //fetch sub properties
@@ -942,6 +952,7 @@ namespace Yabe
             if (entry != null)
             {
                 m_AddressSpaceTree.Nodes.Clear();   //clear
+                AddSpaceLabel.Text = "Address Space";
 
                 BacnetClient comm ;
 
@@ -1028,6 +1039,7 @@ namespace Yabe
                         if (value_list != null && value_list.Count == 1 && value_list[0].Value is uint)
                         {
                             uint list_count = (uint)value_list[0].Value;
+                            AddSpaceLabel.Text = "Address Space : " + list_count.ToString() + " objects";
                             AddObjectListOneByOneAsync(comm, adr, device_id, list_count, AsynchRequestId);
                             return;
                         }
@@ -1039,6 +1051,7 @@ namespace Yabe
                     }
 
                     List<BacnetObjectId> objectList= SortBacnetObjects(value_list);
+                    AddSpaceLabel.Text = "Address Space : " + objectList.Count.ToString() + " objects";
                     //add to tree
                     foreach (BacnetObjectId bobj_id in objectList)
                     {                                                
@@ -1391,10 +1404,9 @@ namespace Yabe
                         // The Prop Name replace the PropId into the Treenode 
                         if (p_value.property.propertyIdentifier == (byte)BacnetPropertyIds.PROP_OBJECT_NAME)
                         {
-                            if (selected_node.ToolTipText == "")  // Tooltip not set is not null, strange !
-                                selected_node.ToolTipText = selected_node.Text;
+ 
+                            ChangeTreeNodePropertyName(selected_node, value.ToString());// Update the object name if needed
 
-                            selected_node.Text = value.ToString(); // Update the object name if needed
                             lock (DevicesObjectsName)
                             {
                                 Tuple<String, BacnetObjectId> t = new Tuple<String, BacnetObjectId>(adr.FullHashString(), object_id);
@@ -2602,8 +2614,9 @@ namespace Yabe
                     {
                         lock (DevicesObjectsName)
                             DevicesObjectsName.Add(new Tuple<String, BacnetObjectId>(adr.FullHashString(), Bacobj), Identifier);
-                        t.ToolTipText = t.Text;
-                        t.Text = Identifier;
+
+                        ChangeTreeNodePropertyName(t, Identifier);
+
                     }
                 }
 
@@ -2714,8 +2727,7 @@ namespace Yabe
                     if (tn.ToolTipText == "")
                     {
                         BacnetReadAccessResult r = result.Single(o => o.objectIdentifier.Equals(b));
-                        tn.ToolTipText = tn.Text;
-                        tn.Text = r.values[0].value[0].ToString();
+                        ChangeTreeNodePropertyName(tn, r.values[0].value[0].ToString());
                     }
                 }
                 catch { }
@@ -2788,8 +2800,7 @@ namespace Yabe
                         {
                             if (AsynchRequestId != this.AsynchRequestId) return; // another test in the GUI thread
 
-                            tn.ToolTipText = tn.Text;
-                            tn.Text = name[0].Value.ToString();
+                            ChangeTreeNodePropertyName(tn, name[0].Value.ToString());
 
                             lock (DevicesObjectsName)
                             {

@@ -217,6 +217,10 @@
 			device Id. Can be usefull to set recipients list in notification class 
 			objects without using Yabe Ip endpoint. 
 
+		2.6.13 DisplayIdWithName
+			Leaves properties Id (such as ANALOG_INPUT:0) along with the properties 
+ 			name or hides this Id.
+
 	2.7 Bacnet Object name
 			By default Bacnet objects are displayed using the object identifier eg : 
 			ANALOG_INPUT:0, DEVICE:333 ...
