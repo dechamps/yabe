@@ -39,14 +39,14 @@
             // ObjectType
             // 
             this.ObjectType.FormattingEnabled = true;
-            this.ObjectType.Location = new System.Drawing.Point(28, 24);
+            this.ObjectType.Location = new System.Drawing.Point(18, 24);
             this.ObjectType.Name = "ObjectType";
-            this.ObjectType.Size = new System.Drawing.Size(217, 21);
+            this.ObjectType.Size = new System.Drawing.Size(227, 21);
             this.ObjectType.TabIndex = 0;
             // 
             // Create
             // 
-            this.Create.Location = new System.Drawing.Point(28, 68);
+            this.Create.Location = new System.Drawing.Point(18, 68);
             this.Create.Name = "Create";
             this.Create.Size = new System.Drawing.Size(75, 23);
             this.Create.TabIndex = 1;
@@ -56,7 +56,7 @@
             // 
             // Cancel
             // 
-            this.Cancel.Location = new System.Drawing.Point(240, 68);
+            this.Cancel.Location = new System.Drawing.Point(247, 68);
             this.Cancel.Name = "Cancel";
             this.Cancel.Size = new System.Drawing.Size(75, 23);
             this.Cancel.TabIndex = 2;
@@ -66,7 +66,7 @@
             // 
             // ObjectId
             // 
-            this.ObjectId.Location = new System.Drawing.Point(251, 25);
+            this.ObjectId.Location = new System.Drawing.Point(256, 25);
             this.ObjectId.Maximum = new decimal(new int[] {
             4194303,
             0,

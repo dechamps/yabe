@@ -102,7 +102,7 @@
       <Value Profile="(Default)">False</Value>
     </Setting>
     <Setting Name="DisplayIdWithName" Type="System.Boolean" Scope="User">
-      <Value Profile="(Default)">False</Value>
+      <Value Profile="(Default)">True</Value>
     </Setting>
   </Settings>
 </SettingsFile>

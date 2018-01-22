@@ -623,7 +623,7 @@ namespace Yabe
             // 
             // year
             // 
-            this.year.Location = new System.Drawing.Point(231, 27);
+            this.year.Location = new System.Drawing.Point(234, 27);
             this.year.Name = "year";
             this.year.Size = new System.Drawing.Size(50, 20);
             this.year.TabIndex = 3;
@@ -631,15 +631,15 @@ namespace Yabe
             // month
             // 
             this.month.FormattingEnabled = true;
-            this.month.Location = new System.Drawing.Point(162, 27);
+            this.month.Location = new System.Drawing.Point(155, 27);
             this.month.Name = "month";
-            this.month.Size = new System.Drawing.Size(53, 21);
+            this.month.Size = new System.Drawing.Size(73, 21);
             this.month.TabIndex = 2;
             // 
             // day
             // 
             this.day.FormattingEnabled = true;
-            this.day.Location = new System.Drawing.Point(101, 27);
+            this.day.Location = new System.Drawing.Point(94, 27);
             this.day.Name = "day";
             this.day.Size = new System.Drawing.Size(53, 21);
             this.day.TabIndex = 1;
@@ -647,7 +647,7 @@ namespace Yabe
             // wday
             // 
             this.wday.FormattingEnabled = true;
-            this.wday.Location = new System.Drawing.Point(16, 27);
+            this.wday.Location = new System.Drawing.Point(9, 27);
             this.wday.Name = "wday";
             this.wday.Size = new System.Drawing.Size(79, 21);
             this.wday.TabIndex = 0;
