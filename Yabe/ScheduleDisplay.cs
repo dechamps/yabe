@@ -689,7 +689,7 @@ namespace Yabe
                 uint ArrayIdx = ASN1.BACNET_ARRAY_ALL;
 
                 if (Reference_Device.Text != "")
-                    device = new BacnetObjectId(BacnetObjectTypes.OBJECT_DEVICE, Convert.ToUInt16(Reference_Device.Text));
+                    device = new BacnetObjectId(BacnetObjectTypes.OBJECT_DEVICE, Convert.ToUInt32(Reference_Device.Text));
                 if (Reference_Array.Text != "")
                     ArrayIdx = Convert.ToUInt16(Reference_Array.Text);
 
