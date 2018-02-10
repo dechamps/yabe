@@ -57,9 +57,11 @@ namespace Weather2_to_Bacnet
 
         // An alternative is to embbed data into code, or to use another way (configuration file, ...)
         string BacnetDeviceId = (string)Registry.GetValue(@"HKEY_LOCAL_MACHINE\SOFTWARE\Weather2_to_Bacnet", "BacnetDeviceId", null);
+        string AppId = (string)Registry.GetValue(@"HKEY_LOCAL_MACHINE\SOFTWARE\Weather2_to_Bacnet", "AppId", null);
         string UserAccessKey = (string)Registry.GetValue(@"HKEY_LOCAL_MACHINE\SOFTWARE\Weather2_to_Bacnet", "UserAccessKey", null);
         string Latitude = (string)Registry.GetValue(@"HKEY_LOCAL_MACHINE\SOFTWARE\Weather2_to_Bacnet", "Latitude", null);
         string Longitude = (string)Registry.GetValue(@"HKEY_LOCAL_MACHINE\SOFTWARE\Weather2_to_Bacnet", "Longitude", null);
+        string Lang = (string)Registry.GetValue(@"HKEY_LOCAL_MACHINE\SOFTWARE\Weather2_to_Bacnet", "Lang", null);
 
         public bool RunAsConsoleApp()
         {
@@ -72,15 +74,15 @@ namespace Weather2_to_Bacnet
         }
 
 
-        private string Wheather2_Request(string UserAccessKey, string Lat, string Long)
+        private string Wheather2_Request(string AppId, string UserAccessKey, string Lat, string Long, string Lg="fr")
         {
-            //return "<?xml version=\"1.0\" encoding=\"UTF-8\"?><weather><curren_weather><temp>14</temp><temp_unit>c</temp_unit><wind><speed>5</speed><dir>SW</dir><wind_unit>kph</wind_unit></wind><humidity>77</humidity><pressure>1018</pressure><weather_text>Mostly cloudy</weather_text><weather_code>1</weather_code></curren_weather><forecast><date>2016-05-20</date><temp_unit>c</temp_unit><day_max_temp>16</day_max_temp><night_min_temp>13</night_min_temp><day><weather_text>Overcast skies</weather_text><weather_code>3</weather_code><wind><speed>25</speed><dir>S</dir><dir_degree>188</dir_degree><wind_unit>kph</wind_unit></wind></day><night><weather_text>Overcast skies</weather_text><weather_code>3</weather_code><wind><speed>36</speed><dir>SSW</dir><dir_degree>201</dir_degree><wind_unit>kph</wind_unit></wind></night></forecast><forecast><date>2016-05-21</date><temp_unit>c</temp_unit><day_max_temp>17</day_max_temp><night_min_temp>12</night_min_temp><day><weather_text>Moderate rain</weather_text><weather_code>63</weather_code><wind><speed>36</speed><dir>S</dir><dir_degree>180</dir_degree><wind_unit>kph</wind_unit></wind></day><night><weather_text>Clear skies</weather_text><weather_code>0</weather_code><wind><speed>32</speed><dir>WSW</dir><dir_degree>255</dir_degree><wind_unit>kph</wind_unit></wind></night></forecast></weather>";
-
             try
             {
-                string Url = "http://www.myweather2.com/developer/forecast.ashx?output=xml?uac=" + UserAccessKey + "&query=" + Lat + "," + Long;
 
-                WebRequest req = WebRequest.Create(Url);
+                string Url = "http://api.weatherunlocked.com/api/current/" + Lat + "," + Long + "?app_id=" + AppId + "&app_key=" + UserAccessKey+"&lang="+Lg+"";
+
+                HttpWebRequest req = (HttpWebRequest)HttpWebRequest.Create(Url);
+                req.Accept = "text/xml";
                 WebResponse resp = req.GetResponse();
                 
                 StreamReader respReader = new StreamReader(resp.GetResponseStream());
@@ -100,7 +102,7 @@ namespace Weather2_to_Bacnet
         {
             try
             {
-                AI.internal_PROP_PRESENT_VALUE = Convert.ToInt32(NodeVal.InnerText);
+                AI.internal_PROP_PRESENT_VALUE = Convert.ToSingle(NodeVal.InnerText, CultureInfo.InvariantCulture);
                 AI.m_PROP_OUT_OF_SERVICE = false;
                 AI.m_PROP_STATUS_FLAGS.SetBit((byte)3, false);
             }
@@ -119,24 +121,24 @@ namespace Weather2_to_Bacnet
                 XmlDocument doc = new XmlDocument();
                 doc.LoadXml(Rep);
 
-                XmlNode node = doc.SelectSingleNode("/weather/curren_weather/temp");
+                XmlNode node = doc.SelectSingleNode("/CurrentWeather/temperature_c");
                 SetAIValue(Temp, node);
                 if (Temp.m_PROP_OUT_OF_SERVICE == false)
                     TrendTemp.AddValue(Temp.internal_PROP_PRESENT_VALUE, 0);
 
-                node = doc.SelectSingleNode("/weather/curren_weather/wind/speed");
+                node = doc.SelectSingleNode("/CurrentWeather/wind_speed_kmh");
                 SetAIValue(Windspeed, node);
 
-                node = doc.SelectSingleNode("/weather/curren_weather/wind/dir");
+                node = doc.SelectSingleNode("/CurrentWeather/wind_direction_com");
                 Windsdir.internal_PROP_PRESENT_VALUE = node.InnerText;
 
-                node = doc.SelectSingleNode("/weather/curren_weather/humidity");
+                node = doc.SelectSingleNode("/CurrentWeather/humidity");
                 SetAIValue(Humidity, node);
 
-                node = doc.SelectSingleNode("/weather/curren_weather/pressure");
+                node = doc.SelectSingleNode("/CurrentWeather/air_pressure_mb");
                 SetAIValue(Pressure, node);
 
-                node = doc.SelectSingleNode("/weather/curren_weather/weather_text");
+                node = doc.SelectSingleNode("/CurrentWeather/weather_description");
                 WeatherDescr.internal_PROP_PRESENT_VALUE = node.InnerText;
 
                 // http://www.meteo.psu.edu/~jyh10/classes/meteo473/java-tdew.htm
@@ -314,7 +316,7 @@ namespace Weather2_to_Bacnet
                 }
 
                 // Read wheather data from the webservice
-                String xmlRep = Wheather2_Request(UserAccessKey, Latitude, Longitude);
+                String xmlRep = Wheather2_Request(AppId, UserAccessKey, Latitude, Longitude, Lang);
                 if (xmlRep != null)
                     ParseWheather2_Response(xmlRep);
 

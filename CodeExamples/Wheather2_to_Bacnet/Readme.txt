@@ -15,14 +15,15 @@
 *********************************************************************/
 
 This program (windows service or console) gets current weather data
-from MyWeather2 Internet Webservice and 'sends' them on Bacnet.
+from WeatherUnlocked Internet Webservice and 'sends' them on Bacnet.
 
-You must first creates a user account into http://www.myweather2.com/
-in order to get a UserAccessKey : see Developper Zone for a 2 Day Forecast 
-Weather API access. It's free of charge for basic services.
+You must first creates a user account into https://developer.weatherunlocked.com/
+in order to get an AppId & Key : see https://developer.weatherunlocked.com/signup
+It's free of charge for basic services.
 
 You have to modify and add information into the registry : have a look to 
-the .Reg file (UserAccessKey, Latitude, Longitude must be modified).
+the .Reg file (AppId, UserAccessKey, Latitude, Longitude must be modified).
+Latitude, Longitude with no more than 3 decimal places.
 
 On an old Win32 only PC, removes Wow6432Node from the .reg file entry :
 	[HKEY_LOCAL_MACHINE\SOFTWARE\Wow6432Node\Weather2_to_Bacnet]
@@ -46,3 +47,4 @@ The code could be simply ported to Linux-Mono :
 	removes the inheritence between MyService and ServiceBase
 	removes MyServiceInstaller class
 
+Weather2 was the service name before 1st March 2018: application name is unchanged.
