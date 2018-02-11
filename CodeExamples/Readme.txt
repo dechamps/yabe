@@ -112,7 +112,7 @@ BacnetToDatabase
 
 Wheather2_to_Bacnet
 	A windows service application (or console) able to get back
-	Weather2 data (http://www.myweather2.com/), and provides it on Bacnet.
+	WeatherUnlock data (http://www.weatherunlocked.com), and provides it on Bacnet.
 	See comments in Readme file in the application directory and look at 
 	Wheather2config.reg file for configuration.
 

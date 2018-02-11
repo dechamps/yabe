@@ -1728,10 +1728,15 @@ namespace System.IO.BACnet
             else
                 ret = "Every days";
 
-            if (month != 255)
+            if (month <= 12)
                 ret = ret + " on " + CultureInfo.CurrentCulture.DateTimeFormat.MonthNames[month - 1];
             else
-                ret = ret + " on every month";
+                if (month == 255)
+                    ret = ret + " on every months";
+                else if (month == 13)
+                    ret = ret + " on odd months";
+                else
+                    ret = ret + " on even months";
 
             return ret;
         }
