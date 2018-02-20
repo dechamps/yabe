@@ -623,23 +623,23 @@ namespace Yabe
             // 
             // year
             // 
-            this.year.Location = new System.Drawing.Point(231, 27);
+            this.year.Location = new System.Drawing.Point(236, 27);
             this.year.Name = "year";
-            this.year.Size = new System.Drawing.Size(50, 20);
+            this.year.Size = new System.Drawing.Size(50, 21);
             this.year.TabIndex = 3;
             // 
             // month
             // 
             this.month.FormattingEnabled = true;
-            this.month.Location = new System.Drawing.Point(162, 27);
+            this.month.Location = new System.Drawing.Point(155, 27);
             this.month.Name = "month";
-            this.month.Size = new System.Drawing.Size(53, 21);
+            this.month.Size = new System.Drawing.Size(73, 21);
             this.month.TabIndex = 2;
             // 
             // day
             // 
             this.day.FormattingEnabled = true;
-            this.day.Location = new System.Drawing.Point(101, 27);
+            this.day.Location = new System.Drawing.Point(95, 27);
             this.day.Name = "day";
             this.day.Size = new System.Drawing.Size(53, 21);
             this.day.TabIndex = 1;
