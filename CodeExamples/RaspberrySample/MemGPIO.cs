@@ -87,7 +87,7 @@ namespace GPIO
                 // http://www.raspberrypi-spy.co.uk/2012/09/checking-your-raspberry-pi-board-version/
                 string readValue = File.ReadAllText("/proc/cpuinfo");
 
-                if (readValue.Contains("BCM2708"))  // BCM2708=BCM2835 for Pi up to B+, Pi2 it's BCM2709=BCM2836
+                if (readValue.Contains("BCM2708") || readValue.Contains("BCM2835"))  // BCM2708=BCM2835 for Pi up to B+, Pi2 it's BCM2709=BCM2836
                     BCM283x_GPIO_BASE = 0x20000000 + 0x200000;
                 else
                     BCM283x_GPIO_BASE = 0x3F000000 + 0x200000;
