@@ -430,5 +430,17 @@ namespace Yabe.Properties {
                 this["DisplayIdWithName"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("CheckReliability")]
+        public string Plugins {
+            get {
+                return ((string)(this["Plugins"]));
+            }
+            set {
+                this["Plugins"] = value;
+            }
+        }
     }
 }

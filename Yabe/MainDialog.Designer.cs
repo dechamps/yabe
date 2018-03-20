@@ -1,6 +1,6 @@
 ﻿namespace Yabe
 {
-    partial class MainDialog
+    partial class YabeMainDialog
     {
         /// <summary>
         /// Required designer variable.
@@ -30,7 +30,7 @@
         {
             this.components = new System.ComponentModel.Container();
             System.Windows.Forms.ImageList m_ImageList;
-            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MainDialog));
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(YabeMainDialog));
             System.Windows.Forms.TreeNode treeNode1 = new System.Windows.Forms.TreeNode("Devices");
             this.toolStrip1 = new System.Windows.Forms.ToolStrip();
             this.m_SearchToolButton = new System.Windows.Forms.ToolStripButton();
@@ -67,6 +67,7 @@
             this.showCalendarToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
             this.optionsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.settingsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.pluginsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.helpToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.helpToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
             this.aboutToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -466,7 +467,8 @@
             // optionsToolStripMenuItem
             // 
             this.optionsToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.settingsToolStripMenuItem});
+            this.settingsToolStripMenuItem,
+            this.pluginsToolStripMenuItem});
             this.optionsToolStripMenuItem.Name = "optionsToolStripMenuItem";
             this.optionsToolStripMenuItem.Size = new System.Drawing.Size(61, 20);
             this.optionsToolStripMenuItem.Text = "Options";
@@ -475,9 +477,16 @@
             // 
             this.settingsToolStripMenuItem.Image = global::Yabe.Properties.Resources.application_form;
             this.settingsToolStripMenuItem.Name = "settingsToolStripMenuItem";
-            this.settingsToolStripMenuItem.Size = new System.Drawing.Size(116, 22);
+            this.settingsToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
             this.settingsToolStripMenuItem.Text = "Settings";
             this.settingsToolStripMenuItem.Click += new System.EventHandler(this.settingsToolStripMenuItem_Click);
+            // 
+            // pluginsToolStripMenuItem
+            // 
+            this.pluginsToolStripMenuItem.Image = global::Yabe.Properties.Resources.plugin;
+            this.pluginsToolStripMenuItem.Name = "pluginsToolStripMenuItem";
+            this.pluginsToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.pluginsToolStripMenuItem.Text = "Plugins";
             // 
             // helpToolStripMenuItem
             // 
@@ -492,7 +501,7 @@
             // 
             this.helpToolStripMenuItem1.Image = global::Yabe.Properties.Resources.information;
             this.helpToolStripMenuItem1.Name = "helpToolStripMenuItem1";
-            this.helpToolStripMenuItem1.Size = new System.Drawing.Size(107, 22);
+            this.helpToolStripMenuItem1.Size = new System.Drawing.Size(152, 22);
             this.helpToolStripMenuItem1.Text = "Help";
             this.helpToolStripMenuItem1.Click += new System.EventHandler(this.helpToolStripMenuItem1_Click);
             // 
@@ -500,7 +509,7 @@
             // 
             this.aboutToolStripMenuItem.Image = global::Yabe.Properties.Resources.information;
             this.aboutToolStripMenuItem.Name = "aboutToolStripMenuItem";
-            this.aboutToolStripMenuItem.Size = new System.Drawing.Size(107, 22);
+            this.aboutToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
             this.aboutToolStripMenuItem.Text = "About";
             this.aboutToolStripMenuItem.Click += new System.EventHandler(this.aboutToolStripMenuItem_Click);
             // 
@@ -941,7 +950,7 @@
             // 
             this.m_subscriptionRenewTimer.Tick += new System.EventHandler(this.m_subscriptionRenewTimer_Tick);
             // 
-            // MainDialog
+            // YabeMainDialog
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
@@ -952,7 +961,7 @@
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.KeyPreview = true;
             this.MainMenuStrip = this.menuStrip1;
-            this.Name = "MainDialog";
+            this.Name = "YabeMainDialog";
             this.Text = "Yet Another Bacnet Explorer - Yabe";
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.MainDialog_FormClosing);
             this.Load += new System.EventHandler(this.MainDialog_Load);
@@ -1002,7 +1011,6 @@
         private System.Windows.Forms.SplitContainer m_SplitContainerRight;
         private System.Windows.Forms.TextBox m_LogText;
         private System.Windows.Forms.SplitContainer splitContainer4;
-        private System.Windows.Forms.TreeView m_DeviceTree;
         private System.Windows.Forms.TabControl tabControl1;
         private System.Windows.Forms.TabPage tabPage1;
         private System.Windows.Forms.PropertyGrid m_DataGrid;
@@ -1057,7 +1065,6 @@
         private System.Windows.Forms.ToolStripMenuItem showScheduleToolStripMenuItem1;
         private System.Windows.Forms.ToolStripMenuItem showNotificationToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem showNotificationToolStripMenuItem1;
-        private CodersLab.Windows.Controls.TreeView m_AddressSpaceTree;
         private System.Windows.Forms.ToolStripMenuItem showCalendarToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem showCalendarToolStripMenuItem1;
         private System.Windows.Forms.ToolStripMenuItem alarmSummaryToolStripMenuItem1;
@@ -1075,6 +1082,9 @@
         private System.Windows.Forms.ToolStripMenuItem sendUnicastUdpWhoIsToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem iPFunctionsToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem editBBMDTablesToolStripMenuItem;
+        public System.Windows.Forms.TreeView m_DeviceTree;
+        public CodersLab.Windows.Controls.TreeView m_AddressSpaceTree;
+        public System.Windows.Forms.ToolStripMenuItem pluginsToolStripMenuItem;
     }
 }
 

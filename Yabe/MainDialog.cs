@@ -41,21 +41,24 @@ using System.Runtime.Serialization.Formatters.Binary;
 using System.Media;
 using System.Linq;
 using System.Collections;
+using System.Reflection;
 
 namespace Yabe
 {
-    public partial class MainDialog : Form
+    public partial class YabeMainDialog : Form
     {       
         private Dictionary<BacnetClient, BacnetDeviceLine> m_devices = new Dictionary<BacnetClient, BacnetDeviceLine>();
         private Dictionary<string, ListViewItem> m_subscription_list = new Dictionary<string, ListViewItem>();
         // Memory of all object names already discovered, first string in the Tuple is the device network address hash
         // The tuple contains two value types, so it's ok for cross session
-        Dictionary<Tuple<String, BacnetObjectId>, String> DevicesObjectsName = new Dictionary<Tuple<String, BacnetObjectId>, String>();
+        public Dictionary<Tuple<String, BacnetObjectId>, String> DevicesObjectsName = new Dictionary<Tuple<String, BacnetObjectId>, String>();
 
         private uint m_next_subscription_id = 0;
 
         private static DeviceStorage m_storage;
         private List<BacnetObjectDescription> objectsDescriptionExternal, objectsDescriptionDefault;
+
+        YabeMainDialog yabeFrm; // Ref to itself, already affected, usefull for plugin developpmenet inside this code, before exporting it
 
         private class BacnetDeviceLine
         {
@@ -71,8 +74,10 @@ namespace Yabe
 
         private int AsynchRequestId=0;
 
-        public MainDialog()
+        public YabeMainDialog()
         {
+            yabeFrm = this;
+
             InitializeComponent();
             Trace.Listeners.Add(new MyTraceListener(this));
             m_DeviceTree.ExpandAll();
@@ -269,9 +274,9 @@ namespace Yabe
         #region " Trace Listner "
         private class MyTraceListener : TraceListener
         {
-            private MainDialog m_form;
+            private YabeMainDialog m_form;
 
-            public MyTraceListener(MainDialog form)
+            public MyTraceListener(YabeMainDialog form)
                 : base("MyListener")
             {
                 m_form = form;
@@ -357,6 +362,26 @@ namespace Yabe
             Utilities.CustomSingleConverter.DontDisplayExactFloats = true;
 
             m_DeviceTree.TreeViewNodeSorter = new NodeSorter();
+
+            string[] listPlugins = Properties.Settings.Default.Plugins.Split(new char[] { ',', ';' });
+
+            foreach (string pluginname in listPlugins)
+            {
+                try
+                {
+                    string name = pluginname.Replace(" ", String.Empty);
+                    Assembly myDll = Assembly.LoadFrom(name + ".dll");
+                    Type[] types = myDll.GetExportedTypes();
+                    IYabePlugin plugin = (IYabePlugin)myDll.CreateInstance(name + ".Plugin", true);
+                    plugin.Init(this);
+                }
+                catch
+                {
+                    Trace.WriteLine("Error loading plugins " + pluginname);
+                }
+            }
+
+            if (pluginsToolStripMenuItem.DropDownItems.Count == 0) pluginsToolStripMenuItem.Visible = false;
         }
 
         private TreeNode FindCommTreeNode(BacnetClient comm)
@@ -1595,7 +1620,7 @@ namespace Yabe
             }
         }
 
-        private bool GetObjectLink(out BacnetClient comm, out BacnetAddress adr, out BacnetObjectId object_id, BacnetObjectTypes ExpectedType)
+        public bool GetObjectLink(out BacnetClient comm, out BacnetAddress adr, out BacnetObjectId object_id, BacnetObjectTypes ExpectedType)
         {
 
             comm = null;
@@ -1634,9 +1659,14 @@ namespace Yabe
                     return false;
                 }
             }
-            object_id = (BacnetObjectId)m_AddressSpaceTree.SelectedNode.Tag;
 
-            return true;
+            if (m_AddressSpaceTree.SelectedNode != null)
+            {
+                object_id = (BacnetObjectId)m_AddressSpaceTree.SelectedNode.Tag;
+                return true;
+            }
+
+            return false;
         }
 
         private void downloadFileToolStripMenuItem_Click(object sender, EventArgs e)
@@ -2185,7 +2215,7 @@ namespace Yabe
 
         private void helpToolStripMenuItem1_Click(object sender, EventArgs e)
         {
-            string readme_path = System.IO.Path.Combine( System.IO.Path.GetDirectoryName( typeof(MainDialog).Assembly.Location), "README.txt");
+            string readme_path = System.IO.Path.Combine( System.IO.Path.GetDirectoryName( typeof(YabeMainDialog).Assembly.Location), "README.txt");
             System.Diagnostics.Process.Start(readme_path);
         }
 

@@ -104,5 +104,8 @@
     <Setting Name="DisplayIdWithName" Type="System.Boolean" Scope="User">
       <Value Profile="(Default)">True</Value>
     </Setting>
+    <Setting Name="Plugins" Type="System.String" Scope="User">
+      <Value Profile="(Default)">CheckReliability</Value>
+    </Setting>
   </Settings>
 </SettingsFile>

@@ -138,7 +138,7 @@ namespace Yabe
                         }
                     }
 
-                    icon = MainDialog.GetIconNum(alarm.objectIdentifier.type);
+                    icon = YabeMainDialog.GetIconNum(alarm.objectIdentifier.type);
                     if (nameStr != null)
                     {
                         if (!Properties.Settings.Default.DisplayIdWithName)

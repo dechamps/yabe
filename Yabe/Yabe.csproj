@@ -128,6 +128,7 @@
       <DependentUpon>ForeignRegistry.cs</DependentUpon>
     </Compile>
     <Compile Include="GenericInputBox.cs" />
+    <Compile Include="IYabePlugin.cs" />
     <Compile Include="MainDialog.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -283,6 +284,7 @@
     <EmbeddedResource Include="Resources\EmbeddedDll\PacketDotNet.dll" />
     <EmbeddedResource Include="Resources\EmbeddedDll\SharpPcap.dll" />
     <EmbeddedResource Include="Resources\EmbeddedDll\ZedGraph.dll" />
+    <None Include="Resources\plugin.png" />
     <Content Include="Search.ico" />
   </ItemGroup>
   <ItemGroup>

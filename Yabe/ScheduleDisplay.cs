@@ -158,7 +158,7 @@ namespace Yabe
             // add a new one
             lvi.Text = newText;
             lvi.Tag = bopr;
-            lvi.ImageIndex = MainDialog.GetIconNum(bopr.objectIdentifier.type);
+            lvi.ImageIndex = YabeMainDialog.GetIconNum(bopr.objectIdentifier.type);
             listReferences.Items.Add(lvi);
         }
 
