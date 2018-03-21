@@ -45,6 +45,7 @@ namespace CheckReliability
         public Reliability(YabeMainDialog yabeFrm)
         {
             this.yabeFrm = yabeFrm;
+            Icon = yabeFrm.Icon; // gets Yabe Icon
             InitializeComponent();
         }
 
@@ -55,6 +56,10 @@ namespace CheckReliability
             // and optionnaly the object into the AddressSpaceTree treeview
             // return false if objId is not OK (but got the value ANALOG:0 !)
             // BacnetClient & BacnetAddress could be null if nothing is selected into the DeviceTree
+
+            // a lot of Error in the Trace due to Read property not existing, remove listerner, then add it back
+            TraceListener trace = Trace.Listeners[1];
+            Trace.Listeners.Remove(Trace.Listeners[1].Name);
 
             try
             {
@@ -70,11 +75,16 @@ namespace CheckReliability
             catch
             { }
 
+            Trace.Listeners.Add(trace);
+
+            treeView1.ExpandAll();
+
             Cursor.Current = Cursors.Default;
         }
 
         void CheckAllObjects(TreeNodeCollection tncol)
         {
+
             foreach (TreeNode tn in tncol) // gets all nodes into the AddressSpaceTree
             {
                 BacnetObjectId object_id = (BacnetObjectId)tn.Tag;
@@ -84,9 +94,6 @@ namespace CheckReliability
                 lock (yabeFrm.DevicesObjectsName) // translate to it's name if already known
                     yabeFrm.DevicesObjectsName.TryGetValue(new Tuple<String, BacnetObjectId>(adr.FullHashString(), object_id), out Identifier);
 
-                // a lot of Error in the Trace due to Read property not existing, remove listerner, then add it back
-                TraceListener trace=Trace.Listeners[1];
-                Trace.Listeners.Remove(Trace.Listeners[1].Name);
                 try
                 {
 
@@ -113,13 +120,10 @@ namespace CheckReliability
                 catch
                 {
                 }
-                Trace.Listeners.Add(trace);
 
                 if (tn.Nodes != null)   // go deap into the tree
                     CheckAllObjects(tn.Nodes);
             }
-
-            treeView1.ExpandAll();
         }
     }
 }

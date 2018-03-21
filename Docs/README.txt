@@ -221,6 +221,9 @@
 			Leaves properties Id (such as ANALOG_INPUT:0) along with the properties 
  			name or hides this Id.
 
+		2.6.14 Plugins
+			List of plugins to be loaded (see §2.8).
+
 	2.7 Bacnet Object name
 			By default Bacnet objects are displayed using the object identifier eg : 
 			ANALOG_INPUT:0, DEVICE:333 ...
@@ -252,6 +255,14 @@
 			one, and the old object mapping will never be cleanned in the file.
 			If a device got a physical address of an old one, the mapping is wrong, but
 			after all read operations in the Address space, it's OK.
+
+	2.8 External plugins
+			User plugins written en C# can be add to Yabe (Menu Option-Plugins). 
+			See Readme file in the YabePlugins source code directory.
+
+	2.9 COV & Event logging
+			Subscriptions updates & Events displayed in the central panel can be 
+			logged into a CSV file : right click in this central panel to do it.
 			
 3.  TECHNICAL
     

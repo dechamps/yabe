@@ -58,6 +58,7 @@
     <Reference Include="System.Xml" />
     <Reference Include="Yabe">
       <HintPath>..\..\Yabe\bin\Debug\Yabe.exe</HintPath>
+      <Private>False</Private>
     </Reference>
   </ItemGroup>
   <ItemGroup>

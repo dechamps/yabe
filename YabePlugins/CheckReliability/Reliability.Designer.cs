@@ -55,6 +55,7 @@
             this.ClientSize = new System.Drawing.Size(291, 315);
             this.Controls.Add(this.Devicename);
             this.Controls.Add(this.treeView1);
+            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
             this.MaximizeBox = false;
             this.MinimizeBox = false;
             this.Name = "Reliability";

@@ -6,7 +6,7 @@ Plugins are compiled as Dll files and should be put close to Yabe.exe.
 This allows users to adds private fonctionnalities & menus to Yabe (but C# knowledge is mandatory).
 
 The settings parameter 'Plugins' should give the list of all plugins (names only without '.dll')
-separated with a , or a  ;
+separated with a , or a  ; Without that plugins are not loaded at Yabe startup.
 
 
 CheckReliability

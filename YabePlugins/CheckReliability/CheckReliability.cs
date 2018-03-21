@@ -41,9 +41,8 @@ namespace CheckReliability // namespace should have the same name as the dll fil
     public class Plugin : IYabePlugin // class should be named Plugin and implementation of IYabePlugin is required
     {
         YabeMainDialog yabeFrm;
-
-	// yabeFrm is also declared into Yabe Main class
-	// This is usefull for plugin developpement inside Yabe project, before exporting it
+	    // yabeFrm is also declared into Yabe Main class
+	    // This is usefull for plugin developpement inside Yabe project, before exporting it
 
         public void Init(YabeMainDialog yabeFrm) // This is the unique mandatory method for a Yabe plugin 
         {
