@@ -34,6 +34,7 @@ using System.Windows.Forms;
 using Yabe;
 using System.IO.BACnet;
 using System.Diagnostics;
+using System.IO.BACnet.Serialize;
 
 namespace CheckReliability
 {
@@ -51,6 +52,14 @@ namespace CheckReliability
 
         private void Reliability_Load(object sender, EventArgs e)
         {
+            BeginInvoke(new Action(RunReadAll)); // Leave Windows displaying the form before processing
+        }
+
+        bool IsEmpty = true;
+
+        void RunReadAll()
+        {
+            Application.UseWaitCursor = true;
 
             // Gets all elements concerning the selected device into the DeviceTree
             // and optionnaly the object into the AddressSpaceTree treeview
@@ -63,14 +72,11 @@ namespace CheckReliability
 
             try
             {
-                Cursor.Current = Cursors.WaitCursor;
-                Application.DoEvents();
-
                 yabeFrm.GetObjectLink(out client, out adr, out objId, BacnetObjectTypes.MAX_BACNET_OBJECT_TYPE);
                 Devicename.Text = adr.ToString();
 
                 CheckAllObjects(yabeFrm.m_AddressSpaceTree.Nodes);
-
+                EmptyList.Visible = IsEmpty;
             }
             catch
             { }
@@ -79,14 +85,17 @@ namespace CheckReliability
 
             treeView1.ExpandAll();
 
-            Cursor.Current = Cursors.Default;
+            Application.UseWaitCursor=false;
+            
         }
 
         void CheckAllObjects(TreeNodeCollection tncol)
         {
-
+           
             foreach (TreeNode tn in tncol) // gets all nodes into the AddressSpaceTree
             {
+                Application.DoEvents();
+
                 BacnetObjectId object_id = (BacnetObjectId)tn.Tag;
 
                 String Identifier = "";
@@ -97,24 +106,48 @@ namespace CheckReliability
                 try
                 {
 
-                    // read RELIABILITY property on all objects (maybe a test could be done to avoid call without interest)
                     IList<BacnetValue> value;
+                    // read RELIABILITY property on all objects (maybe a test could be done to avoid call without interest)   
                     bool ret = client.ReadPropertyRequest(adr, object_id, BacnetPropertyIds.PROP_RELIABILITY, out value);
+
+                    // another solution with ReadPropertyMultipleRequest, but not supported by simple devices
+                    // ... can also read these two properties on all objects in one time (with segmentation on huge devices)
+                    /* 
+                    BacnetReadAccessSpecification[] bras = new BacnetReadAccessSpecification[1];
+                    bras[0].objectIdentifier = object_id;
+                    bras[0].propertyReferences = new BacnetPropertyReference[2];
+                    bras[0].propertyReferences[0] = new BacnetPropertyReference((uint)BacnetPropertyIds.PROP_RELIABILITY, ASN1.BACNET_ARRAY_ALL);
+                    bras[0].propertyReferences[1] = new BacnetPropertyReference((uint)BacnetPropertyIds.PROP_DESCRIPTION, ASN1.BACNET_ARRAY_ALL);
+                    IList<BacnetReadAccessResult> res;
+                    ret=client.ReadPropertyMultipleRequest(adr, bras, out res); // it's a read multiple properties on multiple objects
+                    value = res[0].values[0].value; // for PROP_RELIABILITY
+                    value = res[0].values[1].value; // for PROP_DESCRIPTION
+                    */
 
                     if (ret)
                         if ((uint)value[0].Value != 0) // different than RELIABILITY_NO_FAULT_DETECTED
                         {
+                            IsEmpty = false;
+
                             string name = object_id.ToString();
                             if (name.StartsWith("OBJECT_"))
                                 name=name.Substring(7);
 
                             TreeNode N = treeView1.Nodes.Add(name + " / " + Identifier);
 
-                            name = ((BacnetReliability)value[0].Value).ToString();
-                            name = name.Replace('_', ' ');
-                            name = System.Threading.Thread.CurrentThread.CurrentCulture.TextInfo.ToTitleCase(name.ToLower());
+                            string reliability = ((BacnetReliability)value[0].Value).ToString();
+                            reliability = reliability.Replace('_', ' ');
+                            reliability = System.Threading.Thread.CurrentThread.CurrentCulture.TextInfo.ToTitleCase(reliability.ToLower());
 
-                            N.Nodes.Add(name);
+                            N.Nodes.Add(reliability);
+
+                            // PROP_DESCRIPTION
+                            //... if ReadPropertyMultipleRequest uses value = res[0].values[1].value
+                            /* 
+                            ret = client.ReadPropertyRequest(adr, object_id, BacnetPropertyIds.PROP_DESCRIPTION, out value); // with Description
+                            if (ret)
+                                N.Nodes.Add(value[0].Value.ToString());
+                            */
                         }                            
                 }
                 catch
