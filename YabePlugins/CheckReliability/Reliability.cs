@@ -133,7 +133,11 @@ namespace CheckReliability
                             if (name.StartsWith("OBJECT_"))
                                 name=name.Substring(7);
 
-                            TreeNode N = treeView1.Nodes.Add(name + " / " + Identifier);
+                            TreeNode N;
+                            if (Identifier!="")
+                                 N = treeView1.Nodes.Add(Identifier);
+                            else
+                                N = treeView1.Nodes.Add(name);
 
                             string reliability = ((BacnetReliability)value[0].Value).ToString();
                             reliability = reliability.Replace('_', ' ');
