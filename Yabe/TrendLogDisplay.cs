@@ -57,10 +57,18 @@ namespace Yabe
         {
 
             InitializeComponent();
+            this.comm = comm;
+            this.adr = adr;
+            this.object_id = object_id;
+        }
+
+        private void TrendLogDisplay_Shown(object sender, EventArgs e)
+        {
+            Application.DoEvents(); // Required on Linux/Unbuntu
 
             ToolTip ToolTip1 = new ToolTip();
-            ToolTip1.SetToolTip(m_progressBar, "Click here to stop download");            
-            
+            ToolTip1.SetToolTip(m_progressBar, "Click here to stop download");
+
             m_zedGraphCtl.GraphPane.XAxis.Type = AxisType.Date;
             m_zedGraphCtl.GraphPane.XAxis.Title.Text = "Date/Time";
             m_zedGraphCtl.GraphPane.YAxis.Title.Text = "Values";
@@ -98,9 +106,6 @@ namespace Yabe
                 this.UseWaitCursor = true;
 
                 // Start downloads in thread
-                this.comm = comm;
-                this.adr = adr;
-                this.object_id = object_id;
                 Thread th = new Thread(DownloadFullTrendLog);
                 th.IsBackground = true;
                 th.Start();
@@ -111,7 +116,7 @@ namespace Yabe
                 m_progresslabel.Text = "The trendlog is empty, nothing to display";
             }
 
-            m_list.Visible=false; // to avoid flicker during download
+            m_list.Visible = false; // to avoid flicker during download
         }
 
         // Stop download
@@ -370,5 +375,6 @@ namespace Yabe
             itm.SubItems.Add(status.ToString());
             this.Invoke((MethodInvoker)delegate { m_list.Items.Add(itm); });
         }
+
     }
 }

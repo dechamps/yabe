@@ -52,18 +52,21 @@ namespace Yabe
             m_SerialPortCombo.Items.AddRange(ports);
             m_SerialPtpPortCombo.Items.AddRange(ports);
 
-            //find all pipe transports that's pretending to be com ports
-            ports = BacnetPipeTransport.AvailablePorts;
-            foreach (string str in ports)
-                if (str.StartsWith("com", StringComparison.InvariantCultureIgnoreCase))
-                {
-                    m_SerialPortCombo.Items.Add(str);
-                    m_SerialPtpPortCombo.Items.Add(str);
-                }
+            if (Environment.OSVersion.Platform == System.PlatformID.Win32Windows) 
+            {
+                //find all pipe transports that's pretending to be com ports  : fail on Linux
+                ports = BacnetPipeTransport.AvailablePorts;
+                foreach (string str in ports)
+                    if (str.StartsWith("com", StringComparison.InvariantCultureIgnoreCase))
+                    {
+                        m_SerialPortCombo.Items.Add(str);
+                        m_SerialPtpPortCombo.Items.Add(str);
+                    }
 
-            //select first
-            if (m_SerialPortCombo.Items.Count > 0) m_SerialPortCombo.SelectedItem = m_SerialPortCombo.Items[0];
-            if (m_SerialPtpPortCombo.Items.Count > 0) m_SerialPtpPortCombo.SelectedItem = m_SerialPtpPortCombo.Items[0];
+                //select first
+                if (m_SerialPortCombo.Items.Count > 0) m_SerialPortCombo.SelectedItem = m_SerialPortCombo.Items[0];
+                if (m_SerialPtpPortCombo.Items.Count > 0) m_SerialPtpPortCombo.SelectedItem = m_SerialPtpPortCombo.Items[0];
+            }
         }
 
         private void m_SearchIpButton_Click(object sender, EventArgs e)

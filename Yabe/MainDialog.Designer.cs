@@ -477,7 +477,7 @@
             // 
             this.settingsToolStripMenuItem.Image = global::Yabe.Properties.Resources.application_form;
             this.settingsToolStripMenuItem.Name = "settingsToolStripMenuItem";
-            this.settingsToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.settingsToolStripMenuItem.Size = new System.Drawing.Size(116, 22);
             this.settingsToolStripMenuItem.Text = "Settings";
             this.settingsToolStripMenuItem.Click += new System.EventHandler(this.settingsToolStripMenuItem_Click);
             // 
@@ -485,7 +485,7 @@
             // 
             this.pluginsToolStripMenuItem.Image = global::Yabe.Properties.Resources.plugin;
             this.pluginsToolStripMenuItem.Name = "pluginsToolStripMenuItem";
-            this.pluginsToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.pluginsToolStripMenuItem.Size = new System.Drawing.Size(116, 22);
             this.pluginsToolStripMenuItem.Text = "Plugins";
             // 
             // helpToolStripMenuItem
