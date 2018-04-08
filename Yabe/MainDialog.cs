@@ -369,8 +369,9 @@ namespace Yabe
             {
                 try
                 {
+                    string path = Path.GetDirectoryName(Application.ExecutablePath);
                     string name = pluginname.Replace(" ", String.Empty);
-                    Assembly myDll = Assembly.LoadFrom(name + ".dll");
+                    Assembly myDll = Assembly.LoadFrom(path+"/"+name + ".dll");
                     Type[] types = myDll.GetExportedTypes();
                     IYabePlugin plugin = (IYabePlugin)myDll.CreateInstance(name + ".Plugin", true);
                     plugin.Init(this);
