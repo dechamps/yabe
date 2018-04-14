@@ -2216,7 +2216,7 @@ namespace Yabe
 
         private void helpToolStripMenuItem1_Click(object sender, EventArgs e)
         {
-            string readme_path = System.IO.Path.Combine( System.IO.Path.GetDirectoryName( typeof(YabeMainDialog).Assembly.Location), "README.txt");
+            string readme_path = Path.GetDirectoryName(Application.ExecutablePath)+"/README.txt";
             System.Diagnostics.Process.Start(readme_path);
         }
 
@@ -2759,16 +2759,15 @@ namespace Yabe
                     {
                         BacnetReadAccessResult r = result.Single(o => o.objectIdentifier.Equals(b));
                         ChangeTreeNodePropertyName(tn, r.values[0].value[0].ToString());
+                        lock (DevicesObjectsName)
+                        {
+                            var t = new Tuple<String, BacnetObjectId>(adr.FullHashString(), (BacnetObjectId)tn.Tag);
+                            DevicesObjectsName.Remove(t); // sometimes the same object appears at several place (in Groups for instance).
+                            DevicesObjectsName.Add(t, r.values[0].value[0].ToString());
+                        }
                     }
                 }
                 catch { }
-
-                lock (DevicesObjectsName)
-                {
-                    var t = new Tuple<String, BacnetObjectId>(adr.FullHashString(), (BacnetObjectId)tn.Tag);
-                    DevicesObjectsName.Remove(t); // sometimes the same object appears at several place (in Groups for instance).
-                    DevicesObjectsName.Add(t, tn.Text);
-                }
 
                 if (tn.Nodes != null)
                     SetObjectName(tn.Nodes, result, adr);
@@ -2837,7 +2836,7 @@ namespace Yabe
                             {
                                 var t=new Tuple<String, BacnetObjectId>(adr.FullHashString(), (BacnetObjectId)tn.Tag);
                                 DevicesObjectsName.Remove(t); // sometimes the same object appears at several place (in Groups for instance).
-                                DevicesObjectsName.Add(t, tn.Text);
+                                DevicesObjectsName.Add(t, name[0].Value.ToString());
                             }
                         });
                     }
