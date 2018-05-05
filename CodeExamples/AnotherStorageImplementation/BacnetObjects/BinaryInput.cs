@@ -33,6 +33,13 @@ namespace BaCSharp
 {
     public class BinaryInput : BinaryObject
     {
+        public uint m_PROP_RELIABILITY;
+        [BaCSharpType(BacnetApplicationTags.BACNET_APPLICATION_TAG_ENUMERATED)]
+        public virtual uint PROP_RELIABILITY
+        {
+            get { return m_PROP_RELIABILITY; }
+        }
+
         public BinaryInput(int ObjId, String ObjName, String Description, bool InitialValue)
             : base(new BacnetObjectId(BacnetObjectTypes.OBJECT_BINARY_INPUT, (uint)ObjId), ObjName, Description, InitialValue)
         {

@@ -35,6 +35,12 @@ namespace BaCSharp
 
     public class MultiStateInput : AnalogInput<uint>
     {
+        public uint m_PROP_RELIABILITY;
+        [BaCSharpType(BacnetApplicationTags.BACNET_APPLICATION_TAG_ENUMERATED)]
+        public virtual uint PROP_RELIABILITY
+        {
+            get { return m_PROP_RELIABILITY; }
+        }
 
         public uint m_PROP_NUMBER_OF_STATES;
         [BaCSharpType(BacnetApplicationTags.BACNET_APPLICATION_TAG_UNSIGNED_INT)]
