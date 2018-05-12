@@ -154,10 +154,10 @@ namespace ListCOV_Increment
                     catch
                     {
                     }
-
-                    if (tn.Nodes != null)   // go deap into the tree
-                        CheckAllObjects(tn.Nodes);
                 }
+
+                if (tn.Nodes != null)   // go deap into the tree
+                    CheckAllObjects(tn.Nodes);
             }
         }
 
