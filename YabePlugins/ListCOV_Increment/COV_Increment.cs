@@ -113,8 +113,7 @@ namespace ListCOV_Increment
 
                         IList<BacnetValue> value;
                         // read COV_Increment property on all objects (maybe a test could be done to avoid call without interest)   
-                        //bool ret = client.ReadPropertyRequest(adr, object_id, BacnetPropertyIds.PROP_COV_INCREMENT, out value);
-                        bool ret = client.ReadPropertyRequest(adr, object_id, BacnetPropertyIds.PROP_PRESENT_VALUE, out value);
+                        bool ret = client.ReadPropertyRequest(adr, object_id, BacnetPropertyIds.PROP_COV_INCREMENT, out value);
                         string Increment = value[0].Value.ToString();
 
                         if (ret)
