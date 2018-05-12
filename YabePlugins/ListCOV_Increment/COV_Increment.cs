@@ -1,4 +1,29 @@
-﻿using System;
+﻿/**************************************************************************
+*                           MIT License
+* 
+* Copyright (C) 2018 Frederic Chaxel <fchaxel@free.fr>
+*
+* Permission is hereby granted, free of charge, to any person obtaining
+* a copy of this software and associated documentation files (the
+* "Software"), to deal in the Software without restriction, including
+* without limitation the rights to use, copy, modify, merge, publish,
+* distribute, sublicense, and/or sell copies of the Software, and to
+* permit persons to whom the Software is furnished to do so, subject to
+* the following conditions:
+*
+* The above copyright notice and this permission notice shall be included
+* in all copies or substantial portions of the Software.
+*
+* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+* EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+* MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+* IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
+* CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
+* TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
+* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+*
+*********************************************************************/
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -15,6 +40,8 @@ namespace ListCOV_Increment
 {
     public partial class COV_Increment : Form
     {
+        public BacnetObjectTypes[] Filter; // Filtering list
+
         YabeMainDialog yabeFrm;
         BacnetClient client; BacnetAddress adr; BacnetObjectId objId;
 
@@ -66,52 +93,72 @@ namespace ListCOV_Increment
 
         void CheckAllObjects(TreeNodeCollection tncol)
         {
-           
+
             foreach (TreeNode tn in tncol) // gets all nodes into the AddressSpaceTree
             {
                 Application.DoEvents();
 
                 BacnetObjectId object_id = (BacnetObjectId)tn.Tag;
 
-                 String Identifier = null;
-
-                lock (yabeFrm.DevicesObjectsName) // translate to it's name if already known
-                    yabeFrm.DevicesObjectsName.TryGetValue(new Tuple<String, BacnetObjectId>(adr.FullHashString(), object_id), out Identifier);
-
-                try
+                if (Filter.Contains(object_id.type)) // Only for some objects
                 {
 
-                    IList<BacnetValue> value;
-                    // read COV_Increment property on all objects (maybe a test could be done to avoid call without interest)   
-                    bool ret = client.ReadPropertyRequest(adr, object_id, BacnetPropertyIds.PROP_COV_INCREMENT, out value);
-                    string Increment = value[0].Value.ToString();
+                    String Identifier = null;
 
-                    if (ret)
+                    lock (yabeFrm.DevicesObjectsName) // translate to it's name if already known
+                        yabeFrm.DevicesObjectsName.TryGetValue(new Tuple<String, BacnetObjectId>(adr.FullHashString(), object_id), out Identifier);
+
+                    try
                     {
-                        IsEmpty = false;
-                                    
-                        string name = object_id.ToString();
-                    if (name.StartsWith("OBJECT_"))
-                            name=name.Substring(7);
-                    
-                        TreeNode N;
-                        if (Identifier != null)
-                            N = treeView1.Nodes.Add(Identifier + " (" + System.Threading.Thread.CurrentThread.CurrentCulture.TextInfo.ToTitleCase(name.ToLower()) + ")");
-                        else
-                            N = treeView1.Nodes.Add(name);
-                        ret = client.ReadPropertyRequest(adr, object_id, BacnetPropertyIds.PROP_DESCRIPTION, out value); // with Description
+
+                        IList<BacnetValue> value;
+                        // read COV_Increment property on all objects (maybe a test could be done to avoid call without interest)   
+                        //bool ret = client.ReadPropertyRequest(adr, object_id, BacnetPropertyIds.PROP_COV_INCREMENT, out value);
+                        bool ret = client.ReadPropertyRequest(adr, object_id, BacnetPropertyIds.PROP_PRESENT_VALUE, out value);
+                        string Increment = value[0].Value.ToString();
+
                         if (ret)
-                            N.Nodes.Add(value[0].Value.ToString());
-                        N.Nodes.Add(("Value = ") + Increment);
+                        {
 
+                            string Units = "";
+                            try
+                            {
+                                // read Units property on all objects (maybe a test could be done to avoid call without interest)   
+                                ret = client.ReadPropertyRequest(adr, object_id, BacnetPropertyIds.PROP_UNITS, out value);
+                                Units = ((BacnetUnitsId)((uint)value[0].Value)).ToString();
+                                if (Units.StartsWith("UNITS_"))
+                                    Units = Units.Substring(6);
+                                Units = Units.Replace("_", " ");
+                                Units = System.Threading.Thread.CurrentThread.CurrentCulture.TextInfo.ToTitleCase(Units.ToLower());
+                            }
+                            catch { };
+
+
+                            IsEmpty = false;
+
+                            string name = object_id.ToString();
+                            if (name.StartsWith("OBJECT_"))
+                                name = name.Substring(7);
+
+                            TreeNode N;
+                            if (Identifier != null)
+                                N = treeView1.Nodes.Add(Identifier + " (" + System.Threading.Thread.CurrentThread.CurrentCulture.TextInfo.ToTitleCase(name.ToLower()) + ")");
+                            else
+                                N = treeView1.Nodes.Add(name);
+                            ret = client.ReadPropertyRequest(adr, object_id, BacnetPropertyIds.PROP_DESCRIPTION, out value); // with Description
+                            if (ret)
+                                N.Nodes.Add(value[0].Value.ToString());
+                            N.Nodes.Add(("Value = ") + Increment + " " + Units);
+
+                        }
                     }
-                }
-                catch
-                {
-                }
+                    catch
+                    {
+                    }
 
-                if (tn.Nodes != null)   // go deap into the tree
-                    CheckAllObjects(tn.Nodes);
+                    if (tn.Nodes != null)   // go deap into the tree
+                        CheckAllObjects(tn.Nodes);
+                }
             }
         }
 

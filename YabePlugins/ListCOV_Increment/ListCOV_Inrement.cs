@@ -48,13 +48,42 @@ namespace ListCOV_Increment // namespace should have the same name as the dll fi
         {
             this.yabeFrm = yabeFrm;
 
-            // Creates the Menu Item
+            // Create the Menu Item
             ToolStripMenuItem MenuItem=new ToolStripMenuItem();
             MenuItem.Text="List COV_Increment";
-            MenuItem.Click += new EventHandler(MenuItem_Click);
-
             // Add It as a sub menu (pluginsToolStripMenuItem is the only public Menu member)
-            yabeFrm.pluginsToolStripMenuItem.DropDownItems.Add(MenuItem);           
+            yabeFrm.pluginsToolStripMenuItem.DropDownItems.Add(MenuItem);
+
+            // Create SubMenu Item
+            ToolStripMenuItem  SubMenuItem = new ToolStripMenuItem();
+            SubMenuItem.Text = "on all Objects";
+            SubMenuItem.Tag = new BacnetObjectTypes[] 
+                {BacnetObjectTypes.OBJECT_ANALOG_INPUT,
+                 BacnetObjectTypes.OBJECT_ANALOG_VALUE,
+                 BacnetObjectTypes.OBJECT_ANALOG_OUTPUT,
+                 BacnetObjectTypes.OBJECT_LOOP,
+                 BacnetObjectTypes.OBJECT_PULSE_CONVERTER }; // all objects types with COV_Increment property
+
+            SubMenuItem.Click += new EventHandler(MenuItem_Click);
+            MenuItem.DropDownItems.Add(SubMenuItem);
+
+            SubMenuItem = new ToolStripMenuItem();
+            SubMenuItem.Text = "on Analog Input Objects";
+            SubMenuItem.Tag = new BacnetObjectTypes[] {BacnetObjectTypes.OBJECT_ANALOG_INPUT};
+            SubMenuItem.Click += new EventHandler(MenuItem_Click);
+            MenuItem.DropDownItems.Add(SubMenuItem);
+
+            SubMenuItem = new ToolStripMenuItem();
+            SubMenuItem.Text = "on Analog Output Objects";
+            SubMenuItem.Tag = new BacnetObjectTypes[] { BacnetObjectTypes.OBJECT_ANALOG_OUTPUT };
+            SubMenuItem.Click += new EventHandler(MenuItem_Click);
+            MenuItem.DropDownItems.Add(SubMenuItem);
+
+            SubMenuItem = new ToolStripMenuItem();
+            SubMenuItem.Text = "on Analog Value Objects";
+            SubMenuItem.Tag = new BacnetObjectTypes[] { BacnetObjectTypes.OBJECT_ANALOG_VALUE };
+            SubMenuItem.Click += new EventHandler(MenuItem_Click);
+            MenuItem.DropDownItems.Add(SubMenuItem);
                         
         }
 
@@ -72,6 +101,8 @@ namespace ListCOV_Increment // namespace should have the same name as the dll fi
                 Trace.WriteLine("call to the ListCOV_Inrement plugin");
 
                 COV_Increment frm = new COV_Increment(yabeFrm);
+                frm.Filter = (BacnetObjectTypes[])((ToolStripMenuItem)sender).Tag;
+
                 frm.ShowDialog();
             }
             catch { }
