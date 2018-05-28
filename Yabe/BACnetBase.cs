@@ -6720,14 +6720,10 @@ namespace System.IO.BACnet.Serialize
             /* a tag number of 4 is not extended so only one octet */
             len++;
             /* tag 5 - covIncrement - optional */
-            if (ASN1.decode_is_context_tag(buffer, offset + len, 5))
+            if ((len < apdu_len)&&(ASN1.decode_is_context_tag(buffer, offset + len, 5)))
             {
                 len += ASN1.decode_tag_number_and_value(buffer, offset + len, out tag_number, out len_value);
                 len += ASN1.decode_real(buffer, offset + len, out covIncrement);
-            }
-            else
-            {
-                covIncrement = 0;
             }
 
             return len;
