@@ -443,12 +443,9 @@ namespace Yabe
 
             if (this.ActiveControl == Schedule)   // In the Schedule List
             {
-                // Do not delete A day entry, only a time schedule entry
-                if ((mySelectedScheduleNode != null) && (mySelectedScheduleNode.Parent != null))
-                {
-                    Schedule.Nodes.Remove(mySelectedScheduleNode);
-                    mySelectedScheduleNode = null;
-                }
+                foreach (TreeNode t in Schedule.SelectedNodes)
+                    if (t.Parent != null)
+                        Schedule.Nodes.Remove(t);
             }
             else
             {
@@ -515,7 +512,7 @@ namespace Yabe
             }
         }
 
-        List<String> StrScheduleCopy;
+        static List<String> StrScheduleCopy; // static to permit copy paste between different schedules
         ListViewItem PropertyReferenceCopy;
 
         private void copyToolStripMenuItem_Click(object sender, EventArgs e)
