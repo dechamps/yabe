@@ -442,5 +442,29 @@ namespace Yabe.Properties {
                 this["Plugins"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("Circle")]
+        public global::ZedGraph.SymbolType GraphDotStyle {
+            get {
+                return ((global::ZedGraph.SymbolType)(this["GraphDotStyle"]));
+            }
+            set {
+                this["GraphDotStyle"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool GraphLineStep {
+            get {
+                return ((bool)(this["GraphLineStep"]));
+            }
+            set {
+                this["GraphLineStep"] = value;
+            }
+        }
     }
 }

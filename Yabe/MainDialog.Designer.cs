@@ -87,7 +87,6 @@
             this.readPropertiesNameToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.createObjectToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.label2 = new System.Windows.Forms.Label();
-            this.m_AddressSpaceTree = new CodersLab.Windows.Controls.TreeView();
             this.m_AddressSpaceMenuStrip = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.subscribeToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.downloadFileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -101,6 +100,8 @@
             this.m_SplitContainerRight = new System.Windows.Forms.SplitContainer();
             this.tabControl1 = new System.Windows.Forms.TabControl();
             this.tabPage1 = new System.Windows.Forms.TabPage();
+            this.splitCOV = new System.Windows.Forms.SplitContainer();
+            this.labelDrop1 = new System.Windows.Forms.Label();
             this.m_SubscriptionView = new System.Windows.Forms.ListView();
             this.columnHeader1 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeader2 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
@@ -108,13 +109,17 @@
             this.columnHeader4 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeader5 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeader6 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.columnHeader7 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.m_EventSpaceMenuStrip = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.EventAlarmLogToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.labelDrop2 = new System.Windows.Forms.Label();
+            this.CovGraph = new ZedGraph.ZedGraphControl();
             this.m_DataGrid = new System.Windows.Forms.PropertyGrid();
             this.label1 = new System.Windows.Forms.Label();
             this.m_LogText = new System.Windows.Forms.TextBox();
             this.label4 = new System.Windows.Forms.Label();
             this.m_subscriptionRenewTimer = new System.Windows.Forms.Timer(this.components);
+            this.m_AddressSpaceTree = new CodersLab.Windows.Controls.TreeView();
             m_ImageList = new System.Windows.Forms.ImageList(this.components);
             this.toolStrip1.SuspendLayout();
             this.menuStrip1.SuspendLayout();
@@ -138,6 +143,10 @@
             this.m_SplitContainerRight.SuspendLayout();
             this.tabControl1.SuspendLayout();
             this.tabPage1.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.splitCOV)).BeginInit();
+            this.splitCOV.Panel1.SuspendLayout();
+            this.splitCOV.Panel2.SuspendLayout();
+            this.splitCOV.SuspendLayout();
             this.m_EventSpaceMenuStrip.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -603,7 +612,7 @@
             this.readPropertiesNameToolStripMenuItem,
             this.createObjectToolStripMenuItem});
             this.m_DeviceTreeMenuStrip.Name = "m_DeviceTreeMenuStrip";
-            this.m_DeviceTreeMenuStrip.Size = new System.Drawing.Size(225, 230);
+            this.m_DeviceTreeMenuStrip.Size = new System.Drawing.Size(225, 208);
             // 
             // addDeviceToolStripMenuItem
             // 
@@ -697,24 +706,6 @@
             this.label2.Size = new System.Drawing.Size(46, 13);
             this.label2.TabIndex = 2;
             this.label2.Text = "Devices";
-            // 
-            // m_AddressSpaceTree
-            // 
-            this.m_AddressSpaceTree.ContextMenuStrip = this.m_AddressSpaceMenuStrip;
-            this.m_AddressSpaceTree.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.m_AddressSpaceTree.ImageIndex = 0;
-            this.m_AddressSpaceTree.ImageList = m_ImageList;
-            this.m_AddressSpaceTree.Location = new System.Drawing.Point(0, 13);
-            this.m_AddressSpaceTree.Name = "m_AddressSpaceTree";
-            this.m_AddressSpaceTree.SelectedImageIndex = 0;
-            this.m_AddressSpaceTree.SelectionBackColor = System.Drawing.SystemColors.Highlight;
-            this.m_AddressSpaceTree.SelectionMode = CodersLab.Windows.Controls.TreeViewSelectionMode.MultiSelectSameLevel;
-            this.m_AddressSpaceTree.ShowNodeToolTips = true;
-            this.m_AddressSpaceTree.Size = new System.Drawing.Size(164, 208);
-            this.m_AddressSpaceTree.TabIndex = 0;
-            this.m_AddressSpaceTree.ItemDrag += new System.Windows.Forms.ItemDragEventHandler(this.m_AddressSpaceTree_ItemDrag);
-            this.m_AddressSpaceTree.AfterSelect += new System.Windows.Forms.TreeViewEventHandler(this.m_AddressSpaceTree_AfterSelect);
-            this.m_AddressSpaceTree.MouseDown += new System.Windows.Forms.MouseEventHandler(this.TreeView_MouseDown);
             // 
             // m_AddressSpaceMenuStrip
             // 
@@ -834,7 +825,7 @@
             // 
             // tabPage1
             // 
-            this.tabPage1.Controls.Add(this.m_SubscriptionView);
+            this.tabPage1.Controls.Add(this.splitCOV);
             this.tabPage1.Location = new System.Drawing.Point(4, 22);
             this.tabPage1.Name = "tabPage1";
             this.tabPage1.Padding = new System.Windows.Forms.Padding(3);
@@ -842,6 +833,35 @@
             this.tabPage1.TabIndex = 0;
             this.tabPage1.Text = "Subscriptions, Periodic Polling, Events/Alarms";
             this.tabPage1.UseVisualStyleBackColor = true;
+            // 
+            // splitCOV
+            // 
+            this.splitCOV.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.splitCOV.Location = new System.Drawing.Point(3, 3);
+            this.splitCOV.Name = "splitCOV";
+            this.splitCOV.Orientation = System.Windows.Forms.Orientation.Horizontal;
+            // 
+            // splitCOV.Panel1
+            // 
+            this.splitCOV.Panel1.Controls.Add(this.labelDrop1);
+            this.splitCOV.Panel1.Controls.Add(this.m_SubscriptionView);
+            // 
+            // splitCOV.Panel2
+            // 
+            this.splitCOV.Panel2.Controls.Add(this.labelDrop2);
+            this.splitCOV.Panel2.Controls.Add(this.CovGraph);
+            this.splitCOV.Size = new System.Drawing.Size(382, 380);
+            this.splitCOV.SplitterDistance = 190;
+            this.splitCOV.TabIndex = 1;
+            // 
+            // labelDrop1
+            // 
+            this.labelDrop1.AutoSize = true;
+            this.labelDrop1.Location = new System.Drawing.Point(36, 42);
+            this.labelDrop1.Name = "labelDrop1";
+            this.labelDrop1.Size = new System.Drawing.Size(279, 13);
+            this.labelDrop1.TabIndex = 1;
+            this.labelDrop1.Text = "Drop objects here from the Address Space to subscribe ...";
             // 
             // m_SubscriptionView
             // 
@@ -852,13 +872,14 @@
             this.columnHeader3,
             this.columnHeader4,
             this.columnHeader5,
-            this.columnHeader6});
+            this.columnHeader6,
+            this.columnHeader7});
             this.m_SubscriptionView.ContextMenuStrip = this.m_EventSpaceMenuStrip;
             this.m_SubscriptionView.Dock = System.Windows.Forms.DockStyle.Fill;
             this.m_SubscriptionView.FullRowSelect = true;
-            this.m_SubscriptionView.Location = new System.Drawing.Point(3, 3);
+            this.m_SubscriptionView.Location = new System.Drawing.Point(0, 0);
             this.m_SubscriptionView.Name = "m_SubscriptionView";
-            this.m_SubscriptionView.Size = new System.Drawing.Size(382, 380);
+            this.m_SubscriptionView.Size = new System.Drawing.Size(382, 190);
             this.m_SubscriptionView.TabIndex = 0;
             this.m_SubscriptionView.UseCompatibleStateImageBehavior = false;
             this.m_SubscriptionView.View = System.Windows.Forms.View.Details;
@@ -890,6 +911,11 @@
             // 
             this.columnHeader6.Text = "Status";
             // 
+            // columnHeader7
+            // 
+            this.columnHeader7.Text = "";
+            this.columnHeader7.Width = 4;
+            // 
             // m_EventSpaceMenuStrip
             // 
             this.m_EventSpaceMenuStrip.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
@@ -904,6 +930,33 @@
             this.EventAlarmLogToolStripMenuItem.Size = new System.Drawing.Size(253, 22);
             this.EventAlarmLogToolStripMenuItem.Text = "Start saving Cov/Event/Alarm Log";
             this.EventAlarmLogToolStripMenuItem.Click += new System.EventHandler(this.EventAlarmLogToolStripMenuItem_Click);
+            // 
+            // labelDrop2
+            // 
+            this.labelDrop2.AutoSize = true;
+            this.labelDrop2.Location = new System.Drawing.Point(39, 26);
+            this.labelDrop2.Name = "labelDrop2";
+            this.labelDrop2.Size = new System.Drawing.Size(153, 13);
+            this.labelDrop2.TabIndex = 1;
+            this.labelDrop2.Text = "... or here to subscribe and plot";
+            // 
+            // CovGraph
+            // 
+            this.CovGraph.AllowDrop = true;
+            this.CovGraph.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.CovGraph.Location = new System.Drawing.Point(0, 0);
+            this.CovGraph.Name = "CovGraph";
+            this.CovGraph.ScrollGrace = 0D;
+            this.CovGraph.ScrollMaxX = 0D;
+            this.CovGraph.ScrollMaxY = 0D;
+            this.CovGraph.ScrollMaxY2 = 0D;
+            this.CovGraph.ScrollMinX = 0D;
+            this.CovGraph.ScrollMinY = 0D;
+            this.CovGraph.ScrollMinY2 = 0D;
+            this.CovGraph.Size = new System.Drawing.Size(382, 186);
+            this.CovGraph.TabIndex = 0;
+            this.CovGraph.DragDrop += new System.Windows.Forms.DragEventHandler(this.m_SubscriptionView_DragDrop);
+            this.CovGraph.DragEnter += new System.Windows.Forms.DragEventHandler(this.m_SubscriptionView_DragEnter);
             // 
             // m_DataGrid
             // 
@@ -950,6 +1003,24 @@
             // 
             this.m_subscriptionRenewTimer.Tick += new System.EventHandler(this.m_subscriptionRenewTimer_Tick);
             // 
+            // m_AddressSpaceTree
+            // 
+            this.m_AddressSpaceTree.ContextMenuStrip = this.m_AddressSpaceMenuStrip;
+            this.m_AddressSpaceTree.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.m_AddressSpaceTree.ImageIndex = 0;
+            this.m_AddressSpaceTree.ImageList = m_ImageList;
+            this.m_AddressSpaceTree.Location = new System.Drawing.Point(0, 13);
+            this.m_AddressSpaceTree.Name = "m_AddressSpaceTree";
+            this.m_AddressSpaceTree.SelectedImageIndex = 0;
+            this.m_AddressSpaceTree.SelectionBackColor = System.Drawing.SystemColors.Highlight;
+            this.m_AddressSpaceTree.SelectionMode = CodersLab.Windows.Controls.TreeViewSelectionMode.MultiSelectSameLevel;
+            this.m_AddressSpaceTree.ShowNodeToolTips = true;
+            this.m_AddressSpaceTree.Size = new System.Drawing.Size(164, 208);
+            this.m_AddressSpaceTree.TabIndex = 0;
+            this.m_AddressSpaceTree.ItemDrag += new System.Windows.Forms.ItemDragEventHandler(this.m_AddressSpaceTree_ItemDrag);
+            this.m_AddressSpaceTree.AfterSelect += new System.Windows.Forms.TreeViewEventHandler(this.m_AddressSpaceTree_AfterSelect);
+            this.m_AddressSpaceTree.MouseDown += new System.Windows.Forms.MouseEventHandler(this.TreeView_MouseDown);
+            // 
             // YabeMainDialog
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -994,6 +1065,12 @@
             this.m_SplitContainerRight.ResumeLayout(false);
             this.tabControl1.ResumeLayout(false);
             this.tabPage1.ResumeLayout(false);
+            this.splitCOV.Panel1.ResumeLayout(false);
+            this.splitCOV.Panel1.PerformLayout();
+            this.splitCOV.Panel2.ResumeLayout(false);
+            this.splitCOV.Panel2.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.splitCOV)).EndInit();
+            this.splitCOV.ResumeLayout(false);
             this.m_EventSpaceMenuStrip.ResumeLayout(false);
             this.ResumeLayout(false);
             this.PerformLayout();
@@ -1085,6 +1162,11 @@
         public System.Windows.Forms.TreeView m_DeviceTree;
         public CodersLab.Windows.Controls.TreeView m_AddressSpaceTree;
         public System.Windows.Forms.ToolStripMenuItem pluginsToolStripMenuItem;
+        private System.Windows.Forms.SplitContainer splitCOV;
+        private ZedGraph.ZedGraphControl CovGraph;
+        private System.Windows.Forms.Label labelDrop1;
+        private System.Windows.Forms.Label labelDrop2;
+        private System.Windows.Forms.ColumnHeader columnHeader7;
     }
 }
 

@@ -2,6 +2,7 @@
 *                           MIT License
 * 
 * Copyright (C) 2014 Morten Kvistgaard <mk@pch-engineering.dk>
+* Copyright (C) 2015 Frederic Chaxel <fchaxel@free.fr>
 *
 * Permission is hereby granted, free of charge, to any person obtaining
 * a copy of this software and associated documentation files (the
@@ -42,13 +43,19 @@ using System.Media;
 using System.Linq;
 using System.Collections;
 using System.Reflection;
+using ZedGraph;
 
 namespace Yabe
 {
     public partial class YabeMainDialog : Form
     {       
         private Dictionary<BacnetClient, BacnetDeviceLine> m_devices = new Dictionary<BacnetClient, BacnetDeviceLine>();
+
         private Dictionary<string, ListViewItem> m_subscription_list = new Dictionary<string, ListViewItem>();
+        private Dictionary<string, RollingPointPairList> m_subscription_points = new Dictionary<string, RollingPointPairList>();        
+        Color[] GraphColor = {Color.Red, Color.Blue, Color.Green, Color.Violet, Color.Chocolate, Color.Orange};
+        GraphPane Pane;
+
         // Memory of all object names already discovered, first string in the Tuple is the device network address hash
         // The tuple contains two value types, so it's ok for cross session
         public Dictionary<Tuple<String, BacnetObjectId>, String> DevicesObjectsName = new Dictionary<Tuple<String, BacnetObjectId>, String>();
@@ -81,6 +88,22 @@ namespace Yabe
             InitializeComponent();
             Trace.Listeners.Add(new MyTraceListener(this));
             m_DeviceTree.ExpandAll();
+
+            // COV Graph
+            Pane = CovGraph.GraphPane;
+            Pane.Title.Text = null;
+            CovGraph.IsShowPointValues = true;
+            // X Axis
+            Pane.XAxis.Type = AxisType.Date;
+            Pane.XAxis.Title.Text = null;
+            Pane.XAxis.MajorGrid.IsVisible = true;
+            Pane.XAxis.MajorGrid.Color = Color.Gray;
+            // Y Axis
+            Pane.YAxis.Title.Text = null;
+            Pane.YAxis.MajorGrid.IsVisible = true;
+            Pane.YAxis.MajorGrid.Color = Color.Gray;
+            CovGraph.AxisChange();
+            CovGraph.IsAutoScrollRange = true;
 
             //load splitter setup
             try
@@ -225,6 +248,24 @@ namespace Yabe
                                 itm.SubItems[4].Text = DateTime.Now.ToString("HH:mm:ss");
                                 if (itm.SubItems[5].Text == "Not started") itm.SubItems[5].Text = "OK";
                                 AddLogAlarmEvent(itm);
+                                try
+                                {
+                                    //  try convert from string
+                                    double Y = Convert.ToDouble(itm.SubItems[3].Text);
+                                    XDate X = new XDate(DateTime.Now);
+
+                                    Pane.Title.Text = "";
+
+                                    if ((Properties.Settings.Default.GraphLineStep)&&(m_subscription_points[sub_key].Count != 0))
+                                    {
+                                        PointPair p = m_subscription_points[sub_key].Peek();
+                                        m_subscription_points[sub_key].Add(X, p.Y);
+                                    }
+                                    m_subscription_points[sub_key].Add(X, Y);
+                                    CovGraph.AxisChange();
+                                    CovGraph.Invalidate();
+                                }
+                                catch { }
                                 break;
                             case BacnetPropertyIds.PROP_STATUS_FLAGS:
                                 if (value.value != null && value.value.Count > 0)
@@ -568,6 +609,8 @@ namespace Yabe
 
         private void addDevicesearchToolStripMenuItem_Click(object sender, EventArgs e)
         {
+            labelDrop1.Visible = labelDrop2.Visible = false;
+
             SearchDialog dlg = new SearchDialog();
             if (dlg.ShowDialog(this) == System.Windows.Forms.DialogResult.OK)
             {
@@ -747,37 +790,39 @@ namespace Yabe
             addDevicesearchToolStripMenuItem_Click(this, null);
         }
 
-        private void RemoveSubscriptions(KeyValuePair<BacnetAddress, uint> device)
+        private void RemoveSubscriptions(BacnetAddress adr, uint deviceId, BacnetClient comm)
         {
             LinkedList<string> deletes = new LinkedList<string>();
             foreach (KeyValuePair<string, ListViewItem> entry in m_subscription_list)
             {
                 Subscription sub = (Subscription)entry.Value.Tag;
-                if (sub.adr == device.Key)
+                if (((sub.adr == adr) && (sub.device_id.instance == deviceId)) || (sub.comm == comm))
                 {
                     m_SubscriptionView.Items.Remove(entry.Value);
                     deletes.AddLast(sub.sub_key);
                 }
             }
             foreach (string sub_key in deletes)
+            {
                 m_subscription_list.Remove(sub_key);
-        }
+                try
+                {
+                    RollingPointPairList points = m_subscription_points[sub_key];
+                    foreach (LineItem l in Pane.CurveList)
+                        if (l.Tag == points)
+                        {
+                            Pane.CurveList.Remove(l);
+                            break;
+                        }
 
-        private void RemoveSubscriptions(BacnetClient comm)
-        {
-            LinkedList<string> deletes = new LinkedList<string>();
-            foreach (KeyValuePair<string, ListViewItem> entry in m_subscription_list)
-            {
-                Subscription sub = (Subscription)entry.Value.Tag;
-                if (sub.comm == comm)
-                {
-                    m_SubscriptionView.Items.Remove(entry.Value);
-                    deletes.AddLast(sub.sub_key);
+                    m_subscription_points.Remove(sub_key);
                 }
+                catch { }
             }
-            foreach (string sub_key in deletes)
-                m_subscription_list.Remove(sub_key);
-        }
+
+            CovGraph.AxisChange();
+            CovGraph.Invalidate();
+        }        
 
         private void removeDeviceToolStripMenuItem_Click(object sender, EventArgs e)
         {
@@ -804,7 +849,7 @@ namespace Yabe
                     if (m_devices[comm].Devices.Count == 0)
                         m_devices.Remove(comm);
                     m_DeviceTree.Nodes.Remove(m_DeviceTree.SelectedNode);
-                    RemoveSubscriptions((KeyValuePair<BacnetAddress, uint>)device_entry);
+                    RemoveSubscriptions(device_entry.Value.Key, device_entry.Value.Value, null);
                 }
             }
             else if (comm_entry != null)
@@ -813,7 +858,7 @@ namespace Yabe
                 {
                     m_devices.Remove(comm_entry);
                     m_DeviceTree.Nodes.Remove(m_DeviceTree.SelectedNode);
-                    RemoveSubscriptions(comm_entry);
+                    RemoveSubscriptions(null, 0, comm_entry);
                     comm_entry.Dispose();
                 }
             }
@@ -1963,7 +2008,7 @@ namespace Yabe
             }
         }
 
-        private bool CreateSubscription(BacnetClient comm, BacnetAddress adr, uint device_id, BacnetObjectId object_id)
+        private bool CreateSubscription(BacnetClient comm, BacnetAddress adr, uint device_id, BacnetObjectId object_id, bool WithGraph)
         {
             this.Cursor = Cursors.WaitCursor;
             try
@@ -1974,6 +2019,10 @@ namespace Yabe
                     device_id = FetchDeviceId(comm, adr);
                 }
 
+                m_next_subscription_id++;
+                string sub_key = adr.ToString() + ":" + device_id + ":" + m_next_subscription_id;
+                Subscription sub = new Subscription(comm, adr, new BacnetObjectId(BacnetObjectTypes.OBJECT_DEVICE, device_id), object_id, sub_key, m_next_subscription_id);
+
                 //add to list
                 ListViewItem itm = m_SubscriptionView.Items.Add(adr + " - " + device_id);
                 itm.SubItems.Add(object_id.ToString());
@@ -1981,16 +2030,24 @@ namespace Yabe
                 itm.SubItems.Add("");   //value
                 itm.SubItems.Add("");   //time
                 itm.SubItems.Add("Not started");   //status
-
-                //add to index
-                m_next_subscription_id++;
-                string sub_key = adr.ToString() + ":" + device_id + ":" + m_next_subscription_id;
-
-                Subscription sub = new Subscription(comm, adr, new BacnetObjectId(BacnetObjectTypes.OBJECT_DEVICE, device_id), object_id, sub_key, m_next_subscription_id);
+                itm.SubItems.Add("");   // Graph Line Color
                 itm.Tag = sub;
 
                 lock (m_subscription_list)
+                {
                     m_subscription_list.Add(sub_key, itm);
+                    if (WithGraph)
+                    {
+                        RollingPointPairList points = new RollingPointPairList(1000);
+                        m_subscription_points.Add(sub_key, points);
+                        Color color= GraphColor[Pane.CurveList.Count%GraphColor.Length];
+                        LineItem l = Pane.AddCurve("", points, color, Properties.Settings.Default.GraphDotStyle);
+                        l.Tag = points; // store the link To be able to remove the LineItem
+                        itm.SubItems[6].BackColor = color;
+                        itm.UseItemStyleForSubItems = false;
+                        CovGraph.Invalidate();
+                    }
+                }
 
                 //add to device
 
@@ -2088,7 +2145,7 @@ namespace Yabe
 
                 for (int i = 0; i < Bobjs.Count; i++)
                 {
-                    if (CreateSubscription(comm, adr, entry.Value, Bobjs[i]) == false)
+                    if (CreateSubscription(comm, adr, entry.Value, Bobjs[i], sender==CovGraph) == false)
                         break;
                 }
             }
@@ -2154,9 +2211,28 @@ namespace Yabe
                         //remove from interface
                         m_SubscriptionView.Items.Remove(itm);
                         lock (m_subscription_list)
+                        {
                             m_subscription_list.Remove(sub.sub_key);
+                            try
+                            {
+                                RollingPointPairList points = m_subscription_points[sub.sub_key];
+                                foreach (LineItem l in Pane.CurveList)
+                                    if (l.Tag == points)
+                                    {
+                                        Pane.CurveList.Remove(l);
+                                        break;
+                                    }
+
+                                m_subscription_points.Remove(sub.sub_key);
+                            }
+                            catch { }
+                        }
+
+                        CovGraph.AxisChange();
+                        CovGraph.Invalidate();
+                        m_SubscriptionView.Items.Remove(itm);
                     }
-                    m_SubscriptionView.Items.Remove(itm);
+
                 }
             }
         }
@@ -2355,7 +2431,7 @@ namespace Yabe
             {
                 BacnetObjectId object_id = (BacnetObjectId)t.Tag;
                 //create 
-                if (CreateSubscription(comm, adr, device_id, object_id) == false)
+                if (CreateSubscription(comm, adr, device_id, object_id, false) == false)
                     return;
             }
         }

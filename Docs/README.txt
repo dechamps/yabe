@@ -260,7 +260,9 @@
 			User plugins written en C# can be add to Yabe (Menu Option-Plugins). 
 			See Readme file in the YabePlugins source code directory.
 
-	2.9 COV & Event logging
+	2.9 COV, Event logging & live Graph
+			Objects can be drag/drop on the central panel to be subscribed.
+			If the drag/drop is done onto the graph the value is also drawn.
 			Subscriptions updates & Events displayed in the central panel can be 
 			logged into a CSV file : right click in this central panel to do it.
 			

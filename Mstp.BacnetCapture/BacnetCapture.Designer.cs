@@ -45,7 +45,7 @@
             this.checkMaster = new System.Windows.Forms.CheckBox();
             this.checkTest = new System.Windows.Forms.CheckBox();
             this.checkData = new System.Windows.Forms.CheckBox();
-            this.label6 = new System.Windows.Forms.Label();
+            this.label7 = new System.Windows.Forms.Label();
             this.treeView = new Mstp.BacnetCapture.BufferedTreeView();
             ((System.ComponentModel.ISupportInitialize)(this.checksbox)).BeginInit();
             this.SuspendLayout();
@@ -205,14 +205,14 @@
             this.checkData.UseVisualStyleBackColor = false;
             this.checkData.CheckedChanged += new System.EventHandler(this.checkedFiltresValue_Changed);
             // 
-            // label6
+            // label7
             // 
-            this.label6.AutoSize = true;
-            this.label6.Location = new System.Drawing.Point(74, 51);
-            this.label6.Name = "label6";
-            this.label6.Size = new System.Drawing.Size(266, 13);
-            this.label6.TabIndex = 18;
-            this.label6.Text = "Wireshark -> Menu Capture Option, Manage Interfaces";
+            this.label7.AutoSize = true;
+            this.label7.Location = new System.Drawing.Point(49, 48);
+            this.label7.Name = "label7";
+            this.label7.Size = new System.Drawing.Size(309, 13);
+            this.label7.TabIndex = 19;
+            this.label7.Text = "... start it with the command  : Wireshark.exe -ni \\\\.\\pipe\\bacnet";
             // 
             // treeView
             // 
@@ -229,7 +229,7 @@
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(404, 626);
-            this.Controls.Add(this.label6);
+            this.Controls.Add(this.label7);
             this.Controls.Add(this.checkData);
             this.Controls.Add(this.checkTest);
             this.Controls.Add(this.checkMaster);
@@ -275,7 +275,7 @@
         private System.Windows.Forms.CheckBox checkTest;
         private System.Windows.Forms.CheckBox checkData;
         private BufferedTreeView treeView;
-        private System.Windows.Forms.Label label6;
+        private System.Windows.Forms.Label label7;
     }
 }
 

@@ -107,5 +107,11 @@
     <Setting Name="Plugins" Type="System.String" Scope="User">
       <Value Profile="(Default)">CheckReliability</Value>
     </Setting>
+    <Setting Name="GraphDotStyle" Type="ZedGraph.SymbolType" Scope="User">
+      <Value Profile="(Default)">Circle</Value>
+    </Setting>
+    <Setting Name="GraphLineStep" Type="System.Boolean" Scope="User">
+      <Value Profile="(Default)">False</Value>
+    </Setting>
   </Settings>
 </SettingsFile>
