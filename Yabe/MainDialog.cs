@@ -846,8 +846,7 @@ namespace Yabe
                         comm = m_DeviceTree.SelectedNode.Parent.Parent.Tag as BacnetClient; // device under a router
 
                     m_devices[comm].Devices.Remove((KeyValuePair<BacnetAddress, uint>)device_entry);
-                    if (m_devices[comm].Devices.Count == 0)
-                        m_devices.Remove(comm);
+
                     m_DeviceTree.Nodes.Remove(m_DeviceTree.SelectedNode);
                     RemoveSubscriptions(device_entry.Value.Key, device_entry.Value.Value, null);
                 }
