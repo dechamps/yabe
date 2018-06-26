@@ -241,13 +241,15 @@ namespace Yabe
 
                     foreach (BacnetPropertyValue value in values)
                     {
+                        bool isLog = false;
+
                         switch ((BacnetPropertyIds)value.property.propertyIdentifier)
                         {
                             case BacnetPropertyIds.PROP_PRESENT_VALUE:
                                 itm.SubItems[3].Text = ConvertToText(value.value);
                                 itm.SubItems[4].Text = DateTime.Now.ToString("HH:mm:ss");
                                 if (itm.SubItems[5].Text == "Not started") itm.SubItems[5].Text = "OK";
-                                AddLogAlarmEvent(itm);
+                                if (!isLog)  { AddLogAlarmEvent(itm); isLog=true; }
                                 try
                                 {
                                     //  try convert from string
@@ -289,7 +291,7 @@ namespace Yabe
                                         itm.SubItems[5].Text = "OK";
                                 }
 
-                                AddLogAlarmEvent(itm);
+                                if (!isLog) { AddLogAlarmEvent(itm); isLog = true; }
 
                                 break;
                             default:
