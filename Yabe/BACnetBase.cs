@@ -3237,18 +3237,14 @@ namespace System.IO.BACnet.Serialize
             {
                 buffer.buffer[buffer.offset++] =(byte)((source.net & 0xFF00) >> 8);
                 buffer.buffer[buffer.offset++] = (byte)((source.net & 0x00FF) >> 0);
-                // Modif FC
-                if (destination.net == 0xFFFF)
-                    buffer.buffer[buffer.offset++] = 0;
-                else
+
+                buffer.buffer[buffer.offset++] = (byte)source.adr.Length;
+                if (source.adr.Length > 0)
                 {
-                    buffer.buffer[buffer.offset++] = (byte)destination.adr.Length;
-                    if (destination.adr.Length > 0)
-                    {
-                        for (int i = 0; i < destination.adr.Length; i++)
-                            buffer.buffer[buffer.offset++] = destination.adr[i];
-                    }
+                    for (int i = 0; i < source.adr.Length; i++)
+                        buffer.buffer[buffer.offset++] = source.adr[i];
                 }
+
             }
 
             if (has_destination)
