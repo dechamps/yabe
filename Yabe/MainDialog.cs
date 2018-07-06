@@ -108,6 +108,14 @@ namespace Yabe
             //load splitter setup
             try
             {
+
+                if (Properties.Settings.Default.SettingsUpgradeRequired)
+                {
+                    Properties.Settings.Default.Upgrade();
+                    Properties.Settings.Default.SettingsUpgradeRequired = false;
+                    Properties.Settings.Default.Save();
+                }
+
                 if (Properties.Settings.Default.GUI_FormSize != new Size(0, 0))
                     this.Size = Properties.Settings.Default.GUI_FormSize;
                 FormWindowState state = (FormWindowState)Enum.Parse(typeof(FormWindowState), Properties.Settings.Default.GUI_FormState);
