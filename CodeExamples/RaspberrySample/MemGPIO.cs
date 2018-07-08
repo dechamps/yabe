@@ -27,6 +27,7 @@ using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using System.IO;
+using System.Threading;
 
 //
 // This class could replace FileGPIO, much more faster but only for Raspberry (not Edison, Beagle, ...)
@@ -45,6 +46,8 @@ using System.IO;
 
 namespace GPIO
 {
+    public enum Event_Detect_Type {Rising_Edge=0x4C, Falling_Edge=0x58, High_Level=0x64, Low_Level=0x70, Asynch_Rising_Edge=0x7c, Asynch_Falling_Edge=0x88};
+
     public static class MemGPIO
     {
         /**********************************************************************************************/
@@ -68,10 +71,13 @@ namespace GPIO
 
         // DataSheet BCM 2835 ARM peripherals, page 90
         // https://www.raspberrypi.org/wp-content/uploads/2012/02/BCM283x-ARM-Peripherals.pdf
-        const int BCM283x_GPFSEL0 = 0x0000;    // 6 configuration registers
-        const int BCM283x_GPSET0 = 0x001c;     // 2 output on registers
-        const int BCM283x_GPCLR0 = 0x0028;     // 2 output off registers
-        const int BCM283x_GPLEV0 = 0x0034;     // 2 input level registers
+        const int BCM283x_GPFSEL0 = 0x00;    // 6 configuration registers
+        const int BCM283x_GPSET0 = 0x1c;     // 2 output on registers
+        const int BCM283x_GPCLR0 = 0x28;     // 2 output off registers
+        const int BCM283x_GPLEV0 = 0x34;     // 2 input level registers
+        const int BCM283x_GPEDS0 = 0x40;    // 2 event detect status registers
+        const int BCM283x_GPPUD = 0x94;      // Pull Command
+        const int BCM283x_GPPUDCLK0 = 0x98;  // 2 Pull Clock
 
         /**********************************************************************************************/
         static MemGPIO()
@@ -82,15 +88,25 @@ namespace GPIO
             {
                 // DataSheet BCM 2835 ARM peripherals, page 6
                 uint BCM283x_BLOCK_SIZE = (4 * 1024);
-                uint BCM283x_GPIO_BASE; 
+                uint BCM283x_GPIO_BASE=0;
+                
+                // https://www.iot-programmer.com/index.php/books/22-raspberry-pi-and-the-iot-in-c/chapters-raspberry-pi-and-the-iot-in-c/59-raspberry-pi-and-the-iot-in-c-memory-mapped-gpio?showall=&start=1
+                if (File.Exists("/proc/device-tree/soc/ranges"))
+                {
+                    byte[] buf = File.ReadAllBytes("/proc/device-tree/soc/ranges");                    
+                    BCM283x_GPIO_BASE = (uint)((buf[4] << 24) |( buf[5] << 16) | (buf[6] << 8) | (buf[7] << 0) |  0x200000);                  
+                }
 
-                // http://www.raspberrypi-spy.co.uk/2012/09/checking-your-raspberry-pi-board-version/
-                string readValue = File.ReadAllText("/proc/cpuinfo");
+                if (BCM283x_GPIO_BASE == 0) // old technic, already here : /proc/device-tree/soc/ranges seems not to be present on old kernel versions
+                {
+                    // http://www.raspberrypi-spy.co.uk/2012/09/checking-your-raspberry-pi-board-version/
+                    string readValue = File.ReadAllText("/proc/cpuinfo");
 
-                if (readValue.Contains("BCM2708") || readValue.Contains("BCM2835"))  // BCM2708=BCM2835 for Pi up to B+, Pi2 it's BCM2709=BCM2836
-                    BCM283x_GPIO_BASE = 0x20000000 + 0x200000;
-                else
-                    BCM283x_GPIO_BASE = 0x3F000000 + 0x200000;
+                    if (readValue.Contains("BCM2708") || readValue.Contains("BCM2835"))  // BCM2708=BCM2835 for Pi up to B+, Pi2 it's BCM2709=BCM2836
+                        BCM283x_GPIO_BASE = 0x20000000 + 0x200000;
+                    else
+                        BCM283x_GPIO_BASE = 0x3F000000 + 0x200000;
+                }
 
                 int mem_fd;
                 mem_fd = open("/dev/mem", 10002);
@@ -145,6 +161,86 @@ namespace GPIO
 
                 int value = Marshal.ReadInt32(GPLEV_RegisterAddress);
                 return (value & (1 << ((int)pin % 32))) != 0;
+            }
+        }
+        /**********************************************************************************************/
+        public static void SetPullUpDown(uint pin, bool PullUp, bool PullDown)
+        {
+            if (gpioAddress.ToInt32() == -1) return;
+
+            int Val = 0;
+
+            lock (lockObj)
+            {
+                if (!_In.Contains(pin))    // configuration already done in input mode ?
+                {
+                    SetupPin(pin, 0);
+                    _In.Add(pin); _Out.Remove(pin);
+                }
+
+                // DataSheet BCM 2835 ARM peripherals, pages 100-101
+
+                if (PullDown) Val = 1;
+                if (PullUp) Val = 2; // Value if both set
+
+                Marshal.WriteInt32(gpioAddress + BCM283x_GPPUD, Val);
+                Thread.Sleep(1);
+                IntPtr GPSET_CLK_RegisterAddress = gpioAddress + BCM283x_GPPUDCLK0 + 4 * ((int)pin / 32);
+                Marshal.WriteInt32(GPSET_CLK_RegisterAddress, 1 << ((int)pin % 32));
+                Thread.Sleep(1);
+                Marshal.WriteInt32(gpioAddress + BCM283x_GPPUD, 0);
+                Marshal.WriteInt32(GPSET_CLK_RegisterAddress, 0);
+            }
+        }
+        /**********************************************************************************************/
+        public static void Enable_Event_Detection(uint pin, Event_Detect_Type EvType)
+        {
+            if (gpioAddress.ToInt32() == -1) return;
+
+            lock (lockObj)
+            {
+                if (!_In.Contains(pin))    // configuration already done in input mode ?
+                {
+                    SetupPin(pin, 0);
+                    _In.Add(pin); _Out.Remove(pin);
+                }
+
+                // DataSheet BCM 2835 ARM peripherals, page 97-100
+                IntPtr RegisterAddress = gpioAddress + (int)EvType + 4 * ((int)pin / 32);
+                int val = Marshal.ReadInt32(RegisterAddress);
+                Marshal.WriteInt32(RegisterAddress, val | (1 << ((int)pin % 32)));
+            }
+        }
+        /**********************************************************************************************/
+        public static void Disable_Event_Detection(uint pin, Event_Detect_Type EvType)
+        {
+            if (gpioAddress.ToInt32() == -1) return;
+
+            lock (lockObj)
+            {
+                // DataSheet BCM 2835 ARM peripherals, page 97-100
+                IntPtr RegisterAddress = gpioAddress + (int)EvType + 4 * ((int)pin / 32);
+                int val = Marshal.ReadInt32(RegisterAddress);
+                Marshal.WriteInt32(RegisterAddress, val & ~(1 << ((int)pin % 32)));
+            }
+        }
+        /**********************************************************************************************/
+        public static bool IsEvent_Detected(uint pin)
+        {
+            if (gpioAddress.ToInt32() == -1) return false ;
+
+            lock (lockObj)
+            {
+                // DataSheet BCM 2835 ARM peripherals, page 96
+                IntPtr GPEDS_RegisterAddress = gpioAddress + BCM283x_GPEDS0 + 4 * ((int)pin / 32);
+
+                int value = Marshal.ReadInt32(GPEDS_RegisterAddress);
+                bool EventOK = (value & (1 << ((int)pin % 32))) != 0;
+
+                if (EventOK)
+                    Marshal.WriteInt32(GPEDS_RegisterAddress, (1 << ((int)pin % 32)));
+
+                return EventOK;
             }
         }
         /**********************************************************************************************/
