@@ -65,6 +65,11 @@ namespace Yabe
                 }
                 return null;
             };
+            Run();
+        }
+
+        static void Run()
+        {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
             Application.Run(new YabeMainDialog());
