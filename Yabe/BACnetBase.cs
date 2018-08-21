@@ -1127,7 +1127,8 @@ namespace System.IO.BACnet
             EVENT_STATE_FAULT = 1,
             EVENT_STATE_OFFNORMAL = 2,
             EVENT_STATE_HIGH_LIMIT = 3,
-            EVENT_STATE_LOW_LIMIT = 4
+            EVENT_STATE_LOW_LIMIT = 4,
+            EVENT_STATE_LIFE_SAFETY_ALARM = 5
         } ;
 
         public enum  BacnetEventEnable 
@@ -1687,7 +1688,7 @@ namespace System.IO.BACnet
     public struct BacnetweekNDay : ASN1.IASN1encode
     {
         public byte month;  /* 1 January, 13 Odd, 14 Even, 255 Any */
-        public byte week;   /* Don't realy understand ??? 1 for day 1 to 7, 2 for ... what's the objective ?  boycott it*/
+        public byte week;   /* 255 any, 1 for day 1 to 7, 2 for day 8 to 14, ... 6 last 7 days of this month */
         public byte wday;   /* 1=Monday-7=Sunday, 255 any */
 
         public BacnetweekNDay(byte day, byte month, byte week = 255)
@@ -1728,6 +1729,11 @@ namespace System.IO.BACnet
             else
                 ret = "Every days";
 
+            if ((week >= 1) && (week <= 5))
+                ret = ret + " (days " + (((week - 1) * 7) + 1).ToString() + "-" + (week * 7).ToString() + ")";
+            if (week == 6)
+                ret = ret + " (last 7 days of month)";
+
             if (month <= 12)
                 ret = ret + " on " + CultureInfo.CurrentCulture.DateTimeFormat.MonthNames[month - 1];
             else
@@ -1751,7 +1757,19 @@ namespace System.IO.BACnet
             if ((month == 14) && ((date.Month & 1) == 1))
                 return false;
 
-            // What about week, too much stupid : boycott it !
+            //  week, wrong values not tested
+            if ((week >= 1) && (week <= 5))
+            {
+                if (date.Day <= (week - 1) * 7)
+                    return false;
+                if (date.Day > week * 7)
+                    return false;
+            }
+            if (week == 6) // last 7 days of the month
+            {
+                if (date.AddDays(7).Month==date.Month)
+                    return false;
+            }
 
             if (wday == 255)
                 return true;
@@ -4113,7 +4131,10 @@ namespace System.IO.BACnet.Serialize
 
             buffer.Add((byte)value.Month);
             buffer.Add((byte)value.Day);
-            buffer.Add((byte)value.DayOfWeek);
+            if (value.DayOfWeek==DayOfWeek.Sunday)
+                buffer.Add(7);
+            else
+                buffer.Add((byte)value.DayOfWeek);
         }
 
         public static void encode_application_date(EncodeBuffer buffer, DateTime value)
