@@ -28,14 +28,16 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.IO.BACnet;
+using System.IO.BACnet.Serialize;
 
 namespace BaCSharp
 {
     public class StructuredView : BaCSharpObject
     {
         protected List<BacnetValue> m_PROP_SUBORDINATE_LIST = new List<BacnetValue>();
-        [BaCSharpType(BacnetApplicationTags.BACNET_APPLICATION_TAG_OBJECT_ID)]
-        public virtual List<BacnetValue> PROP_SUBORDINATE_LIST
+
+        [BaCSharpType(BacnetApplicationTags.BACNET_APPLICATION_TAG_DEVICE_OBJECT_REFERENCE)]     
+        public virtual List<BacnetValue> PROP_SUBORDINATE_LIST       
         {
             get { return m_PROP_SUBORDINATE_LIST; }
         }
@@ -49,7 +51,8 @@ namespace BaCSharp
 
         public void AddBacnetObject(BaCSharpObject newObj)
         {
-            m_PROP_SUBORDINATE_LIST.Add(new BacnetValue(BacnetApplicationTags.BACNET_APPLICATION_TAG_OBJECT_ID, newObj.PROP_OBJECT_IDENTIFIER));
+            BacnetValue v = new BacnetValue(BacnetApplicationTags.BACNET_APPLICATION_TAG_DEVICE_OBJECT_REFERENCE, new BacnetDeviceObjectReference(newObj.PROP_OBJECT_IDENTIFIER));
+            m_PROP_SUBORDINATE_LIST.Add(v);
             // Each object provided by the server must be added one by one to the DeviceObject
             Mydevice.AddBacnetObject(newObj);
         }

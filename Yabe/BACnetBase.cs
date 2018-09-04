@@ -1037,6 +1037,7 @@ namespace System.IO.BACnet
         public List<BacnetPropertyIds> propsId;
     }
 
+    [Serializable]
     public struct BacnetDeviceObjectPropertyReference : ASN1.IASN1encode
     {
         public BacnetObjectId objectIdentifier;
@@ -1102,6 +1103,87 @@ namespace System.IO.BACnet
         {
             get { return propertyIdentifier; }
             set { propertyIdentifier = value; }
+        }
+
+    } ;
+
+    [Serializable]
+    public struct BacnetDeviceObjectReference : ASN1.IASN1encode
+    {
+        public BacnetObjectId objectIdentifier;
+        public BacnetObjectId deviceIndentifier;
+
+        public BacnetDeviceObjectReference(BacnetObjectId objectIdentifier, BacnetObjectId? deviceIndentifier = null)
+        {
+            this.objectIdentifier = objectIdentifier;
+
+            if (deviceIndentifier != null)
+                this.deviceIndentifier = deviceIndentifier.Value;
+            else
+                this.deviceIndentifier = new BacnetObjectId(BacnetObjectTypes.MAX_BACNET_OBJECT_TYPE, 0);
+        }
+
+
+        public override string ToString()
+        {
+            if (deviceIndentifier.type == BacnetObjectTypes.OBJECT_DEVICE)
+                return objectIdentifier.ToString() + " on Device:" + deviceIndentifier.Instance.ToString();
+            else
+                return objectIdentifier.ToString();
+        }
+
+        public void ASN1encode(EncodeBuffer buffer)
+        {
+            if (deviceIndentifier.type == BacnetObjectTypes.OBJECT_DEVICE)
+            {
+                ASN1.encode_context_object_id(buffer, 0, deviceIndentifier.type, deviceIndentifier.instance);
+            }
+            ASN1.encode_context_object_id(buffer, 1, objectIdentifier.type, objectIdentifier.instance);
+        }
+
+        public int ASN1decode(byte[] buffer, int offset, uint len_value)
+        {
+            int len = 0;
+
+            byte TagNum;
+            len+=ASN1.decode_tag_number(buffer, offset, out TagNum);
+
+            if (TagNum == 0)
+            {
+                len += ASN1.decode_object_id(buffer, offset + len, out deviceIndentifier.type, out deviceIndentifier.instance);
+                len += ASN1.decode_tag_number(buffer, offset, out TagNum); // shall be 1
+            }
+            else
+                deviceIndentifier = new BacnetObjectId(BacnetObjectTypes.MAX_BACNET_OBJECT_TYPE, 0);
+            
+            len += ASN1.decode_object_id(buffer, offset + len, out objectIdentifier.type, out objectIdentifier.instance);
+
+            return len;
+
+        }
+
+        public BacnetObjectId ObjectId
+        {
+            get { return objectIdentifier; }
+            set { objectIdentifier = value; }
+        }
+        
+        public BacnetObjectId? DeviceId  // shows null when it's not OBJECT_DEVICE
+        {
+            get
+            {
+                if (deviceIndentifier.type == BacnetObjectTypes.OBJECT_DEVICE)
+                    return deviceIndentifier;
+                else
+                    return null;
+            }
+            set
+            {
+                if (value == null)
+                    deviceIndentifier = new BacnetObjectId(BacnetObjectTypes.MAX_BACNET_OBJECT_TYPE, 0);
+                else
+                    deviceIndentifier = value.Value;
+            }
         }
 
     } ;
@@ -5471,6 +5553,16 @@ namespace System.IO.BACnet.Serialize
                     value.Value = v;
                     return tag_len;
                 }
+                else if (property_id == BacnetPropertyIds.PROP_SUBORDINATE_LIST)
+                {
+                    BacnetDeviceObjectReference v=new BacnetDeviceObjectReference();
+                    tag_len = v.ASN1decode(buffer, offset, (uint)max_offset);
+                    if (tag_len < 0) return -1;
+                    value.Tag = BacnetApplicationTags.BACNET_APPLICATION_TAG_DEVICE_OBJECT_REFERENCE;
+                    value.Value = v;
+                    return tag_len;
+                }
+
                 else if (property_id == BacnetPropertyIds.PROP_EVENT_TIME_STAMPS) 
                 {
 

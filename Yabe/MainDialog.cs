@@ -1016,7 +1016,13 @@ namespace Yabe
 
             List<BacnetObjectId> SortedList = new List<BacnetObjectId>();
             foreach (BacnetValue value in RawList)
-                SortedList.Add((BacnetObjectId)value.Value);
+                if (value.Value is BacnetObjectId) // with BacnetObjectId
+                    SortedList.Add((BacnetObjectId)value.Value);
+                else // with Subordinate_List for StructuredView
+                {
+                    BacnetDeviceObjectReference v = (BacnetDeviceObjectReference)value.Value;
+                    SortedList.Add(v.objectIdentifier); // ignore deviceIdentifier
+                }
 
             SortedList.Sort();
 
