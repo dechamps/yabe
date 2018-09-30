@@ -14,6 +14,9 @@ CheckReliability
 	It check all objects in the selected device and displays all of them when the reliability 
 	property value is not 0 (No Fault detected).
 
+CheckStatusFlags
+	Same as previous but with Status Flags.
+
 ListCOV_Increment
 	By Alexander Jaszkowski : displays all COV_INCREMENT values, for network's behaviour debug.
 
