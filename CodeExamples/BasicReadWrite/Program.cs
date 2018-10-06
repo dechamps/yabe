@@ -47,7 +47,6 @@ namespace BasicReadWrite
         /*****************************************************************************************************/
         static void Main(string[] args)
         {
-
             Trace.Listeners.Add(new ConsoleTraceListener());
 
             try
@@ -111,7 +110,7 @@ namespace BasicReadWrite
                 Console.WriteLine("Read value : " + Value.Value.ToString());
 
                 // Write Present_Value property on the object ANALOG_OUTPUT:0 provided by the device 4000
-                BacnetValue newValue = new BacnetValue(Convert.ToSingle(Value.Value));   // expect it's a float
+                BacnetValue newValue = new BacnetValue(BacnetApplicationTags.BACNET_APPLICATION_TAG_REAL, Convert.ToSingle(Value.Value));   // expect it's a float
                 ret = WriteScalarValue(4000, new BacnetObjectId(BacnetObjectTypes.OBJECT_ANALOG_OUTPUT, 0), BacnetPropertyIds.PROP_PRESENT_VALUE, newValue);
 
                 Console.WriteLine("Write feedback : " + ret.ToString());

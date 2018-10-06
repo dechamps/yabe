@@ -3928,7 +3928,6 @@ namespace System.IO.BACnet.Serialize
         {
             if (value.Value == null)
             {
-                // Modif FC
                 buffer.Add((byte)BacnetApplicationTags.BACNET_APPLICATION_TAG_NULL);  
                 return;
             }
@@ -3939,44 +3938,44 @@ namespace System.IO.BACnet.Serialize
                     /* don't encode anything */
                     break;
                 case BacnetApplicationTags.BACNET_APPLICATION_TAG_BOOLEAN:
-                    encode_application_boolean(buffer, (bool)value.Value);
+                    encode_application_boolean(buffer, Convert.ToBoolean(value.Value));
                     break;
                 case BacnetApplicationTags.BACNET_APPLICATION_TAG_UNSIGNED_INT:
-                    encode_application_unsigned(buffer, (uint)value.Value);
+                    encode_application_unsigned(buffer, Convert.ToUInt32(value.Value));
                     break;
                 case BacnetApplicationTags.BACNET_APPLICATION_TAG_SIGNED_INT:
-                    encode_application_signed(buffer, (int)value.Value);
+                    encode_application_signed(buffer, Convert.ToInt32(value.Value));
                     break;
                 case BacnetApplicationTags.BACNET_APPLICATION_TAG_REAL:
-                    encode_application_real(buffer, (float)value.Value);
+                    encode_application_real(buffer, Convert.ToSingle(value.Value));
                     break;
                 case BacnetApplicationTags.BACNET_APPLICATION_TAG_DOUBLE:
-                    encode_application_double(buffer, (double)value.Value);
+                    encode_application_double(buffer, Convert.ToDouble(value.Value));
                     break;
                 case BacnetApplicationTags.BACNET_APPLICATION_TAG_OCTET_STRING:
                     encode_application_octet_string(buffer, (byte[])value.Value, 0, ((byte[])value.Value).Length);
                     break;
                 case BacnetApplicationTags.BACNET_APPLICATION_TAG_CHARACTER_STRING:
-                    encode_application_character_string(buffer, (string)value.Value);
+                    encode_application_character_string(buffer, value.Value.ToString());
                     break;
                 case BacnetApplicationTags.BACNET_APPLICATION_TAG_BIT_STRING:
                     encode_application_bitstring(buffer, (BacnetBitString)value.Value);
                     break;
                 case BacnetApplicationTags.BACNET_APPLICATION_TAG_ENUMERATED:
-                    encode_application_enumerated(buffer, (uint)value.Value);
+                    encode_application_enumerated(buffer, Convert.ToUInt32(value.Value));
                     break;
                 case BacnetApplicationTags.BACNET_APPLICATION_TAG_DATE:
-                    encode_application_date(buffer, (DateTime)value.Value);
+                    encode_application_date(buffer, Convert.ToDateTime(value.Value));
                     break;
                 case BacnetApplicationTags.BACNET_APPLICATION_TAG_TIME:
-                    encode_application_time(buffer, (DateTime)value.Value);
+                    encode_application_time(buffer, Convert.ToDateTime(value.Value));
                     break;
                 // Added for EventTimeStamp 
                 case BacnetApplicationTags.BACNET_APPLICATION_TAG_TIMESTAMP:
                     bacapp_encode_timestamp(buffer, (BacnetGenericTime)value.Value);
                     break;
                 case BacnetApplicationTags.BACNET_APPLICATION_TAG_DATETIME:
-                    bacapp_encode_datetime(buffer, (DateTime)value.Value);
+                    bacapp_encode_datetime(buffer, Convert.ToDateTime(value.Value));
                     break;
                 case BacnetApplicationTags.BACNET_APPLICATION_TAG_OBJECT_ID:
                     encode_application_object_id(buffer, ((BacnetObjectId)value.Value).type, ((BacnetObjectId)value.Value).instance);
