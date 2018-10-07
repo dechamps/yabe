@@ -47,7 +47,7 @@ namespace CheckStatusFlags // namespace should have the same name as the dll fil
         public void Init(YabeMainDialog yabeFrm) // This is the unique mandatory method for a Yabe plugin 
         {
             this.yabeFrm = yabeFrm;
-
+            
             // Creates the Menu Item
             ToolStripMenuItem MenuItem=new ToolStripMenuItem();
             MenuItem.Text="Check Objects Status";
