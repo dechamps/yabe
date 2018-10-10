@@ -433,7 +433,7 @@ namespace Yabe.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("CheckReliability")]
+        [global::System.Configuration.DefaultSettingValueAttribute("CheckReliability, CheckStatusFlags")]
         public string Plugins {
             get {
                 return ((string)(this["Plugins"]));

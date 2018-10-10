@@ -43,6 +43,8 @@ namespace Yabe
 
         public BacnetClient Result { get { return m_result; } }
 
+        private List<Tuple<String, String, String>> ethernet_interfaces;
+
         public SearchDialog()
         {
             InitializeComponent();
@@ -85,9 +87,9 @@ namespace Yabe
         {
             try
             {
-                String[] s = m_EthernetInterfaceCombo.Text.Split(':');
+                string s=ethernet_interfaces.Find(o => o.Item1 == m_EthernetInterfaceCombo.Text).Item3;
 
-                m_result = new BacnetClient(new BacnetEthernetProtocolTransport(s[0]), (int)m_TimeoutValue.Value, (int)m_RetriesValue.Value);
+                m_result = new BacnetClient(new BacnetEthernetProtocolTransport(s), (int)m_TimeoutValue.Value, (int)m_RetriesValue.Value);
                 this.DialogResult = System.Windows.Forms.DialogResult.OK;
             }
             catch{}
@@ -134,20 +136,20 @@ namespace Yabe
             catch { }
         }
 
-
         private void FillEthernetInterface()
         {
-            var devices = LibPcapLiveDeviceList.Instance.Where(dev => dev.Interface != null);
+            ethernet_interfaces = new List<Tuple<String, String, String>>();
 
-            foreach (var device in devices)
+            System.Net.NetworkInformation.NetworkInterface[] interfaces = System.Net.NetworkInformation.NetworkInterface.GetAllNetworkInterfaces();
+            foreach (System.Net.NetworkInformation.NetworkInterface inf in interfaces)
             {
-                if (device.Opened == false) // Don't re-open and lists an already open interface
+                if (!inf.IsReceiveOnly && inf.OperationalStatus == System.Net.NetworkInformation.OperationalStatus.Up && inf.SupportsMulticast && inf.NetworkInterfaceType != System.Net.NetworkInformation.NetworkInterfaceType.Loopback)
                 {
-                    device.Open();
-                    if (device.LinkType == PacketDotNet.LinkLayers.Ethernet
-                        && device.Interface.MacAddress != null)
-                        m_EthernetInterfaceCombo.Items.Add(device.Interface.FriendlyName + ": " + device.Interface.Description);
-                    device.Close();
+                    if (!(inf.Description.Contains("VirtualBox") || inf.Description.Contains("VMware"))) // remove interfaces with virtual machines
+                    {
+                        ethernet_interfaces.Add(new Tuple<string, string, string>(inf.Description, inf.Name, inf.Id));
+                        m_EthernetInterfaceCombo.Items.Add(inf.Description);
+                    }
                 }
             }
         }
@@ -175,14 +177,17 @@ namespace Yabe
             {
                 if (!inf.IsReceiveOnly && inf.OperationalStatus == System.Net.NetworkInformation.OperationalStatus.Up && inf.SupportsMulticast && inf.NetworkInterfaceType != System.Net.NetworkInformation.NetworkInterfaceType.Loopback)
                 {
-                    System.Net.NetworkInformation.IPInterfaceProperties ipinfo = inf.GetIPProperties();
-                    //if (ipinfo.GatewayAddresses == null || ipinfo.GatewayAddresses.Count == 0 || (ipinfo.GatewayAddresses.Count == 1 && ipinfo.GatewayAddresses[0].Address.ToString() == "0.0.0.0")) continue;
-                    foreach (System.Net.NetworkInformation.UnicastIPAddressInformation addr in ipinfo.UnicastAddresses)
+                    if (!(inf.Description.Contains("VirtualBox") || inf.Description.Contains("VMware"))) // remove interfaces with virtual machines
                     {
-                        if ( (addr.Address.AddressFamily == System.Net.Sockets.AddressFamily.InterNetwork) || 
-                            ((addr.Address.AddressFamily == System.Net.Sockets.AddressFamily.InterNetworkV6)&&Properties.Settings.Default.IPv6_Support))
+
+                        System.Net.NetworkInformation.IPInterfaceProperties ipinfo = inf.GetIPProperties();
+                        foreach (System.Net.NetworkInformation.UnicastIPAddressInformation addr in ipinfo.UnicastAddresses)
                         {
-                            ips.Add(addr.Address.ToString());
+                            if ((addr.Address.AddressFamily == System.Net.Sockets.AddressFamily.InterNetwork) ||
+                                ((addr.Address.AddressFamily == System.Net.Sockets.AddressFamily.InterNetworkV6) && Properties.Settings.Default.IPv6_Support))
+                            {
+                                ips.Add(addr.Address.ToString());
+                            }
                         }
                     }
                 }

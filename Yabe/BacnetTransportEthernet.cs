@@ -56,9 +56,10 @@ namespace System.IO.BACnet
         /// 
         /// </summary>
         /// <param name="FriendlydeviceName">Something like "Local Lan 1", "Wireless network", ...</param>
-        public BacnetEthernetProtocolTransport(string FriendlydeviceName)
+        public BacnetEthernetProtocolTransport(string deviceName)
         {
-            this.deviceName = FriendlydeviceName;
+
+            this.deviceName = "\\Device\\NPF_"+deviceName;
         }
 
         public BacnetAddressTypes Type { get { return BacnetAddressTypes.Ethernet; } }
@@ -78,13 +79,14 @@ namespace System.IO.BACnet
 
         private LibPcapLiveDevice Open()
         {
+
             var devices = LibPcapLiveDeviceList.Instance.Where(dev => dev.Interface != null);
 
             if ((deviceName != null) && (deviceName != "")) // specified interface
             {
                 try
                 {
-                    var device = devices.Where(dev => dev.Interface.FriendlyName == deviceName).FirstOrDefault();
+                    var device = devices.Where(dev => dev.Interface.Name == deviceName).FirstOrDefault();
                     device.Open(DeviceMode.Normal, 1000);  // 1000 ms read timeout
                     return device;
                 }
