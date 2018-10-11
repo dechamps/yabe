@@ -48,7 +48,7 @@ namespace CheckStatusFlags
             this.yabeFrm = yabeFrm;
             Icon = yabeFrm.Icon; // gets Yabe Icon
             InitializeComponent();
-            treeView1.ImageList = yabeFrm.m_AddressSpaceTree.ImageList;
+            treeView1.ImageList = Flags_imageList1;
         }
 
         private void StatusFlags_Load(object sender, EventArgs e)
@@ -126,14 +126,14 @@ namespace CheckStatusFlags
                             else
                                 N = treeView1.Nodes.Add(name);
 
-                            N.SelectedImageIndex = N.ImageIndex = 13;
+                            N.SelectedImageIndex = N.ImageIndex = 4;
 
                             // Get the description
                             IList<BacnetValue> value_descr;
                             ret = client.ReadPropertyRequest(adr, object_id, BacnetPropertyIds.PROP_DESCRIPTION, out value_descr);
                             if (ret)
                             {
-                                N.Nodes.Add(new TreeNode(value_descr[0].Value.ToString(),9,9));
+                                N.Nodes.Add(new TreeNode(value_descr[0].Value.ToString(),5,5));
                             }
 
                             for (int i = 0; i < 4; i++)
@@ -141,9 +141,9 @@ namespace CheckStatusFlags
                                 if (value[0].Value.ToString()[i] == '1')
                                 {
                                     String s = Enum.GetName(typeof(BacnetStatusFlags), 1 << i).Replace("_", " ");
-                                    s=System.Threading.Thread.CurrentThread.CurrentCulture.TextInfo.ToTitleCase(s.ToLower());
-                                    N.Nodes.Add(new TreeNode(s.Substring(12),16,16));
-                                }
+                                    string alm = System.Threading.Thread.CurrentThread.CurrentCulture.TextInfo.ToTitleCase(s.ToLower());
+                                    N.Nodes.Add(new TreeNode(alm.Substring(12),i,i));
+                                }                                
                             }
 
                         }                            
