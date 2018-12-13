@@ -2044,6 +2044,17 @@ namespace Yabe
                 itm.SubItems.Add("");   //value
                 itm.SubItems.Add("");   //time
                 itm.SubItems.Add("Not started");   //status
+                if (Properties.Settings.Default.ShowDescriptionWhenUsefull)
+                {
+                    IList<BacnetValue> values;
+                    if (comm.ReadPropertyRequest(adr, object_id, BacnetPropertyIds.PROP_DESCRIPTION, out values))
+                    {
+                        itm.SubItems.Add(values[0].Value.ToString());   // Description
+                    }
+                }
+                else
+                    itm.SubItems.Add(""); // Description
+
                 itm.SubItems.Add("");   // Graph Line Color
                 itm.Tag = sub;
 
@@ -2057,7 +2068,7 @@ namespace Yabe
                         Color color= GraphColor[Pane.CurveList.Count%GraphColor.Length];
                         LineItem l = Pane.AddCurve("", points, color, Properties.Settings.Default.GraphDotStyle);
                         l.Tag = points; // store the link To be able to remove the LineItem
-                        itm.SubItems[6].BackColor = color;
+                        itm.SubItems[7].BackColor = color;
                         itm.UseItemStyleForSubItems = false;
                         CovGraph.Invalidate();
                     }
@@ -3094,7 +3105,7 @@ namespace Yabe
             try
             {
                 AlarmFileWritter = new StreamWriter(filename);
-                AlarmFileWritter.WriteLine("Device;ObjectId;Name;Value;Time;Status");
+                AlarmFileWritter.WriteLine("Device;ObjectId;Name;Value;Time;Status;Description");
                 EventAlarmLogToolStripMenuItem.Text="Stop saving Cov/Event/Alarm Log";                
             }
             catch

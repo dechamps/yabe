@@ -410,12 +410,12 @@ namespace Yabe.Properties {
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("False")]
-        public bool DescriptionInAlarmSummary {
+        public bool ShowDescriptionWhenUsefull {
             get {
-                return ((bool)(this["DescriptionInAlarmSummary"]));
+                return ((bool)(this["ShowDescriptionWhenUsefull"]));
             }
             set {
-                this["DescriptionInAlarmSummary"] = value;
+                this["ShowDescriptionWhenUsefull"] = value;
             }
         }
         

@@ -110,6 +110,7 @@
             this.columnHeader4 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeader5 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeader6 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.columnHeader8 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeader7 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.m_EventSpaceMenuStrip = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.EventAlarmLogToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -891,6 +892,7 @@
             this.columnHeader4,
             this.columnHeader5,
             this.columnHeader6,
+            this.columnHeader8,
             this.columnHeader7});
             this.m_SubscriptionView.ContextMenuStrip = this.m_EventSpaceMenuStrip;
             this.m_SubscriptionView.Dock = System.Windows.Forms.DockStyle.Fill;
@@ -928,6 +930,10 @@
             // columnHeader6
             // 
             this.columnHeader6.Text = "Status";
+            // 
+            // columnHeader8
+            // 
+            this.columnHeader8.Text = "Description";
             // 
             // columnHeader7
             // 
@@ -1167,6 +1173,7 @@
         private System.Windows.Forms.Label labelDrop1;
         private System.Windows.Forms.Label labelDrop2;
         private System.Windows.Forms.ColumnHeader columnHeader7;
+        private System.Windows.Forms.ColumnHeader columnHeader8;
     }
 }
 

@@ -98,7 +98,7 @@
     <Setting Name="IPv6_Support" Type="System.Boolean" Scope="User">
       <Value Profile="(Default)">False</Value>
     </Setting>
-    <Setting Name="DescriptionInAlarmSummary" Type="System.Boolean" Scope="User">
+    <Setting Name="ShowDescriptionWhenUsefull" Type="System.Boolean" Scope="User">
       <Value Profile="(Default)">False</Value>
     </Setting>
     <Setting Name="DisplayIdWithName" Type="System.Boolean" Scope="User">
