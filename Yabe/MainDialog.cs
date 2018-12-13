@@ -176,7 +176,7 @@ namespace Yabe
         {
             if (itm.SubItems[5].Text == status) return;
             itm.SubItems[5].Text = status;
-            itm.SubItems[4].Text = DateTime.Now.ToString("HH:mm:ss");
+            itm.SubItems[4].Text = DateTime.Now.ToString(Properties.Settings.Default.COVTimeFormater);
         }
 
         private string EventTypeNiceName(BacnetEventNotificationData.BacnetEventStates state)
@@ -213,7 +213,7 @@ namespace Yabe
                 itm.SubItems.Add("OBJECT_DEVICE:" + EventData.initiatingObjectIdentifier.instance.ToString());
                 itm.SubItems.Add(EventData.eventObjectIdentifier.type + ":" + EventData.eventObjectIdentifier.instance);   //name
                 itm.SubItems.Add(EventTypeNiceName(EventData.fromState) + " to " + EventTypeNiceName(EventData.toState));
-                itm.SubItems.Add(EventData.timeStamp.Time.ToString("HH:mm:ss"));   //time
+                itm.SubItems.Add(EventData.timeStamp.Time.ToString(Properties.Settings.Default.COVTimeFormater));   //time
                 itm.SubItems.Add(EventData.notifyType.ToString());   //status
             }
             else
@@ -254,7 +254,7 @@ namespace Yabe
                         {
                             case BacnetPropertyIds.PROP_PRESENT_VALUE:
                                 itm.SubItems[3].Text = ConvertToText(value.value);
-                                itm.SubItems[4].Text = DateTime.Now.ToString("HH:mm:ss");
+                                itm.SubItems[4].Text = DateTime.Now.ToString(Properties.Settings.Default.COVTimeFormater);
                                 if (itm.SubItems[5].Text == "Not started") itm.SubItems[5].Text = "OK";
 
                                 try

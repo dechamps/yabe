@@ -56,6 +56,7 @@ Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{
 [Files]
 Source: "..\..\Yabe\bin\Debug\Yabe.exe"; DestDir: "{app}"; Flags: ignoreversion
 Source: "..\..\Yabe\bin\Debug\CheckReliability.dll"; DestDir: "{app}"; Flags: ignoreversion
+Source: "..\..\Yabe\bin\Debug\CheckStatusFlags.dll"; DestDir: "{app}"; Flags: ignoreversion
 Source: "..\..\Yabe\bin\Debug\README.Txt"; DestDir: "{app}"; Flags: ignoreversion
 Source: "..\..\Docs\history.txt"; DestDir: "{app}"; Flags: ignoreversion
 Source: "..\..\Docs\MIT_license.txt"; DestDir: "{app}"; Flags: ignoreversion

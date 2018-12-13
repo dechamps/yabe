@@ -478,5 +478,17 @@ namespace Yabe.Properties {
                 this["SettingsUpgradeRequired"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("HH:mm:ss")]
+        public string COVTimeFormater {
+            get {
+                return ((string)(this["COVTimeFormater"]));
+            }
+            set {
+                this["COVTimeFormater"] = value;
+            }
+        }
     }
 }
