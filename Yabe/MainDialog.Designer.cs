@@ -884,6 +884,7 @@
             // 
             // m_SubscriptionView
             // 
+            this.m_SubscriptionView.AllowColumnReorder = true;
             this.m_SubscriptionView.AllowDrop = true;
             this.m_SubscriptionView.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
             this.columnHeader1,

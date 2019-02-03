@@ -105,7 +105,7 @@ namespace Yabe
             CovGraph.AxisChange();
             CovGraph.IsAutoScrollRange = true;
 
-            //load splitter setup
+            //load splitter setup & SubsciptionView columns order&size
             try
             {
 
@@ -128,13 +128,35 @@ namespace Yabe
                 if (Properties.Settings.Default.GUI_SplitterRight != -1)
                     m_SplitContainerRight.SplitterDistance = Properties.Settings.Default.GUI_SplitterRight;
 
-                // Try to open the current (if exist) object Id<-> object name mapping file
-                Stream stream = File.Open(Properties.Settings.Default.ObjectNameFile, FileMode.Open);
-                BinaryFormatter bf = new System.Runtime.Serialization.Formatters.Binary.BinaryFormatter();
-                var d = (Dictionary<Tuple<String, BacnetObjectId>, String>)bf.Deserialize(stream);
-                stream.Close();
+                try
+                {
+                    // Try to open the current (if exist) object Id<-> object name mapping file
+                    Stream stream = File.Open(Properties.Settings.Default.ObjectNameFile, FileMode.Open);
+                    BinaryFormatter bf = new System.Runtime.Serialization.Formatters.Binary.BinaryFormatter();
+                    var d = (Dictionary<Tuple<String, BacnetObjectId>, String>)bf.Deserialize(stream);
+                    stream.Close();
 
-                if (d != null) DevicesObjectsName = d;
+                    if (d != null) DevicesObjectsName = d;
+                }
+                catch{}
+
+                // m_SubscriptionView Columns order & size
+                if (Properties.Settings.Default.GUI_SubscriptionColumns != null)
+                {
+                    string[] colprops = Properties.Settings.Default.GUI_SubscriptionColumns.Split(';');
+
+                    if (colprops.Length != m_SubscriptionView.Columns.Count * 2)
+                        return;
+
+                    for (int i = 0; i < colprops.Length / 2; i++)
+                    {
+                        m_SubscriptionView.Columns[i].DisplayIndex = Convert.ToInt32(colprops[i * 2]);
+                        m_SubscriptionView.Columns[i].Width = Convert.ToInt32(colprops[i * 2+1]);
+                    }
+
+                    m_SubscriptionView.Refresh();
+                }
+
             }
             catch
             {
@@ -210,7 +232,7 @@ namespace Yabe
             {
                 itm = m_SubscriptionView.Items.Add(adr.ToString());
                 itm.Tag = sub_key;
-                itm.SubItems.Add("OBJECT_DEVICE:" + EventData.initiatingObjectIdentifier.instance.ToString());
+                itm.SubItems.Add("DEVICE:" + EventData.initiatingObjectIdentifier.instance.ToString());
                 itm.SubItems.Add(EventData.eventObjectIdentifier.type + ":" + EventData.eventObjectIdentifier.instance);   //name
                 itm.SubItems.Add(EventTypeNiceName(EventData.fromState) + " to " + EventTypeNiceName(EventData.toState));
                 itm.SubItems.Add(EventData.timeStamp.Time.ToString(Properties.Settings.Default.COVTimeFormater));   //time
@@ -683,6 +705,12 @@ namespace Yabe
                     comm.OnCOVNotification += new BacnetClient.COVNotificationHandler(OnCOVNotification);
                     comm.OnEventNotify += new BacnetClient.EventNotificationCallbackHandler(OnEventNotify);
                     comm.Start();
+
+                    // WhoIs Min & Max limits
+                    int IdMin = -1, IdMax = -1;
+                    Int32.TryParse(dlg.WhoLimitLow.Text, out IdMin); Int32.TryParse(dlg.WhoLimitLow.Text, out IdMax);
+                    if ((IdMin!=-1)&&(IdMax==-1)) IdMax=0x3FFFFF;
+                    if ((IdMax != -1) && (IdMin == -1)) IdMin = 0;
 
                     //start search
                     if (comm.Transport.Type == BacnetAddressTypes.IP || comm.Transport.Type == BacnetAddressTypes.Ethernet 
@@ -2039,7 +2067,7 @@ namespace Yabe
 
                 //add to list
                 ListViewItem itm = m_SubscriptionView.Items.Add(adr + " - " + device_id);
-                itm.SubItems.Add(object_id.ToString());
+                itm.SubItems.Add(object_id.ToString().Substring(7));
                 itm.SubItems.Add(GetObjectName(comm, adr, object_id));   //name
                 itm.SubItems.Add("");   //value
                 itm.SubItems.Add("");   //time
@@ -2186,6 +2214,13 @@ namespace Yabe
                 Properties.Settings.Default.GUI_SplitterRight = m_SplitContainerRight.SplitterDistance;
                 Properties.Settings.Default.GUI_FormSize = this.Size;
                 Properties.Settings.Default.GUI_FormState = this.WindowState.ToString();
+
+                StringBuilder s=new StringBuilder();
+                for (int i = 0; i < m_SubscriptionView.Columns.Count;i++)
+                    s.Append(m_SubscriptionView.Columns[i].DisplayIndex.ToString() + ";" + m_SubscriptionView.Columns[i].Width.ToString() + ";");
+                s.Remove(s.Length-1,1);
+
+                Properties.Settings.Default.GUI_SubscriptionColumns=s.ToString();
 
                 //save
                 Properties.Settings.Default.Save();

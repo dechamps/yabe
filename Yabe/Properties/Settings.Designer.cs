@@ -490,5 +490,17 @@ namespace Yabe.Properties {
                 this["COVTimeFormater"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string GUI_SubscriptionColumns {
+            get {
+                return ((string)(this["GUI_SubscriptionColumns"]));
+            }
+            set {
+                this["GUI_SubscriptionColumns"] = value;
+            }
+        }
     }
 }
