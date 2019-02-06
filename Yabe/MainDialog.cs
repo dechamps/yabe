@@ -708,7 +708,7 @@ namespace Yabe
 
                     // WhoIs Min & Max limits
                     int IdMin = -1, IdMax = -1;
-                    Int32.TryParse(dlg.WhoLimitLow.Text, out IdMin); Int32.TryParse(dlg.WhoLimitLow.Text, out IdMax);
+                    Int32.TryParse(dlg.WhoLimitLow.Text, out IdMin); Int32.TryParse(dlg.WhoLimitHigh.Text, out IdMax);
                     if ((IdMin!=-1)&&(IdMax==-1)) IdMax=0x3FFFFF;
                     if ((IdMax != -1) && (IdMin == -1)) IdMin = 0;
 
@@ -722,7 +722,7 @@ namespace Yabe
                         {
                             for (int i = 0; i < comm.Retries; i++)
                             {
-                                comm.WhoIs();
+                                comm.WhoIs(IdMin,IdMax);
                                 System.Threading.Thread.Sleep(comm.Timeout);
                             }
                         }, null);
