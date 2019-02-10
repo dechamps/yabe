@@ -230,7 +230,7 @@ namespace Yabe
 
             if (itm == null)
             {
-                itm = m_SubscriptionView.Items.Add(adr.ToString());
+                itm = m_SubscriptionView.Items.Add(EventData.initiatingObjectIdentifier.instance.ToString());
                 itm.Tag = sub_key;
                 itm.SubItems.Add("DEVICE:" + EventData.initiatingObjectIdentifier.instance.ToString());
                 itm.SubItems.Add(EventData.eventObjectIdentifier.type + ":" + EventData.eventObjectIdentifier.instance);   //name
@@ -709,6 +709,7 @@ namespace Yabe
                     // WhoIs Min & Max limits
                     int IdMin = -1, IdMax = -1;
                     Int32.TryParse(dlg.WhoLimitLow.Text, out IdMin); Int32.TryParse(dlg.WhoLimitHigh.Text, out IdMax);
+                    if (IdMin == 0) IdMin = -1; if (IdMax == 0) IdMax = -1;
                     if ((IdMin!=-1)&&(IdMax==-1)) IdMax=0x3FFFFF;
                     if ((IdMax != -1) && (IdMin == -1)) IdMin = 0;
 
@@ -2066,7 +2067,7 @@ namespace Yabe
                 Subscription sub = new Subscription(comm, adr, new BacnetObjectId(BacnetObjectTypes.OBJECT_DEVICE, device_id), object_id, sub_key, m_next_subscription_id);
 
                 //add to list
-                ListViewItem itm = m_SubscriptionView.Items.Add(adr + " - " + device_id);
+                ListViewItem itm = m_SubscriptionView.Items.Add(device_id.ToString());
                 itm.SubItems.Add(object_id.ToString().Substring(7));
                 itm.SubItems.Add(GetObjectName(comm, adr, object_id));   //name
                 itm.SubItems.Add("");   //value

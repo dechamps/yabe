@@ -344,15 +344,15 @@
             // 
             // WhoLimitHigh
             // 
-            this.WhoLimitHigh.Location = new System.Drawing.Point(190, 55);
+            this.WhoLimitHigh.Location = new System.Drawing.Point(175, 55);
             this.WhoLimitHigh.Name = "WhoLimitHigh";
-            this.WhoLimitHigh.Size = new System.Drawing.Size(38, 20);
+            this.WhoLimitHigh.Size = new System.Drawing.Size(52, 20);
             this.WhoLimitHigh.TabIndex = 9;
             // 
             // label15
             // 
             this.label15.AutoSize = true;
-            this.label15.Location = new System.Drawing.Point(157, 58);
+            this.label15.Location = new System.Drawing.Point(144, 58);
             this.label15.Name = "label15";
             this.label15.Size = new System.Drawing.Size(27, 13);
             this.label15.TabIndex = 8;
@@ -360,9 +360,9 @@
             // 
             // WhoLimitLow
             // 
-            this.WhoLimitLow.Location = new System.Drawing.Point(98, 55);
+            this.WhoLimitLow.Location = new System.Drawing.Point(86, 55);
             this.WhoLimitLow.Name = "WhoLimitLow";
-            this.WhoLimitLow.Size = new System.Drawing.Size(38, 20);
+            this.WhoLimitLow.Size = new System.Drawing.Size(52, 20);
             this.WhoLimitLow.TabIndex = 7;
             // 
             // label14
