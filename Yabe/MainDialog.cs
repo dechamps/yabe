@@ -1350,13 +1350,20 @@ namespace Yabe
                 //Used the supplied list of supported Properties, otherwise fall back to using the list of default properties.
                 if (objectDidSupplyPropertyList)
                 {
+                    // 3 required properties not in the list
+                    ReadProperty(comm, adr, object_id, BacnetPropertyIds.PROP_OBJECT_NAME, ref values);
+                    ReadProperty(comm, adr, object_id, BacnetPropertyIds.PROP_OBJECT_TYPE, ref values);
+                    ReadProperty(comm, adr, object_id, BacnetPropertyIds.PROP_OBJECT_IDENTIFIER, ref values);
+
                     var proplist = values.Last();
+
                     foreach (var enumeratedValue in proplist.value)
                     {
                         BacnetPropertyIds bpi = (BacnetPropertyIds)(uint)enumeratedValue.Value;
-                        // read all specified properties given by the xml file
+                        // read all specified properties given by the PROP_PROPERTY_LIST, except the 3 previous one
                         ReadProperty(comm, adr, object_id, bpi, ref values);
                     }
+
                 }
                 else
                 {
