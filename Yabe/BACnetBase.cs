@@ -6883,7 +6883,7 @@ namespace System.IO.BACnet.Serialize
                 len += ASN1.decode_application_date(buffer, offset+len, out date);
                 len += ASN1.decode_application_time(buffer, offset+len, out time);
                 EventData.timeStamp.Time= new DateTime(date.Year, date.Month, date.Day, time.Hour, time.Minute, time.Second, time.Millisecond);
-
+                EventData.timeStamp.Tag = BacnetTimestampTags.TIME_STAMP_DATETIME;
                 len+=2; // closing tag 2 then 3
             }
             else

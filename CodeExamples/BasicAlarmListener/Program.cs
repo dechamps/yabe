@@ -94,6 +94,9 @@ namespace BasicAlarmListener
             if (need_confirm)
                 sender.SimpleAckResponse(adr, BacnetConfirmedServices.SERVICE_CONFIRMED_EVENT_NOTIFICATION, invoke_id);
 
+            if (EventData.ackRequired)
+                sender.AlarmAcknowledgement(adr, EventData.eventObjectIdentifier, EventData.toState, "Alarmlistener", EventData.timeStamp, new BacnetGenericTime(DateTime.Now, BacnetTimestampTags.TIME_STAMP_DATETIME), invoke_id);
+
             Console.WriteLine(val + " " + EventData.fromState + " to " + EventData.toState + " " + EventData.notifyType.ToString());
         }
 
