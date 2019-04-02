@@ -29,6 +29,8 @@ using System.IO.BACnet;
 using System.IO.BACnet.Serialize;
 using SharpPcap;
 using SharpPcap.LibPcap;
+using System.Net.Sockets;
+using System.Net;
 
 namespace OfflineStackDebug
 {
@@ -42,6 +44,45 @@ namespace OfflineStackDebug
         {
             bacnet_client.Start();
             ServiceToBeTested();          
+        }
+
+        // To send raw udp activity
+        static void RawUdpTest()
+        {
+            PcapDevice pcap = new CaptureFileReaderDevice(@"..\..\EventNotification3.pcap");
+            RawCapture raw;
+
+            // get the first Bacnet Frame
+            raw = pcap.GetNextPacket();
+            byte[] b = new byte[raw.Data.Length - 0x2a];
+            Array.Copy(raw.Data, 0x2a, b, 0, raw.Data.Length - 0x2a); // Only Udp header
+
+            // Send the frame
+            UdpClient u = new UdpClient();
+            u.Send(b, b.Length, "127.0.0.1", 47808);
+            Console.WriteLine("Event Sent");
+
+            // Wait the response
+            IPEndPoint ep = null;
+            u.Receive(ref ep);
+            Console.WriteLine("receive");
+
+            // get the second Bacnet Frame
+            raw = pcap.GetNextPacket();
+            b = new byte[raw.Data.Length - 0x2a];
+            Array.Copy(raw.Data, 0x2a, b, 0, raw.Data.Length - 0x2a -9); // 9 bytes Ethernet padding removes
+
+            // Send it
+            u.Send(b, b.Length, "127.0.0.1", 47808);
+            Console.WriteLine("Ack Sent");
+
+            // Wait
+            for (; ; )
+            {
+                u.Receive(ref ep);
+                Console.WriteLine("receive");
+            }
+
         }
 
         static void ServiceToBeTested()
