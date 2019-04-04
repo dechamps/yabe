@@ -5534,7 +5534,7 @@ namespace System.IO.BACnet.Serialize
                     value.Value = v;
                     return tag_len;
                 }
-                else if ((property_id == BacnetPropertyIds.PROP_LIST_OF_OBJECT_PROPERTY_REFERENCES)||(property_id == BacnetPropertyIds.PROP_LOG_DEVICE_OBJECT_PROPERTY))
+                else if ((property_id == BacnetPropertyIds.PROP_LIST_OF_OBJECT_PROPERTY_REFERENCES) || (property_id == BacnetPropertyIds.PROP_LOG_DEVICE_OBJECT_PROPERTY) || (property_id == BacnetPropertyIds.PROP_OBJECT_PROPERTY_REFERENCE))
                 {
                     BacnetDeviceObjectPropertyReference v;
                     tag_len = ASN1.decode_device_obj_property_ref(buffer, offset, max_offset, out v);
