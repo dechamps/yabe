@@ -1490,9 +1490,9 @@ namespace System.IO.BACnet
         {
             if (t == typeof(string))
                 return BacnetApplicationTags.BACNET_APPLICATION_TAG_CHARACTER_STRING;
-            else if (t == typeof(int) || t == typeof(short) || t == typeof(sbyte))
+            else if (t == typeof(long) || t == typeof(int) || t == typeof(short) || t == typeof(sbyte))
                 return BacnetApplicationTags.BACNET_APPLICATION_TAG_SIGNED_INT;
-            else if (t == typeof(uint) || t == typeof(ushort) || t == typeof(byte))
+            else if (t == typeof(ulong) || t == typeof(uint) || t == typeof(ushort) || t == typeof(byte))
                 return BacnetApplicationTags.BACNET_APPLICATION_TAG_UNSIGNED_INT;
             else if (t == typeof(bool))
                 return BacnetApplicationTags.BACNET_APPLICATION_TAG_BOOLEAN;
@@ -6546,6 +6546,14 @@ namespace System.IO.BACnet.Serialize
             buffer.Add(tmp1.buffer, tmp1.offset);
         }
 
+        public static void encode_application_unsigned(EncodeBuffer buffer, UInt64 value)
+        {
+            EncodeBuffer tmp1 = new EncodeBuffer();
+            encode_bacnet_unsigned(tmp1, value);
+            encode_tag(buffer, (byte)BacnetApplicationTags.BACNET_APPLICATION_TAG_UNSIGNED_INT, false, (uint)tmp1.offset);
+            buffer.Add(tmp1.buffer, tmp1.offset);
+        }
+
         public static void encode_application_enumerated(EncodeBuffer buffer, UInt32 value)
         {
             EncodeBuffer tmp1 = new EncodeBuffer();
@@ -6554,7 +6562,7 @@ namespace System.IO.BACnet.Serialize
             buffer.Add(tmp1.buffer, tmp1.offset);
         }
 
-        public static void encode_application_signed(EncodeBuffer buffer, Int32 value)
+        public static void encode_application_signed(EncodeBuffer buffer, Int64 value)
         {
             EncodeBuffer tmp1 = new EncodeBuffer();
             encode_bacnet_signed(tmp1, value);
@@ -6562,7 +6570,7 @@ namespace System.IO.BACnet.Serialize
             buffer.Add(tmp1.buffer, tmp1.offset);
         }
 
-        public static void encode_bacnet_unsigned(EncodeBuffer buffer, UInt32 value)
+        public static void encode_bacnet_unsigned(EncodeBuffer buffer, UInt64 value)
         {
             if (value < 0x100)
             {
@@ -6574,11 +6582,15 @@ namespace System.IO.BACnet.Serialize
             }
             else if (value < 0x1000000)
             {
-                encode_unsigned24(buffer, value);
+                encode_unsigned24(buffer, (UInt32)value);
             }
-            else
+            else if (value < 0x100000000)
             {
-                encode_unsigned32(buffer, value);
+                encode_unsigned32(buffer, (UInt32)value);
+            }
+            else 
+            {
+                encode_unsigned64(buffer, value);
             }
         }
 
@@ -6646,7 +6658,7 @@ namespace System.IO.BACnet.Serialize
             encode_bacnet_enumerated(buffer, value);
         }
 
-        public static void encode_bacnet_signed(EncodeBuffer buffer, Int32 value)
+        public static void encode_bacnet_signed(EncodeBuffer buffer, Int64 value)
         {
             /* don't encode the leading X'FF' or X'00' of the two's compliment.
                That is, the first octet of any multi-octet encoded value shall
@@ -6658,10 +6670,11 @@ namespace System.IO.BACnet.Serialize
             else if ((value >= -32768) && (value < 32768))
                 encode_signed16(buffer, (Int16)value);
             else if ((value > -8388608) && (value < 8388608))
-                encode_signed24(buffer, value);
+                encode_signed24(buffer, (int)value);
+            else if ((value > -2147483648) && (value < 2147483648))
+                encode_signed32(buffer, (int)value);
             else
-                encode_signed32(buffer, value);
-
+                encode_signed64(buffer, value);
         }
 
         public static void encode_octet_string(EncodeBuffer buffer, byte[] octet_string, int octet_offset, int octet_count)
@@ -6841,10 +6854,10 @@ namespace System.IO.BACnet.Serialize
                     encode_application_boolean(buffer, Convert.ToBoolean(value.Value));
                     break;
                 case BacnetApplicationTags.BACNET_APPLICATION_TAG_UNSIGNED_INT:
-                    encode_application_unsigned(buffer, Convert.ToUInt32(value.Value));
+                    encode_application_unsigned(buffer, Convert.ToUInt64(value.Value));
                     break;
                 case BacnetApplicationTags.BACNET_APPLICATION_TAG_SIGNED_INT:
-                    encode_application_signed(buffer, Convert.ToInt32(value.Value));
+                    encode_application_signed(buffer, Convert.ToInt64(value.Value));
                     break;
                 case BacnetApplicationTags.BACNET_APPLICATION_TAG_REAL:
                     encode_application_real(buffer, Convert.ToSingle(value.Value));
@@ -7226,6 +7239,18 @@ namespace System.IO.BACnet.Serialize
             buffer.Add((byte)((value & 0x000000ff) >> 0));
         }
 
+        public static void encode_unsigned64(EncodeBuffer buffer, UInt64 value)
+        {
+            buffer.Add((byte)(value >> 56));
+            buffer.Add((byte)((value & 0xff000000000000) >> 48));
+            buffer.Add((byte)((value & 0xff0000000000) >> 40));
+            buffer.Add((byte)((value & 0xff00000000) >> 32));
+            buffer.Add((byte)((value & 0xff000000) >> 24));
+            buffer.Add((byte)((value & 0x00ff0000) >> 16));
+            buffer.Add((byte)((value & 0x0000ff00) >> 8));
+            buffer.Add((byte)((value & 0x000000ff) >> 0));
+        }
+
         public static void encode_signed16(EncodeBuffer buffer, Int16 value)
         {
             buffer.Add((byte)((value & 0xff00) >> 8));
@@ -7241,6 +7266,19 @@ namespace System.IO.BACnet.Serialize
 
         public static void encode_signed32(EncodeBuffer buffer, Int32 value)
         {
+            buffer.Add((byte)((value & 0xff000000) >> 24));
+            buffer.Add((byte)((value & 0x00ff0000) >> 16));
+            buffer.Add((byte)((value & 0x0000ff00) >> 8));
+            buffer.Add((byte)((value & 0x000000ff) >> 0));
+        }
+
+        public static void encode_signed64(EncodeBuffer buffer, Int64 value)
+        {
+            buffer.Add((byte)(value>> 56));
+            buffer.Add((byte)((value & 0xff000000000000) >> 48));
+            buffer.Add((byte)((value & 0xff0000000000) >> 40));
+            buffer.Add((byte)((value & 0xff00000000) >> 32));
+
             buffer.Add((byte)((value & 0xff000000) >> 24));
             buffer.Add((byte)((value & 0x00ff0000) >> 16));
             buffer.Add((byte)((value & 0x0000ff00) >> 8));
@@ -7513,6 +7551,30 @@ namespace System.IO.BACnet.Serialize
             return len;
         }
 
+        public static int decode_unsigned(byte[] buffer, int offset, uint len_value, out ulong value)
+        {
+            uint unsigned_value = 0;
+
+            switch (len_value)
+            {
+                case 1:
+                case 2:
+                case 3:
+                case 4:
+                    decode_unsigned(buffer, offset, len_value, out unsigned_value);
+                    value=unsigned_value;
+                    break;
+                case 8:
+                    decode_unsigned64(buffer, offset, out value);
+                    break;
+                default:
+                    value = 0;
+                    break;
+            }
+
+            return (int)len_value;
+        }
+
         public static int decode_unsigned(byte[] buffer, int offset, uint len_value, out uint value)
         {
             ushort unsigned16_value = 0;
@@ -7538,6 +7600,19 @@ namespace System.IO.BACnet.Serialize
             }
 
             return (int)len_value;
+        }
+
+        public static int decode_unsigned64(byte[] buffer, int offset, out ulong value)
+        {
+            value = ((ulong)((((ulong)buffer[offset + 0]) << 56) & 0xff00000000000000));
+            value |= ((ulong)((((ulong)buffer[offset + 1]) << 48) & 0xff000000000000));
+            value |= ((ulong)((((ulong)buffer[offset + 2]) << 40) & 0xff0000000000));
+            value |= ((ulong)((((ulong)buffer[offset + 3]) << 32) & 0xff00000000));
+            value |= ((ulong)((((ulong)buffer[offset + 4]) << 24) & 0xff000000));
+            value |= ((ulong)((((ulong)buffer[offset + 5]) << 16) & 0x00ff0000));
+            value |= ((ulong)((((ulong)buffer[offset + 6]) << 8) & 0x0000ff00));
+            value |= ((ulong)(((ulong)buffer[offset + 7]) & 0x000000ff));
+            return 8;
         }
 
         public static int decode_unsigned32(byte[] buffer, int offset, out uint value)
@@ -7568,6 +7643,20 @@ namespace System.IO.BACnet.Serialize
         {
             value = buffer[offset + 0];
             return 1;
+        }
+
+        public static int decode_signed64(byte[] buffer, int offset, out long value)
+        {
+            value = ((long)(((long)buffer[offset + 0]) << 56));
+            value |= ((long)((((long)buffer[offset + 1]) << 48) & 0xff000000000000));
+            value |= ((long)((((long)buffer[offset + 2]) << 40) & 0xff0000000000));
+            value |= ((long)((((long)buffer[offset + 3]) << 32) & 0xff00000000));
+
+            value |= ((long)((((long)buffer[offset + 4]) << 24) & 0xff000000));
+            value |= ((long)((((long)buffer[offset + 5]) << 16) & 0x00ff0000));
+            value |= ((long)((((long)buffer[offset + 6]) << 8) & 0x0000ff00));
+            value |= ((long)(((long)buffer[offset + 7]) & 0x000000ff));
+            return 4;
         }
 
         public static int decode_signed32(byte[] buffer, int offset, out int value)
@@ -7642,6 +7731,29 @@ namespace System.IO.BACnet.Serialize
             }
 
             return len;
+        }
+
+        public static int decode_signed(byte[] buffer, int offset, uint len_value, out long value)
+        {
+            switch (len_value)
+            {
+                case 1:
+                case 2:
+                case 3:
+                case 4:
+                    int int_value;;
+                    decode_signed(buffer, offset, len_value, out int_value);
+                    value=int_value;
+                    break;
+                case 8:
+                    decode_signed64(buffer, offset, out value);
+                    break;
+                default:
+                    value = 0;
+                    break;
+            }
+
+            return (int)len_value;
         }
 
         public static int decode_signed(byte[] buffer, int offset, uint len_value, out int value)
@@ -8117,6 +8229,9 @@ namespace System.IO.BACnet.Serialize
             int len = 0;
             uint uint_value;
             int int_value;
+            
+            ulong ulong_value;
+            long long_value;
 
             value = new BacnetValue();
             value.Tag = tag_data_type;
@@ -8130,12 +8245,12 @@ namespace System.IO.BACnet.Serialize
                     value.Value = len_value_type > 0 ? true : false;
                     break;
                 case BacnetApplicationTags.BACNET_APPLICATION_TAG_UNSIGNED_INT:
-                    len = decode_unsigned(buffer, offset, len_value_type, out uint_value);
-                    value.Value = uint_value;
+                    len = decode_unsigned(buffer, offset, len_value_type, out ulong_value);
+                    value.Value = ulong_value;
                     break;
                 case BacnetApplicationTags.BACNET_APPLICATION_TAG_SIGNED_INT:
-                    len = decode_signed(buffer, offset, len_value_type, out int_value);
-                    value.Value = int_value;
+                    len = decode_signed(buffer, offset, len_value_type, out long_value);
+                    value.Value = long_value;
                     break;
                 case BacnetApplicationTags.BACNET_APPLICATION_TAG_REAL:
                     float float_value;
