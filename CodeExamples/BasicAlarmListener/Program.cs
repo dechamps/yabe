@@ -89,13 +89,26 @@ namespace BasicAlarmListener
         /*****************************************************************************************************/
         static void handler_OnEventNotify(BacnetClient sender, BacnetAddress adr, byte invoke_id, BacnetEventNotificationData EventData, bool need_confirm)
         {
-            string val = adr.ToString() + ":" + EventData.initiatingObjectIdentifier.type + ":" + EventData.initiatingObjectIdentifier.instance + ":" + EventData.eventObjectIdentifier.type + ":" + EventData.eventObjectIdentifier.instance;
+             string val;
+            // if event enrollment dispaly which datapoint is being watched
+            if (EventData.eventObjectIdentifier.type == BacnetObjectTypes.OBJECT_EVENT_ENROLLMENT)
+            {
+                IList<BacnetValue> values;
+                sender.ReadPropertyRequest(adr, EventData.eventObjectIdentifier, BacnetPropertyIds.PROP_OBJECT_PROPERTY_REFERENCE, out values);
+
+                BacnetDeviceObjectPropertyReference obj = (BacnetDeviceObjectPropertyReference) values[0].Value;
+                val = adr.ToString() + ":" + EventData.initiatingObjectIdentifier.type + ":" + EventData.initiatingObjectIdentifier.instance + ":" + EventData.eventObjectIdentifier.type + ":" + EventData.eventObjectIdentifier.instance + " object Type : "+obj.objectIdentifier.type + " object Instance :"+obj.objectIdentifier.instance+ " object Property :"+obj.propertyIdentifier;
+            }
+            else
+                val = adr.ToString() + ":" + EventData.initiatingObjectIdentifier.type + ":" + EventData.initiatingObjectIdentifier.instance + ":" + EventData.eventObjectIdentifier.type + ":" + EventData.eventObjectIdentifier.instance;
 
             if (need_confirm)
                 sender.SimpleAckResponse(adr, BacnetConfirmedServices.SERVICE_CONFIRMED_EVENT_NOTIFICATION, invoke_id);
 
+            // Just to show how Acknowledgement can be programmed. Never Ack an alarm like this without tested the source, the reason, ... and normally with a human action
             if (EventData.ackRequired)
-                sender.AlarmAcknowledgement(adr, EventData.eventObjectIdentifier, EventData.toState, "Alarmlistener", EventData.timeStamp, new BacnetGenericTime(DateTime.Now, BacnetTimestampTags.TIME_STAMP_DATETIME), invoke_id);
+                sender.AlarmAcknowledgement(adr, EventData.eventObjectIdentifier, EventData.toState, "Alarmlistener", EventData.timeStamp, new BacnetGenericTime(DateTime.Now, BacnetTimestampTags.TIME_STAMP_DATETIME));
+
 
             Console.WriteLine(val + " " + EventData.fromState + " to " + EventData.toState + " " + EventData.notifyType.ToString());
         }
