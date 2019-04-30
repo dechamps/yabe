@@ -7564,8 +7564,11 @@ namespace System.IO.BACnet.Serialize
                     decode_unsigned(buffer, offset, len_value, out unsigned_value);
                     value=unsigned_value;
                     break;
+                case 5:
+                case 6:
+                case 7:
                 case 8:
-                    decode_unsigned64(buffer, offset, out value);
+                    decode_unsigned64(buffer, offset, out value, len_value);
                     break;
                 default:
                     value = 0;
@@ -7602,17 +7605,16 @@ namespace System.IO.BACnet.Serialize
             return (int)len_value;
         }
 
-        public static int decode_unsigned64(byte[] buffer, int offset, out ulong value)
+        public static int decode_unsigned64(byte[] buffer, int offset, out ulong value, uint len=8)
         {
-            value = ((ulong)((((ulong)buffer[offset + 0]) << 56) & 0xff00000000000000));
-            value |= ((ulong)((((ulong)buffer[offset + 1]) << 48) & 0xff000000000000));
-            value |= ((ulong)((((ulong)buffer[offset + 2]) << 40) & 0xff0000000000));
-            value |= ((ulong)((((ulong)buffer[offset + 3]) << 32) & 0xff00000000));
-            value |= ((ulong)((((ulong)buffer[offset + 4]) << 24) & 0xff000000));
-            value |= ((ulong)((((ulong)buffer[offset + 5]) << 16) & 0x00ff0000));
-            value |= ((ulong)((((ulong)buffer[offset + 6]) << 8) & 0x0000ff00));
-            value |= ((ulong)(((ulong)buffer[offset + 7]) & 0x000000ff));
-            return 8;
+            value = 0;
+            int dec = 8 * ((int)len - 1);
+            for (int i = 0; i < len; i++)
+            {
+                value |=((ulong)(((ulong)buffer[offset + i]) << dec));
+                dec = dec - 8;
+            }
+            return (int)len;
         }
 
         public static int decode_unsigned32(byte[] buffer, int offset, out uint value)
@@ -7626,7 +7628,13 @@ namespace System.IO.BACnet.Serialize
 
         public static int decode_unsigned24(byte[] buffer, int offset, out uint value)
         {
-            value = ((uint)((((uint)buffer[offset + 0]) << 16) & 0x00ff0000));
+            /* negative - bit 7 is set */
+            if ((buffer[offset + 0] & 0x80)!=0)
+                value = 0xff000000;
+            else
+                value = 0;
+
+            value |= ((uint)((((uint)buffer[offset + 0]) << 16) & 0x00ff0000));
             value |= ((uint)((((uint)buffer[offset + 1]) << 8) & 0x0000ff00));
             value |= ((uint)(((uint)buffer[offset + 2]) & 0x000000ff));
             return 3;
@@ -7645,18 +7653,28 @@ namespace System.IO.BACnet.Serialize
             return 1;
         }
 
-        public static int decode_signed64(byte[] buffer, int offset, out long value)
+        // variable lenght decoding of signed int 64
+        public static int decode_signed64(byte[] buffer, int offset, out long value, uint len=8)
         {
-            value = ((long)(((long)buffer[offset + 0]) << 56));
-            value |= ((long)((((long)buffer[offset + 1]) << 48) & 0xff000000000000));
-            value |= ((long)((((long)buffer[offset + 2]) << 40) & 0xff0000000000));
-            value |= ((long)((((long)buffer[offset + 3]) << 32) & 0xff00000000));
 
-            value |= ((long)((((long)buffer[offset + 4]) << 24) & 0xff000000));
-            value |= ((long)((((long)buffer[offset + 5]) << 16) & 0x00ff0000));
-            value |= ((long)((((long)buffer[offset + 6]) << 8) & 0x0000ff00));
-            value |= ((long)(((long)buffer[offset + 7]) & 0x000000ff));
-            return 4;
+            value = 0;
+
+            int dec=56;
+
+            if ((buffer[offset + 0] & 0x80) != 0) /* negative - bit 7 is set */
+                for (int i = (int)len; i < 8; i++)
+                {
+                    value |= ((long)((long)0xFF << dec));
+                    dec = dec - 8;
+                }
+            
+            dec = 8*((int)len-1);
+            for (int i = 0; i < len; i++)
+            {
+                value |= ((long)(((long)buffer[offset + i]) << dec));
+                dec = dec - 8;
+            }
+            return (int)len;
         }
 
         public static int decode_signed32(byte[] buffer, int offset, out int value)
@@ -7745,8 +7763,11 @@ namespace System.IO.BACnet.Serialize
                     decode_signed(buffer, offset, len_value, out int_value);
                     value=int_value;
                     break;
+                case 5:
+                case 6:
+                case 7:
                 case 8:
-                    decode_signed64(buffer, offset, out value);
+                    decode_signed64(buffer, offset, out value, len_value);
                     break;
                 default:
                     value = 0;
