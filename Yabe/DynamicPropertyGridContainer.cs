@@ -1355,6 +1355,12 @@ namespace Utilities
                     case BacnetPropertyIds.PROP_POLARITY:
                         return new BacnetEnumValueConverter(new BacnetPolarity());
                     case BacnetPropertyIds.PROP_UNITS:
+                    case BacnetPropertyIds.PROP_OUTPUT_UNITS:
+                    case BacnetPropertyIds.PROP_CONTROLLED_VARIABLE_UNITS:
+                    case BacnetPropertyIds.PROP_PROPORTIONAL_CONSTANT_UNITS:
+                    case BacnetPropertyIds.PROP_INTEGRAL_CONSTANT_UNITS:
+                    case BacnetPropertyIds.PROP_DERIVATIVE_CONSTANT_UNITS:
+                    case BacnetPropertyIds.PROP_CAR_LOAD_UNITS:
                         return new BacnetEnumValueConverter(new BacnetUnitsId());
                     case BacnetPropertyIds.PROP_RELIABILITY:
                         return new BacnetEnumValueConverter(new BacnetReliability());
@@ -1379,11 +1385,56 @@ namespace Utilities
                     case BacnetPropertyIds.PROP_PROGRAM_STATE:
                         return new BacnetEnumValueConverter(new BacnetProgramState());
                     case BacnetPropertyIds.PROP_REASON_FOR_HALT:
-                        return new BacnetEnumValueConverter(new BacnetReasonForHalt());
+                        return new BacnetEnumValueConverter(new BACnetProgramError());
                     case BacnetPropertyIds.PROP_BACKUP_AND_RESTORE_STATE:
                         return new BacnetEnumValueConverter(new BACnetBackupState());
                     case BacnetPropertyIds.PROP_FILE_ACCESS_METHOD:
                         return new BacnetEnumValueConverter(new BacnetFileAccessMethod());
+                    case BacnetPropertyIds.PROP_DOOR_STATUS:
+                    case BacnetPropertyIds.PROP_LOCK_STATUS:
+                    case BacnetPropertyIds.PROP_CAR_DOOR_STATUS:
+                        return new BacnetEnumValueConverter(new BACnetDoorStatus());
+                    case BacnetPropertyIds.PROP_CREDENTIAL_DISABLE:
+                        return new BacnetEnumValueConverter(new BACnetAccessCredentialDisable());
+                    case BacnetPropertyIds.PROP_OCCUPANCY_STATE:
+                        return new BacnetEnumValueConverter(new BACnetAccessZoneOccupancyState());
+                    case BacnetPropertyIds.PROP_AUTHENTICATION_STATUS:
+                        return new BacnetEnumValueConverter(new BACnetAuthenticationStatus());
+                    case BacnetPropertyIds.PROP_ESCALATOR_MODE:
+                        return new BacnetEnumValueConverter(new BACnetEscalatorMode());
+                    case BacnetPropertyIds.PROP_BACNET_IP_MODE:
+                        return new BacnetEnumValueConverter(new BACnetIPMode());
+                    case BacnetPropertyIds.PROP_MAINTENANCE_REQUIRED:
+                        return new BacnetEnumValueConverter(new BACnetMaintenance());
+                    case BacnetPropertyIds.PROP_NETWORK_NUMBER_QUALITY:
+                        return new BacnetEnumValueConverter(new BACnetNetworkNumberQuality());
+                    case BacnetPropertyIds.PROP_COMMAND:
+                        return new BacnetEnumValueConverter(new BACnetNetworkPortCommand());
+                    case BacnetPropertyIds.PROP_NETWORK_TYPE:
+                        return new BacnetEnumValueConverter(new BACnetNetworkType());
+                    case BacnetPropertyIds.PROP_BASE_DEVICE_SECURITY_POLICY:
+                        return new BacnetEnumValueConverter(new BACnetSecurityLevel());
+                    case BacnetPropertyIds.PROP_PROTOCOL_LEVEL:
+                        return new BacnetEnumValueConverter(new BACnetProtocolLevel());
+                    case BacnetPropertyIds.PROP_SILENCED:
+                        return new BacnetEnumValueConverter(new BACnetSilencedState());
+                    case BacnetPropertyIds.PROP_TIMER_STATE:
+                        return new BacnetEnumValueConverter(new BACnetTimerState());
+                    case BacnetPropertyIds.PROP_LAST_STATE_CHANGE:
+                        return new BacnetEnumValueConverter(new BACnetTimerTransition());
+                    case BacnetPropertyIds.PROP_WRITE_STATUS:
+                        return new BacnetEnumValueConverter(new BACnetWriteStatus());
+                    case BacnetPropertyIds.PROP_DOOR_ALARM_STATE:
+                        return new BacnetEnumValueConverter(new BACnetDoorAlarmState());
+                    case BacnetPropertyIds.PROP_SECURED_STATUS:
+                        return new BacnetEnumValueConverter(new BACnetDoorSecuredStatus());
+                    case BacnetPropertyIds.PROP_ACCESS_EVENT:
+                    case BacnetPropertyIds.PROP_LAST_ACCESS_EVENT:
+                    case BacnetPropertyIds.PROP_ACCESS_ALARM_EVENTS:
+                    case BacnetPropertyIds.PROP_ACCESS_TRANSACTION_EVENTS:
+                        return new BacnetEnumValueConverter(new BACnetAccessEvents());
+                    case BacnetPropertyIds.PROP_FAULT_TYPE:
+                        return new BacnetEnumValueConverter(new BACnetFaultParameter.BACnetFaultType());
                     default:
                         return base.Converter;
                 }

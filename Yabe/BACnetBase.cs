@@ -8228,7 +8228,6 @@ namespace System.IO.BACnet.Serialize
         {
             int len = 0;
             uint uint_value;
-            int int_value;
             
             ulong ulong_value;
             long long_value;
