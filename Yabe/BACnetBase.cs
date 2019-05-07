@@ -7767,12 +7767,12 @@ namespace System.IO.BACnet
                 Id = (BacnetObjectId)v3.Value;
             else
             {
-                BacnetValue[] netdescr=(BacnetValue[])v3.Value;
-                ushort s = (ushort)(uint)netdescr[0].Value;
-                byte[] b=(byte[])netdescr[1].Value;
+                BacnetValue[] netdescr = (BacnetValue[])v3.Value;
+                ushort s = Convert.ToUInt16(netdescr[0].Value);
+                byte[] b = (byte[])netdescr[1].Value;
                 adr = new BacnetAddress(BacnetAddressTypes.IP, s, b);
             }
-            processIdentifier = (uint)v4.Value;
+            processIdentifier = Convert.ToUInt32(v4.Value);
             Ack_Required = (bool)v5.Value;
             evenType = (BacnetBitString)v6.Value;
         }
