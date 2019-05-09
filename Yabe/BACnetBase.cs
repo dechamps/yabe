@@ -9675,10 +9675,6 @@ namespace System.IO.BACnet.Serialize
                         BACnetAccumulatorRecord v = (BACnetAccumulatorRecord)value.Value;
                         v.ASN1encode(buffer);
 
-                    }else if(with_type == typeof(BACnetAction))
-                    {
-                        ASN1.encode_application_enumerated(buffer, (uint)Convert.ToUInt32(value.Value));
-
                     }else
 
                     if (value.Value is byte[])
@@ -11305,26 +11301,7 @@ namespace System.IO.BACnet.Serialize
                 value.Value = v;
 
                 return tag_len;
-            }
-            //put before because Command Object Type also has PROP_ACTION wich decodes to BACnetActionList not BACnetAction 
-            //and yabe dynamicpropertgridcontainer can't decide enum with objecttype
-            //but now how to display in YABE?
-            if (property_id == BacnetPropertyIds.PROP_ACTION && object_type == BacnetObjectTypes.OBJECT_LOOP)
-            {
-                uint u_val;
-                
-                tag_len += ASN1.decode_tag_number_and_value(buffer, offset + len, out tag_number, out len_value_type);
-                if ((BacnetApplicationTags)tag_number == BacnetApplicationTags.BACNET_APPLICATION_TAG_ENUMERATED)
-                    tag_len += ASN1.decode_enumerated(buffer, offset, len_value_type, out u_val);
-                else
-                    return -1;
-
-                value.Tag = BacnetApplicationTags.BACNET_APPLICATION_TAG_ENUMERATED;
-                value.Value = (BACnetAction)u_val;
-
-                return tag_len;
-            }
-            /***********************/
+            }            
 
             /* FIXME: use max_apdu_len! */
             if (!IS_CONTEXT_SPECIFIC(buffer[offset]))

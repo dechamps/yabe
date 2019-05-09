@@ -2006,6 +2006,11 @@ namespace Utilities
                         return new BacnetEnumValueConverter(new BACnetAccessEvents());
                     case BacnetPropertyIds.PROP_FAULT_TYPE:
                         return new BacnetEnumValueConverter(new BACnetFaultParameter.BACnetFaultType());
+                    case BacnetPropertyIds.PROP_ACTION:
+                        //because Command Object Type also has PROP_ACTION wich decodes to BACnetActionList
+                        if (m_Property.bacnetApplicationTags != BacnetApplicationTags.BACNET_APPLICATION_CONTEXT_SPECIFIC)
+                            return new BacnetEnumValueConverter(new BACnetAction());
+                        return base.Converter;
                     default:
                         return base.Converter;
                 }
@@ -2073,6 +2078,7 @@ namespace Utilities
                     return new BacnetEnumValueDisplay(new BACnetBackupState());
                 case BacnetPropertyIds.PROP_FILE_ACCESS_METHOD:
                     return new BacnetEnumValueDisplay(new BacnetFileAccessMethod());
+
 
                 default :
                     return base.GetEditor(editorBaseType);
