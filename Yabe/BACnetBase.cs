@@ -9527,7 +9527,8 @@ namespace System.IO.BACnet.Serialize
 
         public static void bacapp_encode_application_data(EncodeBuffer buffer, BacnetValue value)
         {
-            
+                       
+
             if (value.Value == null)
             {
                 buffer.Add((byte)BacnetApplicationTags.BACNET_APPLICATION_TAG_NULL);  
@@ -9593,6 +9594,10 @@ namespace System.IO.BACnet.Serialize
                     break;
                 default:
                     Type with_type = value.Value.GetType();
+                    if (value.Value is Enum)
+                    {
+                        encode_application_enumerated(buffer, Convert.ToUInt32(value.Value));
+                    }else
                     if (with_type == typeof(BACnetEventParameter))
                     {
                         BACnetEventParameter v = (BACnetEventParameter)value.Value;
