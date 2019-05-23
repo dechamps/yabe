@@ -620,7 +620,7 @@ namespace Yabe
 
         private void aboutToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            MessageBox.Show(this, "Yet Another Bacnet Explorer - Yabe\nVersion " + this.GetType().Assembly.GetName().Version + "\nBy Morten Kvistgaard - Copyright 2014-2017\nBy Frederic Chaxel - Copyright 2015-2018\n" +
+            MessageBox.Show(this, "Yet Another Bacnet Explorer - Yabe\nVersion " + this.GetType().Assembly.GetName().Version + "\nBy Morten Kvistgaard - Copyright 2014-2017\nBy Frederic Chaxel - Copyright 2015-2019\n" +
                 "\nReferences:"+
                 "\nhttp://bacnet.sourceforge.net/" + 
                 "\nhttp://www.unified-automation.com/products/development-tools/uaexpert.html" +
