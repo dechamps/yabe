@@ -2175,6 +2175,7 @@ namespace Yabe
 
         private void m_SubscriptionView_DragDrop(object sender, DragEventArgs e)
         {
+            // Drop from the adress space
             if (e.Data.GetDataPresent("CodersLab.Windows.Controls.NodesCollection", false))
             {
                 //fetch end point
@@ -2209,6 +2210,54 @@ namespace Yabe
                     if (CreateSubscription(comm, adr, entry.Value, Bobjs[i], sender==CovGraph) == false)
                         break;
                 }
+            }
+
+            // Drop a file deviceId;object:Id
+            if (e.Data.GetDataPresent(DataFormats.FileDrop))
+            {
+                string[] files = (string[])e.Data.GetData(DataFormats.FileDrop);
+                if (files.Length != 1) return;
+                try
+                {
+                    StreamReader sr = new StreamReader(files[0]);
+                    while (!sr.EndOfStream)
+                    {
+                        string line=sr.ReadLine();
+                        if (line[0] != '#')
+                        {
+
+                            string[] description = line.Split(';');
+                            if (description.Length == 2)
+                            {
+                                try
+                                {
+                                    uint deviceId;
+                                    deviceId = Convert.ToUInt32(description[0]);
+                                    BacnetObjectId objectId = BacnetObjectId.Parse("OBJECT_" + description[1]);
+
+                                    foreach (var E in m_devices)
+                                    {
+                                        var comm = E.Value.Devices;
+                                        foreach (var deviceEntry in comm)
+                                        {
+                                            if (deviceEntry.Value == deviceId)
+                                            {
+                                                CreateSubscription(E.Key, deviceEntry.Key, deviceId, objectId, sender == CovGraph);
+                                                break;
+                                            }
+                                        }
+
+                                    }
+                                }
+                                catch { }
+
+                            }
+                        }
+                    }
+
+                }
+                catch { }
+
             }
         }
 

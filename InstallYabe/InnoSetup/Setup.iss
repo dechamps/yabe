@@ -64,6 +64,7 @@ Source: "..\..\Docs\ZedGraph Calendar SharpPcap License-LGPL.txt"; DestDir: "{ap
 Source: "..\..\Docs\Treeview_license.txt"; DestDir: "{app}"; Flags: ignoreversion
 
 Source: "..\..\Yabe\bin\Debug\ReadSinglePropDescr.Xml"; DestDir: "{app}"; Flags: ignoreversion
+Source: "..\..\Yabe\AdviseSample.cov"; DestDir: "{app}"; Flags: ignoreversion
 
 Source: "..\..\DemoServer\bin\Debug\DemoServer.exe"; DestDir: "{app}\AddOn"; Flags: ignoreversion
 Source: "..\..\DemoServer\bin\Debug\DeviceStorage.Xml"; DestDir: "{app}\AddOn"; Flags: ignoreversion

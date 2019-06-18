@@ -265,6 +265,10 @@
 			If the drag/drop is done onto the graph the value is also drawn.
 			Subscriptions updates & Events displayed in the central panel can be 
 			logged into a CSV file : right click in this central panel to do it.
+
+			To remove an entry select it then hit the delete key.
+
+			A file with a list can be also provided : see AdvertiseSample.cov.
 			
 3.  TECHNICAL
     
