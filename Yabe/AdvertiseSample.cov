@@ -1,7 +1,11 @@
-# Comment line must start with a #
+# Comment lines, like these 4 first lines, must start with a #, blank lines allowed
 # This file should be drop into Yabe to request all the objects listed here
 # File structure is Bacnet deviceId ; Object:Id
 # Device should be previously discovered or the line is ignored
+
+# two objects from the device 314159
 314159;ANALOG_VALUE:0
 314159;BINARY_OUTPUT:1
+
+# one object from the device 271828
 271828;BINARY_INPUT:4  

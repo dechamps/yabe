@@ -2223,7 +2223,7 @@ namespace Yabe
                     while (!sr.EndOfStream)
                     {
                         string line=sr.ReadLine();
-                        if (line[0] != '#')
+                        if ((line.Length > 0) && (line[0] != '#'))
                         {
 
                             string[] description = line.Split(';');
@@ -2254,6 +2254,7 @@ namespace Yabe
                             }
                         }
                     }
+                    sr.Close();
 
                 }
                 catch { }
