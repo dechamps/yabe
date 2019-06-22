@@ -50,6 +50,7 @@ namespace Yabe
     public partial class YabeMainDialog : Form
     {       
         private Dictionary<BacnetClient, BacnetDeviceLine> m_devices = new Dictionary<BacnetClient, BacnetDeviceLine>();
+        public int DeviceCount { get { return m_devices.Count; } }
 
         private Dictionary<string, ListViewItem> m_subscription_list = new Dictionary<string, ListViewItem>();
         private Dictionary<string, RollingPointPairList> m_subscription_points = new Dictionary<string, RollingPointPairList>();        
