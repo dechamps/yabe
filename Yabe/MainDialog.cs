@@ -1162,9 +1162,9 @@ namespace Yabe
                             return;
                         }
 
-                        if (value_list != null && value_list.Count == 1 && value_list[0].Value is uint)
+                        if (value_list != null && value_list.Count == 1 && value_list[0].Value is ulong)
                         {
-                            uint list_count = (uint)value_list[0].Value;
+                            uint list_count = (uint)(ulong)value_list[0].Value;
                             AddSpaceLabel.Text = "Address Space : " + list_count.ToString() + " objects";
                             AddObjectListOneByOneAsync(comm, adr, device_id, list_count, AsynchRequestId);
                             return;
