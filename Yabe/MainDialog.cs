@@ -1575,6 +1575,8 @@ namespace Yabe
                 (its as ToolStripMenuItem).Visible = false;
             // Set Subscribe always visible
             m_AddressSpaceMenuStrip.Items[0].Visible = true;
+            // Set Search always visible
+            m_AddressSpaceMenuStrip.Items[8].Visible = true;
 
             // Get the node type
             GetObjectLink(out cl, out ba, out objId, BacnetObjectTypes.MAX_BACNET_OBJECT_TYPE);
@@ -3248,6 +3250,28 @@ namespace Yabe
         }
 
         #endregion
+
+        private void searchToolStripMenuItem1_Click(object sender, EventArgs e)
+        {
+            GenericInputBox<TextBox> search = new GenericInputBox<TextBox>("Search object", "Name",     (o) =>
+            {
+                o.Text = m_AddressSpaceTree.SelectedNode.Text;
+            });
+
+            if (search.ShowDialog() == DialogResult.OK)
+            {
+                string find = search.genericInput.Text.ToLower();
+                foreach (TreeNode tn in m_AddressSpaceTree.Nodes)
+                {
+                    if (tn.Text.ToLower().Contains(find))
+                    {
+                        tn.EnsureVisible();
+                        m_AddressSpaceTree.SelectedNode = tn;                       
+                        break;
+                    }
+                }
+            }
+        }
 
     }
 
