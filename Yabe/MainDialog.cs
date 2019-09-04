@@ -3130,7 +3130,18 @@ namespace Yabe
 
                 try
                 {
-                    comm.CreateObjectRequest(adr, new BacnetObjectId((BacnetObjectTypes)F.ObjectType.SelectedIndex, (uint)F.ObjectId.Value));
+                    BacnetPropertyValue[] initialvalues = null;
+
+                    if (F.ObjectName.Text != null) // Add the initial propery name
+                    {
+                        initialvalues = new BacnetPropertyValue[1];
+                        initialvalues[0] = new BacnetPropertyValue();
+                        initialvalues[0].property.propertyIdentifier = (uint)BacnetPropertyIds.PROP_OBJECT_NAME;
+                        initialvalues[0].value = new BacnetValue[1];
+                        initialvalues[0].value[0] = new BacnetValue(F.ObjectName.Text);
+                    }
+                    comm.CreateObjectRequest(adr, new BacnetObjectId((BacnetObjectTypes)F.ObjectType.SelectedIndex, (uint)F.ObjectId.Value), initialvalues);
+
                     m_DeviceTree_AfterSelect(null, new TreeViewEventArgs(m_DeviceTree.SelectedNode));
                 }
                 catch (Exception ex)
