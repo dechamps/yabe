@@ -4887,18 +4887,27 @@ namespace System.IO.BACnet
         private BacnetObjectId device_identifier;
         private BacnetAddress device_address;
 
-        public BacnetObjectId Device_Identifier {
+        public BacnetObjectId Device_Identifier
+        {
             get { return device_identifier; }
             set { device_identifier = value; }
         }
-        public BacnetAddress Device_Address {
+        public BacnetAddress Device_Address
+        {
             get { return device_address; }
             set { device_address = value; }
-             }
+        }
 
         public override string ToString()
         {
-            return "Device_Identifier:" + device_identifier + "Network_Number:" + device_address.net + "mac_address:" + BitConverter.ToString(device_address.adr);
+            try
+            {
+                return "Device_Identifier:" + device_identifier + "Network_Number:" + device_address.net + "mac_address:" + BitConverter.ToString(device_address.adr);
+            }
+            catch
+            {
+                return "";
+            }
         }
 
         public void ASN1encode(EncodeBuffer buffer)
@@ -4924,7 +4933,8 @@ namespace System.IO.BACnet
                 device_identifier = new BacnetObjectId((BacnetObjectTypes)obj_typ, obj_instance);
             }
             else
-                return len - 1;
+                return len;
+
             //device_address
             device_address = new BacnetAddress();
             len += ASN1.decode_tag_number_and_value(buffer, offset + len, out tag, out len_value_type);
@@ -4946,8 +4956,6 @@ namespace System.IO.BACnet
             }
             return len;
         }
-
-
 
     }
 
@@ -6048,7 +6056,7 @@ namespace System.IO.BACnet
                 len++;
 
             }else
-                return len-1;
+                return len;
 
             return len;
 
@@ -6172,7 +6180,7 @@ namespace System.IO.BACnet
                     value = f_val;
                     break;
                 default:
-                    return len - 1;
+                    return len;
             }
             
             return len;
