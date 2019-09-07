@@ -11305,7 +11305,7 @@ namespace System.IO.BACnet.Serialize
 
                 return tag_len;
             }
-            if(property_id == BacnetPropertyIds.PROP_DEVICE_ADDRESS_BINDING ||property_id == BacnetPropertyIds.PROP_LAST_KEY_SERVER || property_id == BacnetPropertyIds.PROP_MANUAL_SLAVE_ADDRESS_BINDING || property_id == BacnetPropertyIds.PROP_SLAVE_ADDRESS_BINDING)
+            if (property_id == BacnetPropertyIds.PROP_LAST_KEY_SERVER)
             {
                 BACnetAddressBinding v = new BACnetAddressBinding();
                 tag_len = v.ASN1decode(buffer, offset, (uint)max_offset);
