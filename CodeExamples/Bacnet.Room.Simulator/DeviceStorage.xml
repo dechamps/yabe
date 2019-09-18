@@ -423,7 +423,7 @@
           <Value>0</Value>
         </Property>
         <Property Id="PROP_PRESENT_VALUE" Tag="BACNET_APPLICATION_TAG_ENUMERATED">
-          <Value>False</Value>
+          <Value>0</Value>
         </Property>
         <Property Id="PROP_RELIABILITY" Tag="BACNET_APPLICATION_TAG_ENUMERATED">
           <Value>0</Value>
@@ -451,13 +451,13 @@
           <Value>5</Value>
         </Property>
         <Property Id="PROP_OUT_OF_SERVICE" Tag="BACNET_APPLICATION_TAG_BOOLEAN">
-          <Value>False</Value>
+          <Value>0</Value>
         </Property>
         <Property Id="PROP_POLARITY" Tag="BACNET_APPLICATION_TAG_ENUMERATED">
           <Value>0</Value>
         </Property>
         <Property Id="PROP_PRESENT_VALUE" Tag="BACNET_APPLICATION_TAG_ENUMERATED">
-          <Value>False</Value>
+          <Value>0</Value>
         </Property>
         <Property Id="PROP_RELIABILITY" Tag="BACNET_APPLICATION_TAG_ENUMERATED">
           <Value>0</Value>
