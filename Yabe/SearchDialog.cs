@@ -143,11 +143,15 @@ namespace Yabe
             {
                 if (device.Opened == false) // Don't re-open and lists an already open interface
                 {
-                    device.Open();
-                    if (device.LinkType == PacketDotNet.LinkLayers.Ethernet
-                        && device.Interface.MacAddress != null)
-                        m_EthernetInterfaceCombo.Items.Add(device.Interface.FriendlyName + ": " + device.Interface.Description);
-                    device.Close();
+                    try
+                    {
+                        device.Open();
+                        if (device.LinkType == PacketDotNet.LinkLayers.Ethernet
+                            && device.Interface.MacAddress != null)
+                            m_EthernetInterfaceCombo.Items.Add(device.Interface.FriendlyName + ": " + device.Interface.Description);
+                        device.Close();
+                    }
+                    catch { }
                 }
             }
         }

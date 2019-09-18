@@ -59,7 +59,7 @@ namespace System.IO.BACnet
         public BacnetEthernetProtocolTransport(string deviceName)
         {
 
-            this.deviceName = "\\Device\\NPF_"+deviceName;
+            this.deviceName = deviceName;
         }
 
         public BacnetAddressTypes Type { get { return BacnetAddressTypes.Ethernet; } }
@@ -86,7 +86,7 @@ namespace System.IO.BACnet
             {
                 try
                 {
-                    var device = devices.Where(dev => dev.Interface.Name == deviceName).FirstOrDefault();
+                    var device = devices.Where(dev => dev.Interface.FriendlyName == deviceName).FirstOrDefault();
                     device.Open(DeviceMode.Normal, 1000);  // 1000 ms read timeout
                     return device;
                 }
