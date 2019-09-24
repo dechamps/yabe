@@ -252,6 +252,7 @@ namespace CodersLab.Windows.Controls
 			}
             set
             {
+                UnselectAllNodes(TreeViewAction.Unknown);
                 LastSelectedNode = value;
                 SelectNode(value, true, TreeViewAction.ByMouse);
             }
