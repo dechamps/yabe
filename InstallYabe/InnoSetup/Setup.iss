@@ -35,16 +35,13 @@ Name: "dutch"; MessagesFile: "compiler:Languages\Dutch.isl"
 Name: "finnish"; MessagesFile: "compiler:Languages\Finnish.isl"
 Name: "french"; MessagesFile: "compiler:Languages\French.isl"
 Name: "german"; MessagesFile: "compiler:Languages\German.isl"
-Name: "greek"; MessagesFile: "compiler:Languages\Greek.isl"
 Name: "hebrew"; MessagesFile: "compiler:Languages\Hebrew.isl"
-Name: "hungarian"; MessagesFile: "compiler:Languages\Hungarian.isl"
 Name: "italian"; MessagesFile: "compiler:Languages\Italian.isl"
 Name: "japanese"; MessagesFile: "compiler:Languages\Japanese.isl"
 Name: "norwegian"; MessagesFile: "compiler:Languages\Norwegian.isl"
 Name: "polish"; MessagesFile: "compiler:Languages\Polish.isl"
 Name: "portuguese"; MessagesFile: "compiler:Languages\Portuguese.isl"
 Name: "russian"; MessagesFile: "compiler:Languages\Russian.isl"
-Name: "serbian"; MessagesFile: "compiler:Languages\SerbianLatin.isl"
 Name: "slovenian"; MessagesFile: "compiler:Languages\Slovenian.isl"
 Name: "spanish"; MessagesFile: "compiler:Languages\Spanish.isl"
 Name: "turkish"; MessagesFile: "compiler:Languages\Turkish.isl"
@@ -57,6 +54,7 @@ Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{
 Source: "..\..\Yabe\bin\Debug\Yabe.exe"; DestDir: "{app}"; Flags: ignoreversion
 Source: "..\..\Yabe\bin\Debug\CheckReliability.dll"; DestDir: "{app}"; Flags: ignoreversion
 Source: "..\..\Yabe\bin\Debug\CheckStatusFlags.dll"; DestDir: "{app}"; Flags: ignoreversion
+Source: "..\..\Yabe\bin\Debug\ListOutOfService.dll"; DestDir: "{app}"; Flags: ignoreversion
 Source: "..\..\Yabe\bin\Debug\README.Txt"; DestDir: "{app}"; Flags: ignoreversion
 Source: "..\..\Docs\history.txt"; DestDir: "{app}"; Flags: ignoreversion
 Source: "..\..\Docs\MIT_license.txt"; DestDir: "{app}"; Flags: ignoreversion

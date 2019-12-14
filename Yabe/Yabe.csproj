@@ -269,7 +269,9 @@
     <Content Include="ReadSinglePropDescr.xml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <EmbeddedResource Include="ReadSinglePropDescrDefault.xml" />
+    <EmbeddedResource Include="ReadSinglePropDescrDefault.xml">
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
     <None Include="Resources\error.png" />
     <None Include="Resources\book_open.png" />
     <None Include="Resources\database_go1.png" />
