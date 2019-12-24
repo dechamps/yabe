@@ -259,7 +259,7 @@ namespace Yabe
                         //update interface
                         for (int i = 0; i < records.Length; i++, Idx++)
                         {
-                            if(records[i].type == BacnetTrendLogValueType.TL_TYPE_UNSIGN || records[i].type == BacnetTrendLogValueType.TL_TYPE_SIGN || records[i].type == BacnetTrendLogValueType.TL_TYPE_REAL)
+                            if(records[i].type == BacnetTrendLogValueType.TL_TYPE_UNSIGN || records[i].type == BacnetTrendLogValueType.TL_TYPE_SIGN || records[i].type == BacnetTrendLogValueType.TL_TYPE_REAL  || records[i].type == BacnetTrendLogValueType.TL_TYPE_ENUM)
                                 Pointslists[i].Add(new XDate(records[i].timestamp), (double)Convert.ChangeType(records[i].Value, typeof(double)));
                             else
                                 Pointslists[i].Add(new XDate(records[i].timestamp), double.NaN);
