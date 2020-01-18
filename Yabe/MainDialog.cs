@@ -1660,7 +1660,7 @@ namespace Yabe
                 BacnetValue[] b_value = null;
                 try
                 {
-                    if (new_value != null && new_value.GetType().IsArray)
+                    if (new_value != null && new_value.GetType().IsArray && new_value.GetType() != typeof(byte[]))
                     {
                         Array arr = (Array)new_value;
                         b_value = new BacnetValue[arr.Length];
