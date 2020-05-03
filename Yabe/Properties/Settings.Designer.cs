@@ -314,12 +314,12 @@ namespace Yabe.Properties {
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("True")]
-        public bool DefaultPreferStructuredView {
+        public bool GetStructuredView {
             get {
-                return ((bool)(this["DefaultPreferStructuredView"]));
+                return ((bool)(this["GetStructuredView"]));
             }
             set {
-                this["DefaultPreferStructuredView"] = value;
+                this["GetStructuredView"] = value;
             }
         }
         

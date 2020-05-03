@@ -961,13 +961,13 @@ namespace Yabe
         private void AddObjectEntry(BacnetClient comm, BacnetAddress adr, string name, BacnetObjectId object_id, TreeNodeCollection nodes)
         {
             if (string.IsNullOrEmpty(name)) name = object_id.ToString();
-            
+
             TreeNode node;
 
             if (name.StartsWith("OBJECT_"))
                 node = nodes.Add(name.Substring(7));
             else
-                node = nodes.Add("PROPRIETARY:"+object_id.Instance.ToString()+" ("+name+")");  // Propertary Objects not in enum appears only with the number such as 584:0
+                node = nodes.Add("PROPRIETARY:" + object_id.Instance.ToString() + " (" + name + ")");  // Propertary Objects not in enum appears only with the number such as 584:0
 
             node.Tag = object_id;
 
@@ -977,20 +977,27 @@ namespace Yabe
             // Get the property name if already known
             String PropName;
 
-            lock(DevicesObjectsName)
+            lock (DevicesObjectsName)
                 if (DevicesObjectsName.TryGetValue(new Tuple<String, BacnetObjectId>(adr.FullHashString(), object_id), out PropName) == true)
                 {
-                    ChangeTreeNodePropertyName(node, PropName);;
+                    ChangeTreeNodePropertyName(node, PropName); ;
                 }
-           
+
             //fetch sub properties
             if (object_id.type == BacnetObjectTypes.OBJECT_GROUP)
                 FetchGroupProperties(comm, adr, object_id, node.Nodes);
-            else if ((object_id.type == BacnetObjectTypes.OBJECT_STRUCTURED_VIEW) && Properties.Settings.Default.DefaultPreferStructuredView)
+            else if ((object_id.type == BacnetObjectTypes.OBJECT_STRUCTURED_VIEW) && Properties.Settings.Default.GetStructuredView)
                 FetchViewObjects(comm, adr, object_id, node.Nodes);
+            else if ((object_id.type == BacnetObjectTypes.OBJECT_DEVICE) && (node.Parent == null) && (Properties.Settings.Default.GetStructuredView==true))
+            {
+                node = node.Nodes.Add("STRUCTURED VIEW");
+                node.ImageIndex = GetIconNum(BacnetObjectTypes.OBJECT_STRUCTURED_VIEW);
+                node.SelectedImageIndex = node.ImageIndex;
+                FetchStructuredObjects(comm, adr, object_id.Instance, node.Nodes);
+            }
         }
 
-        private IList<BacnetValue> FetchStructuredObjects(BacnetClient comm, BacnetAddress adr, uint device_id)
+        private void FetchStructuredObjects(BacnetClient comm, BacnetAddress adr, uint device_id, TreeNodeCollection nodes)
         {
             IList<BacnetValue> ret;
             int old_reties = comm.Retries;
@@ -1000,14 +1007,18 @@ namespace Yabe
                 if (!comm.ReadPropertyRequest(adr, new BacnetObjectId(BacnetObjectTypes.OBJECT_DEVICE, device_id), BacnetPropertyIds.PROP_STRUCTURED_OBJECT_LIST, out ret))
                 {
                     Trace.TraceInformation("Didn't get response from 'Structured Object List'");
-                    return null;
+
                 }
-                return ret == null || ret.Count == 0 ? null : ret;
+                else
+                {
+                    List<BacnetObjectId> objectList = SortBacnetObjects(ret);
+                    foreach (BacnetObjectId objid in objectList)
+                        AddObjectEntry(comm, adr, null, objid, nodes);
+                }
             }
             catch (Exception)
             {
                 Trace.TraceInformation("Got exception from 'Structured Object List'");
-                return null;
             }
             finally
             {
@@ -1122,9 +1133,6 @@ namespace Yabe
                 IList<BacnetValue> value_list = null;
                 try
                 {
-                    //fetch structured view if possible
-                    if(Properties.Settings.Default.DefaultPreferStructuredView) 
-                        value_list = FetchStructuredObjects(comm, adr, device_id);
 
                     //fetch normal list
                     if (value_list == null)
@@ -1772,6 +1780,7 @@ namespace Yabe
 
             if (m_AddressSpaceTree.SelectedNode != null)
             {
+                if (m_AddressSpaceTree.SelectedNode.Tag == null) return false;
                 object_id = (BacnetObjectId)m_AddressSpaceTree.SelectedNode.Tag;
                 return true;
             }

@@ -74,7 +74,7 @@
     <Setting Name="Udp_MaxPayload" Type="System.Int32" Scope="User">
       <Value Profile="(Default)">1472</Value>
     </Setting>
-    <Setting Name="DefaultPreferStructuredView" Type="System.Boolean" Scope="User">
+    <Setting Name="GetStructuredView" Type="System.Boolean" Scope="User">
       <Value Profile="(Default)">True</Value>
     </Setting>
     <Setting Name="DefaultUdpIp" Type="System.String" Scope="User">
