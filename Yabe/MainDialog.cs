@@ -2954,7 +2954,7 @@ namespace Yabe
         {
             foreach (TreeNode tn in tnc)
             {
-                if (tn.ToolTipText == "")
+                if ((tn.ToolTipText == "")&&(tn.Tag!=null))
                 {
                     if (!bras.Exists(o => o.objectIdentifier.Equals((BacnetObjectId)tn.Tag)))
                         bras.Add(new BacnetReadAccessSpecification((BacnetObjectId)tn.Tag, new BacnetPropertyReference[] { new BacnetPropertyReference((uint)BacnetPropertyIds.PROP_OBJECT_NAME, System.IO.BACnet.Serialize.ASN1.BACNET_ARRAY_ALL) }));
@@ -3032,7 +3032,7 @@ namespace Yabe
 
             foreach (TreeNode tn in tnc)
             {
-                if (tn.ToolTipText == "")
+                if ((tn.ToolTipText == "")&&(tn.Tag!=null))
                 {
                     IList<BacnetValue> name;
                     if (comm.ReadPropertyRequest(adr, (BacnetObjectId)tn.Tag, BacnetPropertyIds.PROP_OBJECT_NAME, out name) == true)
