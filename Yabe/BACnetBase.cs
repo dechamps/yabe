@@ -9363,7 +9363,7 @@ namespace System.IO.BACnet.Serialize
                 buffer.Add((byte)(sbyte)value);
             else if ((value >= -32768) && (value < 32768))
                 encode_signed16(buffer, (Int16)value);
-            else if ((value > -8388608) && (value < 8388608))
+            else if ((value > -8388607) && (value < 8388608))
                 encode_signed24(buffer, (int)value);
             else if ((value > -2147483648) && (value < 2147483648))
                 encode_signed32(buffer, (int)value);
@@ -10465,6 +10465,7 @@ namespace System.IO.BACnet.Serialize
         public static int decode_signed24(byte[] buffer, int offset, out int value)
         {
             value = ((int)((((int)buffer[offset + 0]) << 16) & 0x00ff0000));
+            if ((value & 0x800000) != 0) value =  value | (0xff << 24); // signe is 1, so puts all high bits in the int32 to 1
             value |= ((int)((((int)buffer[offset + 1]) << 8) & 0x0000ff00));
             value |= ((int)(((int)buffer[offset + 2]) & 0x000000ff));
             return 3;
