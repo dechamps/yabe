@@ -116,6 +116,8 @@ namespace Yabe
             Pane.YAxis.MajorGrid.Color = Color.Gray;
             CovGraph.AxisChange();
             CovGraph.IsAutoScrollRange = true;
+           
+            CovGraph.PointValueEvent += new ZedGraphControl.PointValueHandler(CovGraph_PointValueEvent);
 
             //load splitter setup & SubsciptionView columns order&size
             try
@@ -174,6 +176,16 @@ namespace Yabe
             {
                 //ignore
             }
+        }
+
+        string CovGraph_PointValueEvent(ZedGraphControl sender, GraphPane pane, CurveItem curve, int iPt)
+        {
+            PointPair point= curve[iPt];
+
+            String Name = (String)curve.Tag;
+            XDate X = new XDate(point.X);
+            string tooltip = Name + Environment.NewLine + X.ToString() + "    " + point.Y.ToString();
+            return tooltip;
         }
 
         private static string ConvertToText(IList<BacnetValue> values)
@@ -2126,7 +2138,7 @@ namespace Yabe
                         m_subscription_points.Add(sub_key, points);
                         Color color= GraphColor[Pane.CurveList.Count%GraphColor.Length];
                         LineItem l = Pane.AddCurve("", points, color, Properties.Settings.Default.GraphDotStyle);
-                        l.Tag = points; // store the link To be able to remove the LineItem
+                        l.Tag = GetObjectName(comm, adr, object_id); // store the Name to display it in the Tooltip
                         itm.SubItems[7].BackColor = color;
                         itm.UseItemStyleForSubItems = false;
                         CovGraph.Invalidate();
@@ -2358,7 +2370,7 @@ namespace Yabe
                             {
                                 RollingPointPairList points = m_subscription_points[sub.sub_key];
                                 foreach (LineItem l in Pane.CurveList)
-                                    if (l.Tag == points)
+                                    if (l.Points == points)
                                     {
                                         Pane.CurveList.Remove(l);
                                         break;

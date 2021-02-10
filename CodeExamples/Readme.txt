@@ -127,4 +127,4 @@ MultipleDevices
 	Based on AnotherStorageImplementation.
 	Shows how to run several devices, due to the Udp multisockets strategies used by 
 	Yabe core code. All devices share the same Udp Port 47808 for broadcast activities
-	and uses and exclusive socket for all others exchanges.
+	and uses an exclusive socket for all others exchanges.

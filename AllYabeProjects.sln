@@ -1,6 +1,6 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 11.00
-# Visual C# Express 2010
+# Visual Studio 2010
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mstp.BacnetCapture", "Mstp.BacnetCapture\Mstp.BacnetCapture.csproj", "{EDBEE09C-1C7C-4110-91EF-7DE206404553}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Yabe", "Yabe\Yabe.csproj", "{EE493B17-8185-406C-881F-1144092F01CB}"
@@ -26,6 +26,8 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RaspberrySample", "CodeExamples\RaspberrySample\RaspberrySample.csproj", "{47FC9B60-CC4A-479C-8267-DCEEE53067AC}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Wheather2_to_Bacnet", "CodeExamples\Wheather2_to_Bacnet\Wheather2_to_Bacnet.csproj", "{7995A5E4-3DD5-40DE-BFB4-E9952B095F1F}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MultipleDevices", "CodeExamples\MultipleDevices\MultipleDevices.csproj", "{0F730C97-46B1-49BA-8281-232899AA0E5A}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -240,6 +242,21 @@ Global
 		{7995A5E4-3DD5-40DE-BFB4-E9952B095F1F}.Release|Mixed Platforms.Build.0 = Release|x86
 		{7995A5E4-3DD5-40DE-BFB4-E9952B095F1F}.Release|x86.ActiveCfg = Release|x86
 		{7995A5E4-3DD5-40DE-BFB4-E9952B095F1F}.Release|x86.Build.0 = Release|x86
+		{0F730C97-46B1-49BA-8281-232899AA0E5A}.Debug|Any CPU.ActiveCfg = Debug|x86
+		{0F730C97-46B1-49BA-8281-232899AA0E5A}.Debug|Mixed Platforms.ActiveCfg = Debug|x86
+		{0F730C97-46B1-49BA-8281-232899AA0E5A}.Debug|Mixed Platforms.Build.0 = Debug|x86
+		{0F730C97-46B1-49BA-8281-232899AA0E5A}.Debug|x86.ActiveCfg = Debug|x86
+		{0F730C97-46B1-49BA-8281-232899AA0E5A}.Debug|x86.Build.0 = Debug|x86
+		{0F730C97-46B1-49BA-8281-232899AA0E5A}.R|Any CPU.ActiveCfg = Release|x86
+		{0F730C97-46B1-49BA-8281-232899AA0E5A}.R|Mixed Platforms.ActiveCfg = Release|x86
+		{0F730C97-46B1-49BA-8281-232899AA0E5A}.R|Mixed Platforms.Build.0 = Release|x86
+		{0F730C97-46B1-49BA-8281-232899AA0E5A}.R|x86.ActiveCfg = Release|x86
+		{0F730C97-46B1-49BA-8281-232899AA0E5A}.R|x86.Build.0 = Release|x86
+		{0F730C97-46B1-49BA-8281-232899AA0E5A}.Release|Any CPU.ActiveCfg = Release|x86
+		{0F730C97-46B1-49BA-8281-232899AA0E5A}.Release|Mixed Platforms.ActiveCfg = Release|x86
+		{0F730C97-46B1-49BA-8281-232899AA0E5A}.Release|Mixed Platforms.Build.0 = Release|x86
+		{0F730C97-46B1-49BA-8281-232899AA0E5A}.Release|x86.ActiveCfg = Release|x86
+		{0F730C97-46B1-49BA-8281-232899AA0E5A}.Release|x86.Build.0 = Release|x86
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
