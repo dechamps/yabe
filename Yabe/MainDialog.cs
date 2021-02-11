@@ -2098,6 +2098,7 @@ namespace Yabe
             this.Cursor = Cursors.WaitCursor;
             try
             {
+                String CurveToolTip;
                 //fetch device_id if needed
                 if (device_id >= System.IO.BACnet.Serialize.ASN1.BACNET_MAX_INSTANCE)
                 {
@@ -2111,7 +2112,8 @@ namespace Yabe
                 //add to list
                 ListViewItem itm = m_SubscriptionView.Items.Add(device_id.ToString());
                 itm.SubItems.Add(object_id.ToString().Substring(7));
-                itm.SubItems.Add(GetObjectName(comm, adr, object_id));   //name
+                CurveToolTip = GetObjectName(comm, adr, object_id);
+                itm.SubItems.Add(CurveToolTip);   //name
                 itm.SubItems.Add("");   //value
                 itm.SubItems.Add("");   //time
                 itm.SubItems.Add("Not started");   //status
@@ -2121,6 +2123,7 @@ namespace Yabe
                     if (comm.ReadPropertyRequest(adr, object_id, BacnetPropertyIds.PROP_DESCRIPTION, out values))
                     {
                         itm.SubItems.Add(values[0].Value.ToString());   // Description
+                        CurveToolTip = CurveToolTip + Environment.NewLine + values[0].Value.ToString();
                     }
                 }
                 else
@@ -2138,7 +2141,7 @@ namespace Yabe
                         m_subscription_points.Add(sub_key, points);
                         Color color= GraphColor[Pane.CurveList.Count%GraphColor.Length];
                         LineItem l = Pane.AddCurve("", points, color, Properties.Settings.Default.GraphDotStyle);
-                        l.Tag = GetObjectName(comm, adr, object_id); // store the Name to display it in the Tooltip
+                        l.Tag = CurveToolTip; // store the Name to display it in the Tooltip
                         itm.SubItems[7].BackColor = color;
                         itm.UseItemStyleForSubItems = false;
                         CovGraph.Invalidate();
