@@ -7853,9 +7853,10 @@ namespace System.IO.BACnet
             if (this.adr == null) this.adr = new byte[0];
         }
 
-        public BacnetAddress(BacnetAddressTypes type, String s)
+        public BacnetAddress(BacnetAddressTypes type, String s, UInt16 net=0)
         {
             this.type = type;
+            this.net = net;
             switch (type)
             {
                 case BacnetAddressTypes.IP:

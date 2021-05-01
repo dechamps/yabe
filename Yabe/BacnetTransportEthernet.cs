@@ -64,7 +64,7 @@ namespace System.IO.BACnet
 
         public BacnetAddressTypes Type { get { return BacnetAddressTypes.Ethernet; } }
 
-        public BacnetAddress GetBroadcastAddress() { return new BacnetAddress(BacnetAddressTypes.Ethernet, "FF-FF-FF-FF-FF-FF"); }
+        public BacnetAddress GetBroadcastAddress() { return new BacnetAddress(BacnetAddressTypes.Ethernet, "FF-FF-FF-FF-FF-FF", 65535); }
         public int HeaderLength { get { return 6 + 6 + 2 + 3; } }
         public BacnetMaxAdpu MaxAdpuLength { get { return BacnetMaxAdpu.MAX_APDU1476; } }
         public int MaxBufferLength { get { return 1500; } }
