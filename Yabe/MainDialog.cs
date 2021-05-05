@@ -2773,9 +2773,10 @@ namespace Yabe
         {
             communicationControlToolStripMenuItem_Click(this, null);
         }
-        // Modif FC
-        // base on https://www.big-eu.org/s/big_ede_2_3.zip
+
+        // Base on https://www.big-eu.org/s/big_ede_2_3.zip
         // This will download all values from a given device and store it in 2 csv files : EDE and StateText (for Binary and Multistate objects)
+        // Ede files for Units and ObjectTypes are common when all values are coming from the standard
         private void exportDeviceEDEFileToolStripMenuItem_Click(object sender, EventArgs e)
         {
             //fetch end point
@@ -2800,10 +2801,19 @@ namespace Yabe
             Application.DoEvents();
             try
             {
-
-                BacnetObjectTypes[] TypeWithUnitText = new BacnetObjectTypes[] {BacnetObjectTypes.OBJECT_BINARY_INPUT,BacnetObjectTypes.OBJECT_BINARY_OUTPUT,BacnetObjectTypes.OBJECT_BINARY_VALUE,
+                // The objects with PROP_STATE_TEXT
+                BacnetObjectTypes[] TypeWithStateText = new BacnetObjectTypes[] {BacnetObjectTypes.OBJECT_BINARY_INPUT,BacnetObjectTypes.OBJECT_BINARY_OUTPUT,BacnetObjectTypes.OBJECT_BINARY_VALUE,
                                                       BacnetObjectTypes.OBJECT_MULTI_STATE_INPUT,BacnetObjectTypes.OBJECT_MULTI_STATE_OUTPUT,BacnetObjectTypes.OBJECT_MULTI_STATE_VALUE};
                 int StateTextCount = 0;
+
+                // Read 4 properties even if not existing in the given object
+                BacnetPropertyReference[] propertiesWithText = new BacnetPropertyReference[3] 
+                                                                    {   
+                                                                        new BacnetPropertyReference((uint)BacnetPropertyIds.PROP_OBJECT_NAME, System.IO.BACnet.Serialize.ASN1.BACNET_ARRAY_ALL), 
+                                                                        new BacnetPropertyReference((uint)BacnetPropertyIds.PROP_DESCRIPTION, System.IO.BACnet.Serialize.ASN1.BACNET_ARRAY_ALL),
+                                                                        new BacnetPropertyReference((uint)BacnetPropertyIds.PROP_UNITS, System.IO.BACnet.Serialize.ASN1.BACNET_ARRAY_ALL),
+                                                                        new BacnetPropertyReference((uint)BacnetPropertyIds.PROP_STATE_TEXT, System.IO.BACnet.Serialize.ASN1.BACNET_ARRAY_ALL)
+                                                                    };
 
                 String FileName = dlg.FileName.Remove(dlg.FileName.Length - 4, 4);
 
@@ -2831,35 +2841,17 @@ namespace Yabe
                     BacnetObjectId Bacobj = (BacnetObjectId)t.Tag;
                     string Identifier = "";
                     string Description = "";
-                    string UnitCode = ""; // No actualy in usage
+                    String UnitCode = "";
+   
                     IList<BacnetValue> State_Text = null;
 
-                    bool Prop_Object_NameOK = false;
-                    lock (DevicesObjectsName)
-                        Prop_Object_NameOK = DevicesObjectsName.TryGetValue(new Tuple<String, BacnetObjectId>(adr.FullHashString(), Bacobj), out Identifier);
-
-                    if ((ReadPropertyMultipleSupported) && (!Prop_Object_NameOK))
+                    if (ReadPropertyMultipleSupported)
                     {
                         try
                         {
-                            BacnetPropertyReference[] properties;
-
-                            if (Array.Exists(TypeWithUnitText, o => o == Bacobj.type) == false)
-                                properties = new BacnetPropertyReference[2] 
-                                                                    {   
-                                                                        new BacnetPropertyReference((uint)BacnetPropertyIds.PROP_OBJECT_NAME, System.IO.BACnet.Serialize.ASN1.BACNET_ARRAY_ALL), 
-                                                                        new BacnetPropertyReference((uint)BacnetPropertyIds.PROP_DESCRIPTION, System.IO.BACnet.Serialize.ASN1.BACNET_ARRAY_ALL),
-                                                                    };
-                            else
-                                properties = new BacnetPropertyReference[3] 
-                                                                    {   
-                                                                        new BacnetPropertyReference((uint)BacnetPropertyIds.PROP_OBJECT_NAME, System.IO.BACnet.Serialize.ASN1.BACNET_ARRAY_ALL), 
-                                                                        new BacnetPropertyReference((uint)BacnetPropertyIds.PROP_DESCRIPTION, System.IO.BACnet.Serialize.ASN1.BACNET_ARRAY_ALL),
-                                                                        new BacnetPropertyReference((uint)BacnetPropertyIds.PROP_STATE_TEXT, System.IO.BACnet.Serialize.ASN1.BACNET_ARRAY_ALL),
-                                                                    };
-
+  
                             IList<BacnetReadAccessResult> multi_value_list;
-                            BacnetReadAccessSpecification[] propToRead = new BacnetReadAccessSpecification[] { new BacnetReadAccessSpecification(Bacobj, properties) };
+                            BacnetReadAccessSpecification[] propToRead = new BacnetReadAccessSpecification[] { new BacnetReadAccessSpecification(Bacobj, propertiesWithText) };
                             comm.ReadPropertyMultipleRequest(adr, propToRead, out multi_value_list);
                             BacnetReadAccessResult br = multi_value_list[0];
 
@@ -2869,17 +2861,28 @@ namespace Yabe
                                     Identifier = pv.value[0].Value.ToString();
                                 if ((BacnetPropertyIds)pv.property.propertyIdentifier == BacnetPropertyIds.PROP_DESCRIPTION)
                                     if (!(pv.value[0].Value is BacnetError))
-                                        Description = pv.value[0].Value.ToString(); ;
+                                        Description = pv.value[0].Value.ToString();
+                                if ((BacnetPropertyIds)pv.property.propertyIdentifier == BacnetPropertyIds.PROP_UNITS)
+                                    if (!(pv.value[0].Value is BacnetError))
+                                        UnitCode = pv.value[0].Value.ToString();
                                 if ((BacnetPropertyIds)pv.property.propertyIdentifier == BacnetPropertyIds.PROP_STATE_TEXT)
                                     if (!(pv.value[0].Value is BacnetError))
                                         State_Text = pv.value;
                             }
                         }
-                        catch { ReadPropertyMultipleSupported = false; }
+                        catch 
+                        { 
+                            ReadPropertyMultipleSupported = false; // assume the error is due to that 
+                        }
                     }
-                    else
+                    if (!ReadPropertyMultipleSupported)
                     {
                         IList<BacnetValue> out_value;
+
+                        bool Prop_Object_NameOK = false;
+                        // Maybe we already have the name
+                        lock (DevicesObjectsName)
+                            Prop_Object_NameOK = DevicesObjectsName.TryGetValue(new Tuple<String, BacnetObjectId>(adr.FullHashString(), Bacobj), out Identifier);
 
                         if (!Prop_Object_NameOK)
                         {
@@ -2893,11 +2896,12 @@ namespace Yabe
                             if (!(out_value[0].Value is BacnetError))
                                 Description = out_value[0].Value.ToString();
 
-                            if (Array.Exists(TypeWithUnitText, o => o == Bacobj.type) == true)
+                            if (Array.Exists(TypeWithStateText, o => o == Bacobj.type) == true)
                                 comm.ReadPropertyRequest(adr, Bacobj, BacnetPropertyIds.PROP_STATE_TEXT, out State_Text);
                         }
                         catch { }
                     }
+
 
                     if (State_Text == null)
                         Sw_EDE.WriteLine(Bacobj.ToString() + ";" + device_id.ToString() + ";" + Identifier + ";" + ((int)Bacobj.type).ToString() + ";" + Bacobj.instance.ToString() + ";" + Description + ";;;;;;;;;" + UnitCode);
