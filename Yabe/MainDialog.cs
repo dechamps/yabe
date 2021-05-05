@@ -2774,8 +2774,8 @@ namespace Yabe
             communicationControlToolStripMenuItem_Click(this, null);
         }
         // Modif FC
-        // base on http://www.big-eu.org/fileadmin/downloads/EDE2_2_Templates.zip
-        // This will download all values from a given device and store it in an EDE csv format,
+        // base on https://www.big-eu.org/s/big_ede_2_3.zip
+        // This will download all values from a given device and store it in 2 csv files : EDE and StateText (for Binary and Multistate objects)
         private void exportDeviceEDEFileToolStripMenuItem_Click(object sender, EventArgs e)
         {
             //fetch end point
@@ -2790,7 +2790,7 @@ namespace Yabe
                 MessageBox.Show(this, "Please select a device node", "Wrong node", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 return;
             }
-  
+
             //select file to store
             SaveFileDialog dlg = new SaveFileDialog();
             dlg.Filter = "csv|*.csv";
@@ -2800,41 +2800,64 @@ namespace Yabe
             Application.DoEvents();
             try
             {
-                StreamWriter Sw = new StreamWriter(dlg.FileName);
 
-                Sw.WriteLine("# Proposal_Engineering-Data-Exchange - B.I.G.-EU");
-                Sw.WriteLine("PROJECT_NAME");
-                Sw.WriteLine("VERSION_OF_REFERENCEFILE");
-                Sw.WriteLine("TIMESTAMP_OF_LAST_CHANGE;" + DateTime.Now.ToShortDateString());
-                Sw.WriteLine("AUTHOR_OF_LAST_CHANGE;YABE Yet Another Bacnet Explorer");
-                Sw.WriteLine("VERSION_OF_LAYOUT;2.2");
-                Sw.WriteLine("#mandatory;mandator;mandatory;mandatory;mandatory;optional;optional;optional;optional;optional;optional;optional;optional;optional;optional;optional");
-                Sw.WriteLine("# keyname;device obj.-instance;object-name;object-type;object-instance;description;present-value-default;min-present-value;max-present-value;settable;supports COV;hi-limit;low-limit;state-text-reference;unit-code;vendor-specific-addres");
+                BacnetObjectTypes[] TypeWithUnitText = new BacnetObjectTypes[] {BacnetObjectTypes.OBJECT_BINARY_INPUT,BacnetObjectTypes.OBJECT_BINARY_OUTPUT,BacnetObjectTypes.OBJECT_BINARY_VALUE,
+                                                      BacnetObjectTypes.OBJECT_MULTI_STATE_INPUT,BacnetObjectTypes.OBJECT_MULTI_STATE_OUTPUT,BacnetObjectTypes.OBJECT_MULTI_STATE_VALUE};
+                int StateTextCount = 0;
 
-                BacnetPropertyReference[] properties = new BacnetPropertyReference[2] 
-                                                                {   
-                                                                    new BacnetPropertyReference((uint)BacnetPropertyIds.PROP_OBJECT_NAME, System.IO.BACnet.Serialize.ASN1.BACNET_ARRAY_ALL), 
-                                                                    new BacnetPropertyReference((uint)BacnetPropertyIds.PROP_DESCRIPTION, System.IO.BACnet.Serialize.ASN1.BACNET_ARRAY_ALL),
-                                                                };
+                String FileName = dlg.FileName.Remove(dlg.FileName.Length - 4, 4);
+
+                StreamWriter Sw_EDE = new StreamWriter(FileName + "_EDE.csv");
+                StreamWriter Sw_StateText = new StreamWriter(FileName + "_StateTexts.csv");
+
+                Sw_EDE.WriteLine("#Engineering-Data-Exchange - B.I.G.-EU");
+                Sw_EDE.WriteLine("PROJECT_NAME");
+                Sw_EDE.WriteLine("VERSION_OF_REFERENCEFILE");
+                Sw_EDE.WriteLine("TIMESTAMP_OF_LAST_CHANGE;" + DateTime.Now.ToShortDateString());
+                Sw_EDE.WriteLine("AUTHOR_OF_LAST_CHANGE;YABE Yet Another Bacnet Explorer");
+                Sw_EDE.WriteLine("VERSION_OF_LAYOUT;2.3");
+                Sw_EDE.WriteLine("#mandatory;mandator;mandatory;mandatory;mandatory;optional;optional;optional;optional;optional;optional;optional;optional;optional;optional;optional");
+                Sw_EDE.WriteLine("# keyname;device obj.-instance;object-name;object-type;object-instance;description;present-value-default;min-present-value;max-present-value;settable;supports COV;hi-limit;low-limit;state-text-reference;unit-code;vendor-specific-addres");
+
+                Sw_StateText.WriteLine("#State Text Reference");
+                // Some colums, certainly enough. User need to add it manualy in the csv file if it's to few.
+                Sw_StateText.WriteLine("#Reference Number;Text 1 or Inactive-Text;Text 2 or Active-Text;Text 3;Text 4;Text 5;Text 6;Text 7;Text 8;Text 9;Text 10;Text 11;Text 12;Text 13");
 
                 bool ReadPropertyMultipleSupported = true;
 
                 // Object list is already in the AddressSpaceTree, so no need to query it again
                 foreach (TreeNode t in m_AddressSpaceTree.Nodes)
                 {
-                    BacnetObjectId Bacobj = (BacnetObjectId)t.Tag; 
+                    BacnetObjectId Bacobj = (BacnetObjectId)t.Tag;
                     string Identifier = "";
                     string Description = "";
                     string UnitCode = ""; // No actualy in usage
+                    IList<BacnetValue> State_Text = null;
 
-                    bool Prop_Object_NameOK=false;
+                    bool Prop_Object_NameOK = false;
                     lock (DevicesObjectsName)
                         Prop_Object_NameOK = DevicesObjectsName.TryGetValue(new Tuple<String, BacnetObjectId>(adr.FullHashString(), Bacobj), out Identifier);
 
-                    if ((ReadPropertyMultipleSupported)&&(!Prop_Object_NameOK))
+                    if ((ReadPropertyMultipleSupported) && (!Prop_Object_NameOK))
                     {
                         try
                         {
+                            BacnetPropertyReference[] properties;
+
+                            if (Array.Exists(TypeWithUnitText, o => o == Bacobj.type) == false)
+                                properties = new BacnetPropertyReference[2] 
+                                                                    {   
+                                                                        new BacnetPropertyReference((uint)BacnetPropertyIds.PROP_OBJECT_NAME, System.IO.BACnet.Serialize.ASN1.BACNET_ARRAY_ALL), 
+                                                                        new BacnetPropertyReference((uint)BacnetPropertyIds.PROP_DESCRIPTION, System.IO.BACnet.Serialize.ASN1.BACNET_ARRAY_ALL),
+                                                                    };
+                            else
+                                properties = new BacnetPropertyReference[3] 
+                                                                    {   
+                                                                        new BacnetPropertyReference((uint)BacnetPropertyIds.PROP_OBJECT_NAME, System.IO.BACnet.Serialize.ASN1.BACNET_ARRAY_ALL), 
+                                                                        new BacnetPropertyReference((uint)BacnetPropertyIds.PROP_DESCRIPTION, System.IO.BACnet.Serialize.ASN1.BACNET_ARRAY_ALL),
+                                                                        new BacnetPropertyReference((uint)BacnetPropertyIds.PROP_STATE_TEXT, System.IO.BACnet.Serialize.ASN1.BACNET_ARRAY_ALL),
+                                                                    };
+
                             IList<BacnetReadAccessResult> multi_value_list;
                             BacnetReadAccessSpecification[] propToRead = new BacnetReadAccessSpecification[] { new BacnetReadAccessSpecification(Bacobj, properties) };
                             comm.ReadPropertyMultipleRequest(adr, propToRead, out multi_value_list);
@@ -2847,6 +2870,9 @@ namespace Yabe
                                 if ((BacnetPropertyIds)pv.property.propertyIdentifier == BacnetPropertyIds.PROP_DESCRIPTION)
                                     if (!(pv.value[0].Value is BacnetError))
                                         Description = pv.value[0].Value.ToString(); ;
+                                if ((BacnetPropertyIds)pv.property.propertyIdentifier == BacnetPropertyIds.PROP_STATE_TEXT)
+                                    if (!(pv.value[0].Value is BacnetError))
+                                        State_Text = pv.value;
                             }
                         }
                         catch { ReadPropertyMultipleSupported = false; }
@@ -2858,7 +2884,7 @@ namespace Yabe
                         if (!Prop_Object_NameOK)
                         {
                             comm.ReadPropertyRequest(adr, Bacobj, BacnetPropertyIds.PROP_OBJECT_NAME, out out_value);
-                            Identifier = out_value[0].Value.ToString();                           
+                            Identifier = out_value[0].Value.ToString();
                         }
 
                         try
@@ -2866,12 +2892,25 @@ namespace Yabe
                             comm.ReadPropertyRequest(adr, Bacobj, BacnetPropertyIds.PROP_DESCRIPTION, out out_value);
                             if (!(out_value[0].Value is BacnetError))
                                 Description = out_value[0].Value.ToString();
+
+                            if (Array.Exists(TypeWithUnitText, o => o == Bacobj.type) == true)
+                                comm.ReadPropertyRequest(adr, Bacobj, BacnetPropertyIds.PROP_STATE_TEXT, out State_Text);
                         }
                         catch { }
                     }
 
-                    Sw.WriteLine(Bacobj.ToString() + ";" + device_id.ToString() + ";" + Identifier + ";" + ((int)Bacobj.type).ToString() + ";" + Bacobj.instance.ToString() + ";" + Description + ";;;;;;;;;" + UnitCode);
+                    if (State_Text == null)
+                        Sw_EDE.WriteLine(Bacobj.ToString() + ";" + device_id.ToString() + ";" + Identifier + ";" + ((int)Bacobj.type).ToString() + ";" + Bacobj.instance.ToString() + ";" + Description + ";;;;;;;;;" + UnitCode);
+                    else
+                    {
+                        Sw_EDE.WriteLine(Bacobj.ToString() + ";" + device_id.ToString() + ";" + Identifier + ";" + ((int)Bacobj.type).ToString() + ";" + Bacobj.instance.ToString() + ";" + Description + ";;;;;;;;" + StateTextCount + ";" + UnitCode);
 
+                        Sw_StateText.Write(StateTextCount++);
+                        foreach (var v in State_Text)
+                            Sw_StateText.Write(";" + v.Value.ToString());
+
+                        Sw_StateText.WriteLine();
+                    }
                     // Update also the Dictonary of known object name and the treenode
                     if (t.ToolTipText == "")
                     {
@@ -2879,11 +2918,11 @@ namespace Yabe
                             DevicesObjectsName.Add(new Tuple<String, BacnetObjectId>(adr.FullHashString(), Bacobj), Identifier);
 
                         ChangeTreeNodePropertyName(t, Identifier);
-
                     }
                 }
 
-                Sw.Close();
+                Sw_EDE.Close();
+                Sw_StateText.Close();
 
                 //display
                 MessageBox.Show(this, "Done", "Export done", MessageBoxButtons.OK, MessageBoxIcon.Information);
