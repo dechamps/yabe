@@ -2807,7 +2807,7 @@ namespace Yabe
                 int StateTextCount = 0;
 
                 // Read 4 properties even if not existing in the given object
-                BacnetPropertyReference[] propertiesWithText = new BacnetPropertyReference[3] 
+                BacnetPropertyReference[] propertiesWithText = new BacnetPropertyReference[4] 
                                                                     {   
                                                                         new BacnetPropertyReference((uint)BacnetPropertyIds.PROP_OBJECT_NAME, System.IO.BACnet.Serialize.ASN1.BACNET_ARRAY_ALL), 
                                                                         new BacnetPropertyReference((uint)BacnetPropertyIds.PROP_DESCRIPTION, System.IO.BACnet.Serialize.ASN1.BACNET_ARRAY_ALL),
