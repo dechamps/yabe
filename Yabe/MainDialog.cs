@@ -2801,18 +2801,18 @@ namespace Yabe
             Application.DoEvents();
             try
             {
-                // The objects with PROP_STATE_TEXT
-                BacnetObjectTypes[] TypeWithStateText = new BacnetObjectTypes[] {BacnetObjectTypes.OBJECT_BINARY_INPUT,BacnetObjectTypes.OBJECT_BINARY_OUTPUT,BacnetObjectTypes.OBJECT_BINARY_VALUE,
-                                                      BacnetObjectTypes.OBJECT_MULTI_STATE_INPUT,BacnetObjectTypes.OBJECT_MULTI_STATE_OUTPUT,BacnetObjectTypes.OBJECT_MULTI_STATE_VALUE};
+
                 int StateTextCount = 0;
 
-                // Read 4 properties even if not existing in the given object
-                BacnetPropertyReference[] propertiesWithText = new BacnetPropertyReference[4] 
+                // Read 6 properties even if not existing in the given object
+                BacnetPropertyReference[] propertiesWithText = new BacnetPropertyReference[6] 
                                                                     {   
                                                                         new BacnetPropertyReference((uint)BacnetPropertyIds.PROP_OBJECT_NAME, System.IO.BACnet.Serialize.ASN1.BACNET_ARRAY_ALL), 
                                                                         new BacnetPropertyReference((uint)BacnetPropertyIds.PROP_DESCRIPTION, System.IO.BACnet.Serialize.ASN1.BACNET_ARRAY_ALL),
                                                                         new BacnetPropertyReference((uint)BacnetPropertyIds.PROP_UNITS, System.IO.BACnet.Serialize.ASN1.BACNET_ARRAY_ALL),
-                                                                        new BacnetPropertyReference((uint)BacnetPropertyIds.PROP_STATE_TEXT, System.IO.BACnet.Serialize.ASN1.BACNET_ARRAY_ALL)
+                                                                        new BacnetPropertyReference((uint)BacnetPropertyIds.PROP_STATE_TEXT, System.IO.BACnet.Serialize.ASN1.BACNET_ARRAY_ALL),
+                                                                        new BacnetPropertyReference((uint)BacnetPropertyIds.PROP_INACTIVE_TEXT, System.IO.BACnet.Serialize.ASN1.BACNET_ARRAY_ALL),
+                                                                        new BacnetPropertyReference((uint)BacnetPropertyIds.PROP_ACTIVE_TEXT, System.IO.BACnet.Serialize.ASN1.BACNET_ARRAY_ALL),
                                                                     };
 
                 String FileName = dlg.FileName.Remove(dlg.FileName.Length - 4, 4);
@@ -2833,7 +2833,7 @@ namespace Yabe
                 // Some colums, certainly enough. User need to add it manualy in the csv file if it's to few.
                 Sw_StateText.WriteLine("#Reference Number;Text 1 or Inactive-Text;Text 2 or Active-Text;Text 3;Text 4;Text 5;Text 6;Text 7;Text 8;Text 9;Text 10;Text 11;Text 12;Text 13");
 
-                bool ReadPropertyMultipleSupported = true;
+                bool ReadPropertyMultipleSupported = true; // For the first request assume it's OK
 
                 // Object list is already in the AddressSpaceTree, so no need to query it again
                 foreach (TreeNode t in m_AddressSpaceTree.Nodes)
@@ -2842,10 +2842,12 @@ namespace Yabe
                     string Identifier = "";
                     string Description = "";
                     String UnitCode = "";
+                    String InactiveText = "";
+                    String ActiveText = "";
    
                     IList<BacnetValue> State_Text = null;
 
-                    if (ReadPropertyMultipleSupported)
+                    if (ReadPropertyMultipleSupported) 
                     {
                         try
                         {
@@ -2857,6 +2859,7 @@ namespace Yabe
 
                             foreach (BacnetPropertyValue pv in br.values)
                             {
+
                                 if ((BacnetPropertyIds)pv.property.propertyIdentifier == BacnetPropertyIds.PROP_OBJECT_NAME)
                                     Identifier = pv.value[0].Value.ToString();
                                 if ((BacnetPropertyIds)pv.property.propertyIdentifier == BacnetPropertyIds.PROP_DESCRIPTION)
@@ -2868,6 +2871,12 @@ namespace Yabe
                                 if ((BacnetPropertyIds)pv.property.propertyIdentifier == BacnetPropertyIds.PROP_STATE_TEXT)
                                     if (!(pv.value[0].Value is BacnetError))
                                         State_Text = pv.value;
+                                if ((BacnetPropertyIds)pv.property.propertyIdentifier == BacnetPropertyIds.PROP_INACTIVE_TEXT)
+                                    if (!(pv.value[0].Value is BacnetError))
+                                        InactiveText = pv.value[0].Value.ToString();
+                                if ((BacnetPropertyIds)pv.property.propertyIdentifier == BacnetPropertyIds.PROP_ACTIVE_TEXT)
+                                    if (!(pv.value[0].Value is BacnetError))
+                                        ActiveText = pv.value[0].Value.ToString();
                             }
                         }
                         catch 
@@ -2896,26 +2905,44 @@ namespace Yabe
                             if (!(out_value[0].Value is BacnetError))
                                 Description = out_value[0].Value.ToString();
 
-                            if (Array.Exists(TypeWithStateText, o => o == Bacobj.type) == true)
+                            // OBJECT_MULTI_STATE_INPUT, OBJECT_MULTI_STATE_OUTPUT, OBJECT_MULTI_STATE_VALUE
+                            if ((Bacobj.type >= BacnetObjectTypes.OBJECT_MULTI_STATE_INPUT) && (Bacobj.type <= BacnetObjectTypes.OBJECT_MULTI_STATE_INPUT+2))
+                            {
                                 comm.ReadPropertyRequest(adr, Bacobj, BacnetPropertyIds.PROP_STATE_TEXT, out State_Text);
+                                if (State_Text[0].Value is BacnetError) State_Text = null;
+                            }
+
+                            // OBJECT_BINARY_INPUT, OBJECT_BINARY_OUTPUT, OBJECT_BINARY_VALUE
+                            if ((Bacobj.type >= BacnetObjectTypes.OBJECT_BINARY_INPUT) && (Bacobj.type <= BacnetObjectTypes.OBJECT_BINARY_INPUT+2))
+                            {
+                                comm.ReadPropertyRequest(adr, Bacobj, BacnetPropertyIds.PROP_INACTIVE_TEXT, out out_value);
+                                if (!(out_value[0].Value is BacnetError))
+                                    InactiveText = out_value[0].Value.ToString();
+                                comm.ReadPropertyRequest(adr, Bacobj, BacnetPropertyIds.PROP_ACTIVE_TEXT, out out_value);
+                                if (!(out_value[0].Value is BacnetError))
+                                    ActiveText = out_value[0].Value.ToString();
+                            }
                         }
                         catch { }
                     }
 
-
-                    if (State_Text == null)
+                    if ((State_Text == null)&&(InactiveText==""))
                         Sw_EDE.WriteLine(Bacobj.ToString() + ";" + device_id.ToString() + ";" + Identifier + ";" + ((int)Bacobj.type).ToString() + ";" + Bacobj.instance.ToString() + ";" + Description + ";;;;;;;;;" + UnitCode);
                     else
                     {
                         Sw_EDE.WriteLine(Bacobj.ToString() + ";" + device_id.ToString() + ";" + Identifier + ";" + ((int)Bacobj.type).ToString() + ";" + Bacobj.instance.ToString() + ";" + Description + ";;;;;;;;" + StateTextCount + ";" + UnitCode);
 
                         Sw_StateText.Write(StateTextCount++);
-                        foreach (var v in State_Text)
-                            Sw_StateText.Write(";" + v.Value.ToString());
+
+                        if (State_Text!=null)
+                            foreach (var v in State_Text)
+                                Sw_StateText.Write(";" + v.Value.ToString());
+                        else
+                            Sw_StateText.Write(";"+InactiveText+";"+ActiveText);
 
                         Sw_StateText.WriteLine();
                     }
-                    // Update also the Dictonary of known object name and the treenode
+                    // Update also the Dictionary of known object name and the threenode
                     if (t.ToolTipText == "")
                     {
                         lock (DevicesObjectsName)

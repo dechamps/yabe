@@ -422,6 +422,12 @@
         <Property Id="PROP_POLARITY" Tag="BACNET_APPLICATION_TAG_ENUMERATED">
           <Value>0</Value>
         </Property>
+        <Property Id="PROP_INACTIVE_TEXT" Tag="BACNET_APPLICATION_TAG_CHARACTER_STRING">
+          <Value>Off</Value>
+        </Property>
+        <Property Id="PROP_ACTIVE_TEXT" Tag="BACNET_APPLICATION_TAG_CHARACTER_STRING">
+          <Value>On</Value>
+        </Property>
         <Property Id="PROP_PRESENT_VALUE" Tag="BACNET_APPLICATION_TAG_ENUMERATED">
           <Value>0</Value>
         </Property>
@@ -455,6 +461,12 @@
         </Property>
         <Property Id="PROP_POLARITY" Tag="BACNET_APPLICATION_TAG_ENUMERATED">
           <Value>0</Value>
+        </Property>
+        <Property Id="PROP_INACTIVE_TEXT" Tag="BACNET_APPLICATION_TAG_CHARACTER_STRING">
+          <Value>Off</Value>
+        </Property>
+        <Property Id="PROP_ACTIVE_TEXT" Tag="BACNET_APPLICATION_TAG_CHARACTER_STRING">
+          <Value>On</Value>
         </Property>
         <Property Id="PROP_PRESENT_VALUE" Tag="BACNET_APPLICATION_TAG_ENUMERATED">
           <Value>0</Value>
