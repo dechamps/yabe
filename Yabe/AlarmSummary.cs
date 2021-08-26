@@ -65,6 +65,7 @@ namespace Yabe
         {
             if (e.KeyCode == Keys.F4)
             {
+                Alarms.Clear();
                 AlarmSummary_Shown(null, null);
 
             }
