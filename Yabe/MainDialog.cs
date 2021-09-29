@@ -3286,6 +3286,11 @@ namespace Yabe
                     Trace.WriteLine("WritePriority change to level " + i.ToString() + " : " + ((BacnetWritePriority)i).ToString());
                 }
             }
+
+            // Refresh the Properties grid
+            if (e.KeyCode == Keys.F4)
+                if (m_AddressSpaceTree.SelectedNode != null)
+                    m_AddressSpaceTree_AfterSelect(null, new TreeViewEventArgs(m_AddressSpaceTree.SelectedNode));
         }
 
         #region "Alarm Logger"
