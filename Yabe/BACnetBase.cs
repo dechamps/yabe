@@ -10406,12 +10406,8 @@ namespace System.IO.BACnet.Serialize
 
         public static int decode_unsigned24(byte[] buffer, int offset, out uint value)
         {
-            /* negative - bit 7 is set */
-            if ((buffer[offset + 0] & 0x80)!=0)
-                value = 0xff000000;
-            else
-                value = 0;
 
+            value = 0;
             value |= ((uint)((((uint)buffer[offset + 0]) << 16) & 0x00ff0000));
             value |= ((uint)((((uint)buffer[offset + 1]) << 8) & 0x0000ff00));
             value |= ((uint)(((uint)buffer[offset + 2]) & 0x000000ff));
