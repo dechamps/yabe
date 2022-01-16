@@ -10406,9 +10406,7 @@ namespace System.IO.BACnet.Serialize
 
         public static int decode_unsigned24(byte[] buffer, int offset, out uint value)
         {
-
-            value = 0;
-            value |= ((uint)((((uint)buffer[offset + 0]) << 16) & 0x00ff0000));
+            value = ((uint)((((uint)buffer[offset + 0]) << 16) & 0x00ff0000));
             value |= ((uint)((((uint)buffer[offset + 1]) << 8) & 0x0000ff00));
             value |= ((uint)(((uint)buffer[offset + 2]) & 0x000000ff));
             return 3;
@@ -11422,7 +11420,7 @@ namespace System.IO.BACnet.Serialize
                     value.Value = v;
                     return tag_len;
                 }
-                else if (property_id == BacnetPropertyIds.PROP_EVENT_TIME_STAMPS || property_id == BacnetPropertyIds.PROP_COMMAND_TIME_ARRAY || property_id == BacnetPropertyIds.PROP_LAST_COMMAND_TIME || property_id == BacnetPropertyIds.PROP_ACCESS_EVENT_TIME ||property_id == BacnetPropertyIds.PROP_UPDATE_TIME)
+                else if (property_id == BacnetPropertyIds.PROP_EVENT_TIME_STAMPS || property_id == BacnetPropertyIds.PROP_COMMAND_TIME_ARRAY || property_id == BacnetPropertyIds.PROP_LAST_COMMAND_TIME || property_id == BacnetPropertyIds.PROP_ACCESS_EVENT_TIME || property_id == BacnetPropertyIds.PROP_UPDATE_TIME || property_id == BacnetPropertyIds.PROP_LAST_RESTORE_TIME)
                 {
 
                     ASN1.decode_tag_number_and_value(buffer, offset + len, out tag_number, out len_value_type);
