@@ -60,7 +60,7 @@ namespace Yabe
             System.IO.FileStream fs = null;
             try
             {
-                fs = System.IO.File.OpenWrite(filename);
+                fs = System.IO.File.Create(filename);
             }
             catch (Exception ex)
             {
@@ -103,7 +103,7 @@ namespace Yabe
             System.IO.FileStream fs = null;
             try
             {
-                fs = System.IO.File.OpenWrite(filename);
+                fs = System.IO.File.Create(filename);
             }
             catch (Exception ex)
             {
@@ -157,7 +157,7 @@ namespace Yabe
             System.IO.FileStream fs = null;
             try
             {
-                fs = System.IO.File.OpenWrite(filename);
+                fs = System.IO.File.Create(filename);
             }
             catch (Exception ex)
             {
