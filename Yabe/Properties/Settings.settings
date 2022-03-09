@@ -12,10 +12,10 @@
       <Value Profile="(Default)">-1</Value>
     </Setting>
     <Setting Name="GUI_FormSize" Type="System.Drawing.Size" Scope="User">
-      <Value Profile="(Default)">0, 0</Value>
+      <Value Profile="(Default)">-1, -1</Value>
     </Setting>
     <Setting Name="GUI_FormState" Type="System.String" Scope="User">
-      <Value Profile="(Default)">Normal</Value>
+      <Value Profile="(Default)">Maximized</Value>
     </Setting>
     <Setting Name="Udp_ExclusiveUseOfSocket" Type="System.Boolean" Scope="User">
       <Value Profile="(Default)">False</Value>
@@ -27,10 +27,10 @@
       <Value Profile="(Default)">False</Value>
     </Setting>
     <Setting Name="DefaultRetries" Type="System.Decimal" Scope="User">
-      <Value Profile="(Default)">3</Value>
+      <Value Profile="(Default)">2</Value>
     </Setting>
     <Setting Name="DefaultTimeout" Type="System.Decimal" Scope="User">
-      <Value Profile="(Default)">1000</Value>
+      <Value Profile="(Default)">2000</Value>
     </Setting>
     <Setting Name="DefaultUdpPort" Type="System.Decimal" Scope="User">
       <Value Profile="(Default)">47808</Value>
@@ -39,7 +39,7 @@
       <Value Profile="(Default)">38400</Value>
     </Setting>
     <Setting Name="DefaultSourceAddress" Type="System.Decimal" Scope="User">
-      <Value Profile="(Default)">-1</Value>
+      <Value Profile="(Default)">128</Value>
     </Setting>
     <Setting Name="DefaultMaxMaster" Type="System.Decimal" Scope="User">
       <Value Profile="(Default)">127</Value>
@@ -74,8 +74,8 @@
     <Setting Name="Udp_MaxPayload" Type="System.Int32" Scope="User">
       <Value Profile="(Default)">1472</Value>
     </Setting>
-    <Setting Name="GetStructuredView" Type="System.Boolean" Scope="User">
-      <Value Profile="(Default)">True</Value>
+    <Setting Name="Address_Space_Structured_View" Type="Yabe.AddressTreeViewType" Scope="User">
+      <Value Profile="(Default)">Structured</Value>
     </Setting>
     <Setting Name="DefaultUdpIp" Type="System.String" Scope="User">
       <Value Profile="(Default)" />
@@ -90,10 +90,10 @@
       <Value Profile="(Default)" />
     </Setting>
     <Setting Name="Subscriptions_ReplacementPollingPeriod" Type="System.UInt32" Scope="User">
-      <Value Profile="(Default)">5</Value>
+      <Value Profile="(Default)">1000</Value>
     </Setting>
-    <Setting Name="ObjectNameFile" Type="System.String" Scope="User">
-      <Value Profile="(Default)" />
+    <Setting Name="Auto_Store_Object_Names_File" Type="System.String" Scope="User">
+      <Value Profile="(Default)">C:\Yabe Stored Object Names\Auto_Stored_Object_Names.YabeMap</Value>
     </Setting>
     <Setting Name="IPv6_Support" Type="System.Boolean" Scope="User">
       <Value Profile="(Default)">False</Value>
@@ -105,10 +105,10 @@
       <Value Profile="(Default)">True</Value>
     </Setting>
     <Setting Name="Plugins" Type="System.String" Scope="User">
-      <Value Profile="(Default)">CheckReliability, CheckStatusFlags, ListOutOfService</Value>
+      <Value Profile="(Default)">CheckReliability, CheckStatusFlags, ListOutOfService, GlobalCommander</Value>
     </Setting>
     <Setting Name="GraphDotStyle" Type="ZedGraph.SymbolType" Scope="User">
-      <Value Profile="(Default)">Circle</Value>
+      <Value Profile="(Default)">Square</Value>
     </Setting>
     <Setting Name="GraphLineStep" Type="System.Boolean" Scope="User">
       <Value Profile="(Default)">False</Value>
@@ -120,7 +120,25 @@
       <Value Profile="(Default)">HH:mm:ss</Value>
     </Setting>
     <Setting Name="GUI_SubscriptionColumns" Type="System.String" Scope="User">
-      <Value Profile="(Default)" />
+      <Value Profile="(Default)">0;46;1;129;2;160;3;60;4;60;5;55;6;60;7;4</Value>
+    </Setting>
+    <Setting Name="GUI_SplitterMiddle" Type="System.Int32" Scope="User">
+      <Value Profile="(Default)">-1</Value>
+    </Setting>
+    <Setting Name="COV_Export_Path" Type="System.String" Scope="User">
+      <Value Profile="(Default)">C:\COV Graph Exports\</Value>
+    </Setting>
+    <Setting Name="UsePollingByDefault" Type="System.Boolean" Scope="User">
+      <Value Profile="(Default)">True</Value>
+    </Setting>
+    <Setting Name="Auto_Store_Object_Names" Type="System.Boolean" Scope="User">
+      <Value Profile="(Default)">False</Value>
+    </Setting>
+    <Setting Name="Auto_Store_Period_Minutes" Type="System.Int32" Scope="User">
+      <Value Profile="(Default)">5</Value>
+    </Setting>
+    <Setting Name="Vertical_Object_Splitter_Orientation" Type="System.Boolean" Scope="User">
+      <Value Profile="(Default)">False</Value>
     </Setting>
   </Settings>
 </SettingsFile>

@@ -105,6 +105,7 @@
             this.splitCOV = new System.Windows.Forms.SplitContainer();
             this.labelDrop1 = new System.Windows.Forms.Label();
             this.m_SubscriptionView = new System.Windows.Forms.ListView();
+            this.columnVisible = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeader1 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeader2 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeader3 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
@@ -115,6 +116,16 @@
             this.columnHeader7 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.m_EventSpaceMenuStrip = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.EventAlarmLogToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.splitContainer2 = new System.Windows.Forms.SplitContainer();
+            this.splitContainer1 = new System.Windows.Forms.SplitContainer();
+            this.splitContainer3 = new System.Windows.Forms.SplitContainer();
+            this.btnExport = new System.Windows.Forms.Button();
+            this.btnPlay = new System.Windows.Forms.Button();
+            this.splitContainer5 = new System.Windows.Forms.SplitContainer();
+            this.pollRateSelector = new System.Windows.Forms.NumericUpDown();
+            this.CovOpn = new System.Windows.Forms.RadioButton();
+            this.PollOpn = new System.Windows.Forms.RadioButton();
+            this.ClearPlotterButton = new System.Windows.Forms.Button();
             this.labelDrop2 = new System.Windows.Forms.Label();
             this.CovGraph = new ZedGraph.ZedGraphControl();
             this.m_DataGrid = new System.Windows.Forms.PropertyGrid();
@@ -122,6 +133,7 @@
             this.m_LogText = new System.Windows.Forms.TextBox();
             this.label4 = new System.Windows.Forms.Label();
             this.m_subscriptionRenewTimer = new System.Windows.Forms.Timer(this.components);
+            this.SaveObjectNamesTimer = new System.Windows.Forms.Timer(this.components);
             m_ImageList = new System.Windows.Forms.ImageList(this.components);
             this.toolStrip1.SuspendLayout();
             this.menuStrip1.SuspendLayout();
@@ -150,6 +162,23 @@
             this.splitCOV.Panel2.SuspendLayout();
             this.splitCOV.SuspendLayout();
             this.m_EventSpaceMenuStrip.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.splitContainer2)).BeginInit();
+            this.splitContainer2.Panel1.SuspendLayout();
+            this.splitContainer2.Panel2.SuspendLayout();
+            this.splitContainer2.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
+            this.splitContainer1.Panel1.SuspendLayout();
+            this.splitContainer1.Panel2.SuspendLayout();
+            this.splitContainer1.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.splitContainer3)).BeginInit();
+            this.splitContainer3.Panel1.SuspendLayout();
+            this.splitContainer3.Panel2.SuspendLayout();
+            this.splitContainer3.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.splitContainer5)).BeginInit();
+            this.splitContainer5.Panel1.SuspendLayout();
+            this.splitContainer5.Panel2.SuspendLayout();
+            this.splitContainer5.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.pollRateSelector)).BeginInit();
             this.SuspendLayout();
             // 
             // m_ImageList
@@ -181,7 +210,7 @@
             this.m_RemoveToolButton});
             this.toolStrip1.Location = new System.Drawing.Point(0, 24);
             this.toolStrip1.Name = "toolStrip1";
-            this.toolStrip1.Size = new System.Drawing.Size(759, 25);
+            this.toolStrip1.Size = new System.Drawing.Size(1126, 25);
             this.toolStrip1.TabIndex = 1;
             this.toolStrip1.Text = "toolStrip1";
             // 
@@ -214,7 +243,7 @@
             this.helpToolStripMenuItem});
             this.menuStrip1.Location = new System.Drawing.Point(0, 0);
             this.menuStrip1.Name = "menuStrip1";
-            this.menuStrip1.Size = new System.Drawing.Size(759, 24);
+            this.menuStrip1.Size = new System.Drawing.Size(1126, 24);
             this.menuStrip1.TabIndex = 2;
             this.menuStrip1.Text = "menuStrip1";
             // 
@@ -539,8 +568,8 @@
             // 
             this.m_SplitContainerButtom.Panel2.Controls.Add(this.m_LogText);
             this.m_SplitContainerButtom.Panel2.Controls.Add(this.label4);
-            this.m_SplitContainerButtom.Size = new System.Drawing.Size(759, 554);
-            this.m_SplitContainerButtom.SplitterDistance = 412;
+            this.m_SplitContainerButtom.Size = new System.Drawing.Size(1126, 631);
+            this.m_SplitContainerButtom.SplitterDistance = 544;
             this.m_SplitContainerButtom.TabIndex = 3;
             // 
             // m_SplitContainerLeft
@@ -556,8 +585,8 @@
             // m_SplitContainerLeft.Panel2
             // 
             this.m_SplitContainerLeft.Panel2.Controls.Add(this.m_SplitContainerRight);
-            this.m_SplitContainerLeft.Size = new System.Drawing.Size(759, 412);
-            this.m_SplitContainerLeft.SplitterDistance = 164;
+            this.m_SplitContainerLeft.Size = new System.Drawing.Size(1126, 544);
+            this.m_SplitContainerLeft.SplitterDistance = 451;
             this.m_SplitContainerLeft.TabIndex = 0;
             // 
             // splitContainer4
@@ -565,7 +594,6 @@
             this.splitContainer4.Dock = System.Windows.Forms.DockStyle.Fill;
             this.splitContainer4.Location = new System.Drawing.Point(0, 0);
             this.splitContainer4.Name = "splitContainer4";
-            this.splitContainer4.Orientation = System.Windows.Forms.Orientation.Horizontal;
             // 
             // splitContainer4.Panel1
             // 
@@ -576,8 +604,8 @@
             // 
             this.splitContainer4.Panel2.Controls.Add(this.m_AddressSpaceTree);
             this.splitContainer4.Panel2.Controls.Add(this.AddSpaceLabel);
-            this.splitContainer4.Size = new System.Drawing.Size(164, 412);
-            this.splitContainer4.SplitterDistance = 187;
+            this.splitContainer4.Size = new System.Drawing.Size(451, 544);
+            this.splitContainer4.SplitterDistance = 189;
             this.splitContainer4.TabIndex = 0;
             // 
             // m_DeviceTree
@@ -595,7 +623,7 @@
             this.m_DeviceTree.SelectedImageIndex = 0;
             this.m_DeviceTree.ShowNodeToolTips = true;
             this.m_DeviceTree.ShowRootLines = false;
-            this.m_DeviceTree.Size = new System.Drawing.Size(164, 174);
+            this.m_DeviceTree.Size = new System.Drawing.Size(189, 531);
             this.m_DeviceTree.TabIndex = 0;
             this.m_DeviceTree.AfterSelect += new System.Windows.Forms.TreeViewEventHandler(this.m_DeviceTree_AfterSelect);
             this.m_DeviceTree.MouseDown += new System.Windows.Forms.MouseEventHandler(this.TreeView_MouseDown);
@@ -721,7 +749,7 @@
             this.m_AddressSpaceTree.SelectionBackColor = System.Drawing.SystemColors.Highlight;
             this.m_AddressSpaceTree.SelectionMode = CodersLab.Windows.Controls.TreeViewSelectionMode.MultiSelectSameLevel;
             this.m_AddressSpaceTree.ShowNodeToolTips = true;
-            this.m_AddressSpaceTree.Size = new System.Drawing.Size(164, 208);
+            this.m_AddressSpaceTree.Size = new System.Drawing.Size(258, 531);
             this.m_AddressSpaceTree.TabIndex = 0;
             this.m_AddressSpaceTree.ItemDrag += new System.Windows.Forms.ItemDragEventHandler(this.m_AddressSpaceTree_ItemDrag);
             this.m_AddressSpaceTree.AfterSelect += new System.Windows.Forms.TreeViewEventHandler(this.m_AddressSpaceTree_AfterSelect);
@@ -838,8 +866,8 @@
             // 
             this.m_SplitContainerRight.Panel2.Controls.Add(this.m_DataGrid);
             this.m_SplitContainerRight.Panel2.Controls.Add(this.label1);
-            this.m_SplitContainerRight.Size = new System.Drawing.Size(591, 412);
-            this.m_SplitContainerRight.SplitterDistance = 396;
+            this.m_SplitContainerRight.Size = new System.Drawing.Size(671, 544);
+            this.m_SplitContainerRight.SplitterDistance = 467;
             this.m_SplitContainerRight.TabIndex = 0;
             // 
             // tabControl1
@@ -849,7 +877,7 @@
             this.tabControl1.Location = new System.Drawing.Point(0, 0);
             this.tabControl1.Name = "tabControl1";
             this.tabControl1.SelectedIndex = 0;
-            this.tabControl1.Size = new System.Drawing.Size(396, 412);
+            this.tabControl1.Size = new System.Drawing.Size(467, 544);
             this.tabControl1.TabIndex = 0;
             // 
             // tabPage1
@@ -858,7 +886,7 @@
             this.tabPage1.Location = new System.Drawing.Point(4, 22);
             this.tabPage1.Name = "tabPage1";
             this.tabPage1.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPage1.Size = new System.Drawing.Size(388, 386);
+            this.tabPage1.Size = new System.Drawing.Size(459, 518);
             this.tabPage1.TabIndex = 0;
             this.tabPage1.Text = "Subscriptions, Periodic Polling, Events/Alarms";
             this.tabPage1.UseVisualStyleBackColor = true;
@@ -877,26 +905,27 @@
             // 
             // splitCOV.Panel2
             // 
-            this.splitCOV.Panel2.Controls.Add(this.labelDrop2);
-            this.splitCOV.Panel2.Controls.Add(this.CovGraph);
-            this.splitCOV.Size = new System.Drawing.Size(382, 380);
-            this.splitCOV.SplitterDistance = 190;
+            this.splitCOV.Panel2.Controls.Add(this.splitContainer2);
+            this.splitCOV.Size = new System.Drawing.Size(453, 512);
+            this.splitCOV.SplitterDistance = 200;
             this.splitCOV.TabIndex = 1;
             // 
             // labelDrop1
             // 
             this.labelDrop1.AutoSize = true;
-            this.labelDrop1.Location = new System.Drawing.Point(36, 42);
+            this.labelDrop1.Location = new System.Drawing.Point(45, 74);
             this.labelDrop1.Name = "labelDrop1";
-            this.labelDrop1.Size = new System.Drawing.Size(340, 13);
+            this.labelDrop1.Size = new System.Drawing.Size(175, 26);
             this.labelDrop1.TabIndex = 1;
-            this.labelDrop1.Text = "Drop .a cov file or objects from the Address Space here to subscribe ...";
+            this.labelDrop1.Text = "Drop a cov file or objects from the\r\nAddress Space here to subscribe ...";
             // 
             // m_SubscriptionView
             // 
             this.m_SubscriptionView.AllowColumnReorder = true;
             this.m_SubscriptionView.AllowDrop = true;
+            this.m_SubscriptionView.CheckBoxes = true;
             this.m_SubscriptionView.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
+            this.columnVisible,
             this.columnHeader1,
             this.columnHeader2,
             this.columnHeader3,
@@ -908,15 +937,23 @@
             this.m_SubscriptionView.ContextMenuStrip = this.m_EventSpaceMenuStrip;
             this.m_SubscriptionView.Dock = System.Windows.Forms.DockStyle.Fill;
             this.m_SubscriptionView.FullRowSelect = true;
+            this.m_SubscriptionView.HideSelection = false;
             this.m_SubscriptionView.Location = new System.Drawing.Point(0, 0);
             this.m_SubscriptionView.Name = "m_SubscriptionView";
-            this.m_SubscriptionView.Size = new System.Drawing.Size(382, 190);
+            this.m_SubscriptionView.Size = new System.Drawing.Size(453, 200);
             this.m_SubscriptionView.TabIndex = 0;
             this.m_SubscriptionView.UseCompatibleStateImageBehavior = false;
             this.m_SubscriptionView.View = System.Windows.Forms.View.Details;
+            this.m_SubscriptionView.ItemChecked += new System.Windows.Forms.ItemCheckedEventHandler(this.m_SubscriptionView_ItemChecked);
+            this.m_SubscriptionView.SelectedIndexChanged += new System.EventHandler(this.m_SubscriptionView_SelectedIndexChanged);
             this.m_SubscriptionView.DragDrop += new System.Windows.Forms.DragEventHandler(this.m_SubscriptionView_DragDrop);
             this.m_SubscriptionView.DragEnter += new System.Windows.Forms.DragEventHandler(this.m_SubscriptionView_DragEnter);
             this.m_SubscriptionView.KeyDown += new System.Windows.Forms.KeyEventHandler(this.m_SubscriptionView_KeyDown);
+            // 
+            // columnVisible
+            // 
+            this.columnVisible.Text = "Show";
+            this.columnVisible.Width = 39;
             // 
             // columnHeader1
             // 
@@ -966,10 +1003,177 @@
             this.EventAlarmLogToolStripMenuItem.Text = "Start saving Cov/Event/Alarm Log";
             this.EventAlarmLogToolStripMenuItem.Click += new System.EventHandler(this.EventAlarmLogToolStripMenuItem_Click);
             // 
+            // splitContainer2
+            // 
+            this.splitContainer2.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.splitContainer2.FixedPanel = System.Windows.Forms.FixedPanel.Panel1;
+            this.splitContainer2.IsSplitterFixed = true;
+            this.splitContainer2.Location = new System.Drawing.Point(0, 0);
+            this.splitContainer2.Name = "splitContainer2";
+            this.splitContainer2.Orientation = System.Windows.Forms.Orientation.Horizontal;
+            // 
+            // splitContainer2.Panel1
+            // 
+            this.splitContainer2.Panel1.Controls.Add(this.splitContainer1);
+            // 
+            // splitContainer2.Panel2
+            // 
+            this.splitContainer2.Panel2.Controls.Add(this.labelDrop2);
+            this.splitContainer2.Panel2.Controls.Add(this.CovGraph);
+            this.splitContainer2.Size = new System.Drawing.Size(453, 308);
+            this.splitContainer2.SplitterDistance = 25;
+            this.splitContainer2.TabIndex = 2;
+            // 
+            // splitContainer1
+            // 
+            this.splitContainer1.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.splitContainer1.IsSplitterFixed = true;
+            this.splitContainer1.Location = new System.Drawing.Point(0, 0);
+            this.splitContainer1.Name = "splitContainer1";
+            // 
+            // splitContainer1.Panel1
+            // 
+            this.splitContainer1.Panel1.Controls.Add(this.splitContainer3);
+            this.splitContainer1.Panel1MinSize = 60;
+            // 
+            // splitContainer1.Panel2
+            // 
+            this.splitContainer1.Panel2.Controls.Add(this.splitContainer5);
+            this.splitContainer1.Panel2MinSize = 220;
+            this.splitContainer1.Size = new System.Drawing.Size(453, 25);
+            this.splitContainer1.SplitterDistance = 190;
+            this.splitContainer1.TabIndex = 1;
+            // 
+            // splitContainer3
+            // 
+            this.splitContainer3.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.splitContainer3.IsSplitterFixed = true;
+            this.splitContainer3.Location = new System.Drawing.Point(0, 0);
+            this.splitContainer3.Margin = new System.Windows.Forms.Padding(0);
+            this.splitContainer3.Name = "splitContainer3";
+            // 
+            // splitContainer3.Panel1
+            // 
+            this.splitContainer3.Panel1.Controls.Add(this.btnExport);
+            // 
+            // splitContainer3.Panel2
+            // 
+            this.splitContainer3.Panel2.Controls.Add(this.btnPlay);
+            this.splitContainer3.Size = new System.Drawing.Size(190, 25);
+            this.splitContainer3.SplitterDistance = 94;
+            this.splitContainer3.TabIndex = 4;
+            // 
+            // btnExport
+            // 
+            this.btnExport.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.btnExport.Location = new System.Drawing.Point(0, 0);
+            this.btnExport.Name = "btnExport";
+            this.btnExport.Size = new System.Drawing.Size(94, 25);
+            this.btnExport.TabIndex = 0;
+            this.btnExport.Text = "Export Setup";
+            this.btnExport.UseVisualStyleBackColor = true;
+            this.btnExport.Click += new System.EventHandler(this.btnExport_Click);
+            // 
+            // btnPlay
+            // 
+            this.btnPlay.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.btnPlay.Location = new System.Drawing.Point(0, 0);
+            this.btnPlay.Name = "btnPlay";
+            this.btnPlay.Size = new System.Drawing.Size(92, 25);
+            this.btnPlay.TabIndex = 0;
+            this.btnPlay.Text = "Pause Plotter";
+            this.btnPlay.UseVisualStyleBackColor = true;
+            this.btnPlay.Click += new System.EventHandler(this.btnPlay_Click);
+            // 
+            // splitContainer5
+            // 
+            this.splitContainer5.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.splitContainer5.IsSplitterFixed = true;
+            this.splitContainer5.Location = new System.Drawing.Point(0, 0);
+            this.splitContainer5.Margin = new System.Windows.Forms.Padding(0);
+            this.splitContainer5.Name = "splitContainer5";
+            // 
+            // splitContainer5.Panel1
+            // 
+            this.splitContainer5.Panel1.Controls.Add(this.pollRateSelector);
+            this.splitContainer5.Panel1.Controls.Add(this.CovOpn);
+            this.splitContainer5.Panel1.Controls.Add(this.PollOpn);
+            this.splitContainer5.Panel1MinSize = 170;
+            // 
+            // splitContainer5.Panel2
+            // 
+            this.splitContainer5.Panel2.Controls.Add(this.ClearPlotterButton);
+            this.splitContainer5.Panel2MinSize = 30;
+            this.splitContainer5.Size = new System.Drawing.Size(259, 25);
+            this.splitContainer5.SplitterDistance = 174;
+            this.splitContainer5.TabIndex = 4;
+            // 
+            // pollRateSelector
+            // 
+            this.pollRateSelector.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.pollRateSelector.Location = new System.Drawing.Point(115, 5);
+            this.pollRateSelector.Maximum = new decimal(new int[] {
+            120000,
+            0,
+            0,
+            0});
+            this.pollRateSelector.Minimum = new decimal(new int[] {
+            100,
+            0,
+            0,
+            0});
+            this.pollRateSelector.Name = "pollRateSelector";
+            this.pollRateSelector.Size = new System.Drawing.Size(57, 20);
+            this.pollRateSelector.TabIndex = 6;
+            this.pollRateSelector.Value = new decimal(new int[] {
+            1000,
+            0,
+            0,
+            0});
+            this.pollRateSelector.ValueChanged += new System.EventHandler(this.pollRateSelector_ValueChanged);
+            // 
+            // CovOpn
+            // 
+            this.CovOpn.AutoSize = true;
+            this.CovOpn.Font = new System.Drawing.Font("Arial Narrow", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.CovOpn.Location = new System.Drawing.Point(3, 4);
+            this.CovOpn.Name = "CovOpn";
+            this.CovOpn.Size = new System.Drawing.Size(45, 19);
+            this.CovOpn.TabIndex = 7;
+            this.CovOpn.Text = "COV";
+            this.CovOpn.UseVisualStyleBackColor = true;
+            // 
+            // PollOpn
+            // 
+            this.PollOpn.AutoSize = true;
+            this.PollOpn.Checked = true;
+            this.PollOpn.Font = new System.Drawing.Font("Arial Narrow", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.PollOpn.Location = new System.Drawing.Point(51, 4);
+            this.PollOpn.Name = "PollOpn";
+            this.PollOpn.Size = new System.Drawing.Size(62, 19);
+            this.PollOpn.TabIndex = 6;
+            this.PollOpn.TabStop = true;
+            this.PollOpn.Text = "Poll (ms)";
+            this.PollOpn.UseVisualStyleBackColor = true;
+            this.PollOpn.CheckedChanged += new System.EventHandler(this.PollOpn_CheckedChanged);
+            // 
+            // ClearPlotterButton
+            // 
+            this.ClearPlotterButton.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.ClearPlotterButton.Location = new System.Drawing.Point(0, 0);
+            this.ClearPlotterButton.Name = "ClearPlotterButton";
+            this.ClearPlotterButton.Size = new System.Drawing.Size(81, 25);
+            this.ClearPlotterButton.TabIndex = 6;
+            this.ClearPlotterButton.Text = "Clear Plotter";
+            this.ClearPlotterButton.UseVisualStyleBackColor = true;
+            this.ClearPlotterButton.Click += new System.EventHandler(this.ClearPlotterButton_Click);
+            // 
             // labelDrop2
             // 
             this.labelDrop2.AutoSize = true;
-            this.labelDrop2.Location = new System.Drawing.Point(39, 26);
+            this.labelDrop2.Location = new System.Drawing.Point(60, 68);
             this.labelDrop2.Name = "labelDrop2";
             this.labelDrop2.Size = new System.Drawing.Size(153, 13);
             this.labelDrop2.TabIndex = 1;
@@ -988,7 +1192,7 @@
             this.CovGraph.ScrollMinX = 0D;
             this.CovGraph.ScrollMinY = 0D;
             this.CovGraph.ScrollMinY2 = 0D;
-            this.CovGraph.Size = new System.Drawing.Size(382, 186);
+            this.CovGraph.Size = new System.Drawing.Size(453, 279);
             this.CovGraph.TabIndex = 0;
             this.CovGraph.DragDrop += new System.Windows.Forms.DragEventHandler(this.m_SubscriptionView_DragDrop);
             this.CovGraph.DragEnter += new System.Windows.Forms.DragEventHandler(this.m_SubscriptionView_DragEnter);
@@ -999,7 +1203,8 @@
             this.m_DataGrid.LineColor = System.Drawing.SystemColors.ControlDark;
             this.m_DataGrid.Location = new System.Drawing.Point(0, 13);
             this.m_DataGrid.Name = "m_DataGrid";
-            this.m_DataGrid.Size = new System.Drawing.Size(191, 399);
+            this.m_DataGrid.PropertySort = System.Windows.Forms.PropertySort.Categorized;
+            this.m_DataGrid.Size = new System.Drawing.Size(200, 531);
             this.m_DataGrid.TabIndex = 0;
             this.m_DataGrid.PropertyValueChanged += new System.Windows.Forms.PropertyValueChangedEventHandler(this.m_DataGrid_PropertyValueChanged);
             // 
@@ -1021,7 +1226,7 @@
             this.m_LogText.Multiline = true;
             this.m_LogText.Name = "m_LogText";
             this.m_LogText.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
-            this.m_LogText.Size = new System.Drawing.Size(759, 125);
+            this.m_LogText.Size = new System.Drawing.Size(1126, 70);
             this.m_LogText.TabIndex = 0;
             // 
             // label4
@@ -1038,11 +1243,16 @@
             // 
             this.m_subscriptionRenewTimer.Tick += new System.EventHandler(this.m_subscriptionRenewTimer_Tick);
             // 
+            // SaveObjectNamesTimer
+            // 
+            this.SaveObjectNamesTimer.Interval = 240000;
+            this.SaveObjectNamesTimer.Tick += new System.EventHandler(this.SaveObjectNamesTimer_Tick);
+            // 
             // YabeMainDialog
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(759, 603);
+            this.ClientSize = new System.Drawing.Size(1126, 680);
             this.Controls.Add(this.m_SplitContainerButtom);
             this.Controls.Add(this.toolStrip1);
             this.Controls.Add(this.menuStrip1);
@@ -1085,10 +1295,28 @@
             this.splitCOV.Panel1.ResumeLayout(false);
             this.splitCOV.Panel1.PerformLayout();
             this.splitCOV.Panel2.ResumeLayout(false);
-            this.splitCOV.Panel2.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.splitCOV)).EndInit();
             this.splitCOV.ResumeLayout(false);
             this.m_EventSpaceMenuStrip.ResumeLayout(false);
+            this.splitContainer2.Panel1.ResumeLayout(false);
+            this.splitContainer2.Panel2.ResumeLayout(false);
+            this.splitContainer2.Panel2.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.splitContainer2)).EndInit();
+            this.splitContainer2.ResumeLayout(false);
+            this.splitContainer1.Panel1.ResumeLayout(false);
+            this.splitContainer1.Panel2.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).EndInit();
+            this.splitContainer1.ResumeLayout(false);
+            this.splitContainer3.Panel1.ResumeLayout(false);
+            this.splitContainer3.Panel2.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)(this.splitContainer3)).EndInit();
+            this.splitContainer3.ResumeLayout(false);
+            this.splitContainer5.Panel1.ResumeLayout(false);
+            this.splitContainer5.Panel1.PerformLayout();
+            this.splitContainer5.Panel2.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)(this.splitContainer5)).EndInit();
+            this.splitContainer5.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)(this.pollRateSelector)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -1186,6 +1414,18 @@
         private System.Windows.Forms.ColumnHeader columnHeader7;
         private System.Windows.Forms.ColumnHeader columnHeader8;
         private System.Windows.Forms.ToolStripMenuItem searchToolStripMenuItem1;
+        private System.Windows.Forms.Button btnExport;
+        private System.Windows.Forms.SplitContainer splitContainer2;
+        private System.Windows.Forms.SplitContainer splitContainer1;
+        private System.Windows.Forms.Button btnPlay;
+        private System.Windows.Forms.ColumnHeader columnVisible;
+        private System.Windows.Forms.SplitContainer splitContainer3;
+        private System.Windows.Forms.SplitContainer splitContainer5;
+        private System.Windows.Forms.Button ClearPlotterButton;
+        private System.Windows.Forms.NumericUpDown pollRateSelector;
+        private System.Windows.Forms.RadioButton CovOpn;
+        private System.Windows.Forms.RadioButton PollOpn;
+        private System.Windows.Forms.Timer SaveObjectNamesTimer;
     }
 }
 

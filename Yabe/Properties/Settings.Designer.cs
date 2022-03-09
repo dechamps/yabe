@@ -61,7 +61,7 @@ namespace Yabe.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("0, 0")]
+        [global::System.Configuration.DefaultSettingValueAttribute("-1, -1")]
         public global::System.Drawing.Size GUI_FormSize {
             get {
                 return ((global::System.Drawing.Size)(this["GUI_FormSize"]));
@@ -73,7 +73,7 @@ namespace Yabe.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("Normal")]
+        [global::System.Configuration.DefaultSettingValueAttribute("Maximized")]
         public string GUI_FormState {
             get {
                 return ((string)(this["GUI_FormState"]));
@@ -121,7 +121,7 @@ namespace Yabe.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("3")]
+        [global::System.Configuration.DefaultSettingValueAttribute("2")]
         public decimal DefaultRetries {
             get {
                 return ((decimal)(this["DefaultRetries"]));
@@ -133,7 +133,7 @@ namespace Yabe.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("1000")]
+        [global::System.Configuration.DefaultSettingValueAttribute("2000")]
         public decimal DefaultTimeout {
             get {
                 return ((decimal)(this["DefaultTimeout"]));
@@ -169,7 +169,7 @@ namespace Yabe.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("-1")]
+        [global::System.Configuration.DefaultSettingValueAttribute("128")]
         public decimal DefaultSourceAddress {
             get {
                 return ((decimal)(this["DefaultSourceAddress"]));
@@ -313,13 +313,13 @@ namespace Yabe.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("True")]
-        public bool GetStructuredView {
+        [global::System.Configuration.DefaultSettingValueAttribute("Structured")]
+        public global::Yabe.AddressTreeViewType Address_Space_Structured_View {
             get {
-                return ((bool)(this["GetStructuredView"]));
+                return ((global::Yabe.AddressTreeViewType)(this["Address_Space_Structured_View"]));
             }
             set {
-                this["GetStructuredView"] = value;
+                this["Address_Space_Structured_View"] = value;
             }
         }
         
@@ -373,7 +373,7 @@ namespace Yabe.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("5")]
+        [global::System.Configuration.DefaultSettingValueAttribute("1000")]
         public uint Subscriptions_ReplacementPollingPeriod {
             get {
                 return ((uint)(this["Subscriptions_ReplacementPollingPeriod"]));
@@ -385,13 +385,13 @@ namespace Yabe.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("")]
-        public string ObjectNameFile {
+        [global::System.Configuration.DefaultSettingValueAttribute("C:\\Yabe Stored Object Names\\Auto_Stored_Object_Names.YabeMap")]
+        public string Auto_Store_Object_Names_File {
             get {
-                return ((string)(this["ObjectNameFile"]));
+                return ((string)(this["Auto_Store_Object_Names_File"]));
             }
             set {
-                this["ObjectNameFile"] = value;
+                this["Auto_Store_Object_Names_File"] = value;
             }
         }
         
@@ -433,7 +433,7 @@ namespace Yabe.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("CheckReliability, CheckStatusFlags, ListOutOfService")]
+        [global::System.Configuration.DefaultSettingValueAttribute("CheckReliability, CheckStatusFlags, ListOutOfService, GlobalCommander")]
         public string Plugins {
             get {
                 return ((string)(this["Plugins"]));
@@ -445,7 +445,7 @@ namespace Yabe.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("Circle")]
+        [global::System.Configuration.DefaultSettingValueAttribute("Square")]
         public global::ZedGraph.SymbolType GraphDotStyle {
             get {
                 return ((global::ZedGraph.SymbolType)(this["GraphDotStyle"]));
@@ -493,13 +493,85 @@ namespace Yabe.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        [global::System.Configuration.DefaultSettingValueAttribute("0;46;1;129;2;160;3;60;4;60;5;55;6;60;7;4")]
         public string GUI_SubscriptionColumns {
             get {
                 return ((string)(this["GUI_SubscriptionColumns"]));
             }
             set {
                 this["GUI_SubscriptionColumns"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("-1")]
+        public int GUI_SplitterMiddle {
+            get {
+                return ((int)(this["GUI_SplitterMiddle"]));
+            }
+            set {
+                this["GUI_SplitterMiddle"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("C:\\COV Graph Exports\\")]
+        public string COV_Export_Path {
+            get {
+                return ((string)(this["COV_Export_Path"]));
+            }
+            set {
+                this["COV_Export_Path"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("True")]
+        public bool UsePollingByDefault {
+            get {
+                return ((bool)(this["UsePollingByDefault"]));
+            }
+            set {
+                this["UsePollingByDefault"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool Auto_Store_Object_Names {
+            get {
+                return ((bool)(this["Auto_Store_Object_Names"]));
+            }
+            set {
+                this["Auto_Store_Object_Names"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("5")]
+        public int Auto_Store_Period_Minutes {
+            get {
+                return ((int)(this["Auto_Store_Period_Minutes"]));
+            }
+            set {
+                this["Auto_Store_Period_Minutes"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool Vertical_Object_Splitter_Orientation {
+            get {
+                return ((bool)(this["Vertical_Object_Splitter_Orientation"]));
+            }
+            set {
+                this["Vertical_Object_Splitter_Orientation"] = value;
             }
         }
     }

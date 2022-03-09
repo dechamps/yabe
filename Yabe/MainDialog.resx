@@ -128,7 +128,7 @@
         AAEAAAD/////AQAAAAAAAAAMAgAAAFdTeXN0ZW0uV2luZG93cy5Gb3JtcywgVmVyc2lvbj00LjAuMC4w
         LCBDdWx0dXJlPW5ldXRyYWwsIFB1YmxpY0tleVRva2VuPWI3N2E1YzU2MTkzNGUwODkFAQAAACZTeXN0
         ZW0uV2luZG93cy5Gb3Jtcy5JbWFnZUxpc3RTdHJlYW1lcgEAAAAERGF0YQcCAgAAAAkDAAAADwMAAACi
-        RgAAAk1TRnQBSQFMAgEBEQEAAYgBEgGIARIBEAEAARABAAT/ASEBAAj/AUIBTQE2BwABNgMAASgDAAFA
+        RgAAAk1TRnQBSQFMAgEBEQEAAcgBFgHIARYBEAEAARABAAT/ASEBAAj/AUIBTQE2BwABNgMAASgDAAFA
         AwABUAMAAQEBAAEgBgABUP8AEwADUQGiAQABpwHgAf8BAAGkAd8B/wEAAaEB3QH/AQABngHcAf8BAAGb
         AdoB/wEAAZgB2QH/AQABkwHWAf8BAAGMAdMB/wEAAYUBzwH/AgABzAH/AgAByQH/AgABxgH/AgABwwH/
         AgABwQH/A1EBosAAAVgCXwHjAb4B4wH1Af8B9AH8Af4B/wHvAfsB/gH/Ae4B+wH+Af8B7gH7Af4B/wHv
@@ -449,6 +449,12 @@
   </metadata>
   <metadata name="m_subscriptionRenewTimer.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
     <value>740, 17</value>
+  </metadata>
+  <metadata name="SaveObjectNamesTimer.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
+    <value>941, 17</value>
+  </metadata>
+  <metadata name="$this.TrayHeight" type="System.Int32, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089">
+    <value>65</value>
   </metadata>
   <assembly alias="System.Drawing" name="System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
   <data name="$this.Icon" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
