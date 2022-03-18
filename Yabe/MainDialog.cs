@@ -3166,7 +3166,12 @@ namespace Yabe
                                 {
                                     uint deviceId;
                                     deviceId = Convert.ToUInt32(description[1]);
-                                    BacnetObjectId objectId = BacnetObjectId.Parse("OBJECT_" + description[2]);
+                                    string objectIdString = description[2];
+                                    if (!objectIdString.StartsWith("OBJECT_"))
+                                    {
+                                        objectIdString = "OBJECT_" + objectIdString;
+                                    }
+                                    BacnetObjectId objectId = BacnetObjectId.Parse(objectIdString);
                                     int period = Int32.Parse(description[3]);
                                     foreach (var E in m_devices)
                                     {
