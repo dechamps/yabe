@@ -527,9 +527,10 @@ namespace Yabe
             {
                 try
                 {
-                    string path = Path.GetDirectoryName(Application.ExecutablePath);
+                    // string path = Path.GetDirectoryName(Application.ExecutablePath);
                     string name = pluginname.Replace(" ", String.Empty);
-                    Assembly myDll = Assembly.LoadFrom(path + "\\" + name + ".dll");
+                    // Assembly myDll = Assembly.LoadFrom(path + "\\" + name + ".dll");
+                    Assembly myDll = Assembly.LoadFrom(name + ".dll");
                     Trace.WriteLine(String.Format("Loaded plugin \"{0}\".", pluginname));
                     Type[] types = myDll.GetExportedTypes();
                     IYabePlugin plugin = (IYabePlugin)myDll.CreateInstance(name + ".Plugin", true);
@@ -803,7 +804,7 @@ namespace Yabe
                 product = this.GetType().Assembly.GetName().Name;
             }
 
-            MessageBox.Show(this, product + "\nVersion " + this.GetType().Assembly.GetName().Version + "\nBy Morten Kvistgaard - Copyright 2014-2017\nBy Frederic Chaxel - Copyright 2015-2020\n" +
+            MessageBox.Show(this, product + "\nVersion " + this.GetType().Assembly.GetName().Version + "\nBy Morten Kvistgaard - Copyright 2014-2017\nBy Frederic Chaxel - Copyright 2015-2022\n" +
                 "\nReferences:"+
                 "\nhttp://bacnet.sourceforge.net/" + 
                 "\nhttp://www.unified-automation.com/products/development-tools/uaexpert.html" +
@@ -1766,159 +1767,13 @@ namespace Yabe
             return true;
         }
 
-        private void UpdateGrid(TreeNode selected_node)
+        private String UpdateGrid(BacnetClient comm, BacnetAddress adr, BacnetObjectId object_id)
         {
-            this.Cursor = Cursors.WaitCursor;
+            string ReturnPROP_OBJECT_NAME = null;
             try
             {
-                _selectedNode = null;
-                //fetch end point
-                if (m_DeviceTree.SelectedNode == null) return;
-                else if (m_DeviceTree.SelectedNode.Tag == null) return;
-                else if (!(m_DeviceTree.SelectedNode.Tag is KeyValuePair<BacnetAddress, uint>)) return;
-                KeyValuePair<BacnetAddress, uint> entry = (KeyValuePair<BacnetAddress, uint>)m_DeviceTree.SelectedNode.Tag;
-                BacnetAddress adr = entry.Key;
-                BacnetClient comm;
-                
-                if (m_DeviceTree.SelectedNode.Parent.Tag is BacnetClient)
-                    comm = (BacnetClient)m_DeviceTree.SelectedNode.Parent.Tag;
-                else
-                    comm = (BacnetClient)m_DeviceTree.SelectedNode.Parent.Parent.Tag;  // routed node
-
-                if (selected_node.Tag is BacnetObjectId)
-                {
-                    m_DataGrid.SelectedObject = null;   //clear
-
-                    BacnetObjectId object_id = (BacnetObjectId)selected_node.Tag;
-                    BacnetPropertyReference[] properties = new BacnetPropertyReference[] { new BacnetPropertyReference((uint)BacnetPropertyIds.PROP_ALL, System.IO.BACnet.Serialize.ASN1.BACNET_ARRAY_ALL) };
-                    IList<BacnetReadAccessResult> multi_value_list;
-                    try
-                    {                       
-                        //fetch properties. This might not be supported (ReadMultiple) or the response might be too long.
-                        if (!comm.ReadPropertyMultipleRequest(adr, object_id, properties, out multi_value_list))
-                        {
-                            Trace.TraceWarning("Couldn't perform ReadPropertyMultiple ... Trying ReadProperty instead");
-                            if (!ReadAllPropertiesBySingle(comm, adr, object_id, out multi_value_list))
-                            {
-                                MessageBox.Show(this, "Couldn't fetch properties", "Communication Error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                                return;
-                            }
-                        }
-                    }
-                    catch (Exception)
-                    {
-                        Trace.TraceWarning("Couldn't perform ReadPropertyMultiple ... Trying ReadProperty instead");
-                        Application.DoEvents();
-                        try
-                        {
-                            //fetch properties with single calls
-                            if (!ReadAllPropertiesBySingle(comm, adr, object_id, out multi_value_list))
-                            {
-                                MessageBox.Show(this, "Couldn't fetch properties", "Communication Error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                                return;
-                            }
-                        }
-                        catch (Exception ex)
-                        {
-                            MessageBox.Show(this, "Error during read: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                            return;
-                        }
-                    }
-
-                    //update grid
-                    Utilities.DynamicPropertyGridContainer bag = new Utilities.DynamicPropertyGridContainer();
-                    foreach (BacnetPropertyValue p_value in multi_value_list[0].values)
-                    {
-                        object value = null;
-                        BacnetValue[] b_values = null;
-                        if (p_value.value != null)
-                        {
-
-                             b_values = new BacnetValue[p_value.value.Count];
-
-                            p_value.value.CopyTo(b_values, 0);
-                            if (b_values.Length > 1)
-                            {
-                                object[] arr = new object[b_values.Length];
-                                for (int j = 0; j < arr.Length; j++)
-                                    arr[j] = b_values[j].Value;
-                                value = arr;
-                            }
-                            else if (b_values.Length == 1)
-                                value = b_values[0].Value;
-                        }
-                        else
-                            b_values = new BacnetValue[0];
-
-                        // Modif FC
-                        switch ((BacnetPropertyIds)p_value.property.propertyIdentifier)
-                        {
-                            // PROP_RELINQUISH_DEFAULT can be write to null value
-                            case BacnetPropertyIds.PROP_PRESENT_VALUE:
-                                // change to the related nullable type
-                                Type t = null;
-                                try
-                                {
-                                    t = value.GetType();
-                                    t = Type.GetType("System.Nullable`1[" + value.GetType().FullName + "]");
-                                }
-                                catch { }
-                                bag.Add(new Utilities.CustomProperty(GetNiceName((BacnetPropertyIds)p_value.property.propertyIdentifier), value, t != null ? t : typeof(string), false, "", b_values.Length > 0 ? b_values[0].Tag : (BacnetApplicationTags?)null, null, p_value.property));
-                                break;
-
-                            default:
-                                bag.Add(new Utilities.CustomProperty(GetNiceName((BacnetPropertyIds)p_value.property.propertyIdentifier), value, value != null ? value.GetType() : typeof(string), false, "", b_values.Length > 0 ? b_values[0].Tag : (BacnetApplicationTags?)null, null, p_value.property));
-                                break;
-                        }
-
-                        // The Prop Name replace the PropId into the Treenode 
-                        if (p_value.property.propertyIdentifier == (byte)BacnetPropertyIds.PROP_OBJECT_NAME)
-                        {
-                            
-                            ChangeTreeNodePropertyName(selected_node, value.ToString());// Update the object name if needed
-
-                            lock (DevicesObjectsName)
-                            {
-                                Tuple<String, BacnetObjectId> t = new Tuple<String, BacnetObjectId>(adr.FullHashString(), object_id);
-                                if (DevicesObjectsName.ContainsKey(t))
-                                {
-                                    if (!DevicesObjectsName[t].Equals(value.ToString()))
-                                    {
-                                        DevicesObjectsName.Remove(t);
-                                        DevicesObjectsName.Add(t, value.ToString());
-                                        objectNamesChangedFlag = true;
-                                    }
-                                }
-                                else
-                                {
-                                    DevicesObjectsName.Add(t, value.ToString());
-                                    objectNamesChangedFlag = true;
-                                }
-                            }
-                        }
-                    }
-                    m_DataGrid.SelectedObject = bag;
-                    _selectedNode = selected_node;
-                }
-            }
-            finally
-            {
-                this.Cursor = Cursors.Default;
-            }
-        }
-
-        private void UpdateGrid(Subscription subscription)
-        {
-            this.Cursor = Cursors.WaitCursor;
-            try
-            {
-                _selectedNode = null;
-                BacnetAddress adr = subscription.adr;
-                BacnetClient comm = subscription.comm;
-
                 m_DataGrid.SelectedObject = null;   //clear
 
-                BacnetObjectId object_id = subscription.object_id;
                 BacnetPropertyReference[] properties = new BacnetPropertyReference[] { new BacnetPropertyReference((uint)BacnetPropertyIds.PROP_ALL, System.IO.BACnet.Serialize.ASN1.BACNET_ARRAY_ALL) };
                 IList<BacnetReadAccessResult> multi_value_list;
                 try
@@ -1930,7 +1785,7 @@ namespace Yabe
                         if (!ReadAllPropertiesBySingle(comm, adr, object_id, out multi_value_list))
                         {
                             MessageBox.Show(this, "Couldn't fetch properties", "Communication Error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                            return;
+                            return ReturnPROP_OBJECT_NAME;
                         }
                     }
                 }
@@ -1944,13 +1799,13 @@ namespace Yabe
                         if (!ReadAllPropertiesBySingle(comm, adr, object_id, out multi_value_list))
                         {
                             MessageBox.Show(this, "Couldn't fetch properties", "Communication Error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                            return;
+                            return ReturnPROP_OBJECT_NAME;
                         }
                     }
                     catch (Exception ex)
                     {
                         MessageBox.Show(this, "Error during read: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                        return;
+                        return ReturnPROP_OBJECT_NAME;
                     }
                 }
 
@@ -1979,17 +1834,16 @@ namespace Yabe
                     else
                         b_values = new BacnetValue[0];
 
-                    // Modif FC
                     switch ((BacnetPropertyIds)p_value.property.propertyIdentifier)
                     {
-                        // PROP_RELINQUISH_DEFAULT can be write to null value
+                        // PROP_PRESENT_VALUE can be write at null value to clear the prioroityarray if exists
                         case BacnetPropertyIds.PROP_PRESENT_VALUE:
                             // change to the related nullable type
-                            Type t = null;
+                            Type t = value.GetType();
                             try
                             {
-                                t = value.GetType();
-                                t = Type.GetType("System.Nullable`1[" + value.GetType().FullName + "]");
+                                if (t != typeof(String)) // a bug on linuxmono where the folling instruction generates a wrong type
+                                    t = Type.GetType("System.Nullable`1[" + value.GetType().FullName + "]");
                             }
                             catch { }
                             bag.Add(new Utilities.CustomProperty(GetNiceName((BacnetPropertyIds)p_value.property.propertyIdentifier), value, t != null ? t : typeof(string), false, "", b_values.Length > 0 ? b_values[0].Tag : (BacnetApplicationTags?)null, null, p_value.property));
@@ -1999,8 +1853,96 @@ namespace Yabe
                             bag.Add(new Utilities.CustomProperty(GetNiceName((BacnetPropertyIds)p_value.property.propertyIdentifier), value, value != null ? value.GetType() : typeof(string), false, "", b_values.Length > 0 ? b_values[0].Tag : (BacnetApplicationTags?)null, null, p_value.property));
                             break;
                     }
+
+                    // The Prop Name replace the PropId into the Treenode 
+                    if (p_value.property.propertyIdentifier == (byte)BacnetPropertyIds.PROP_OBJECT_NAME)
+                    {
+                        ReturnPROP_OBJECT_NAME = value.ToString();
+                    }
                 }
+
                 m_DataGrid.SelectedObject = bag;
+            }
+            catch { }
+
+            return ReturnPROP_OBJECT_NAME;
+        }
+
+
+        private void UpdateGrid(TreeNode selected_node)
+        {
+            this.Cursor = Cursors.WaitCursor;
+            try
+            {
+                _selectedNode = null;
+                //fetch end point
+                if (m_DeviceTree.SelectedNode == null) return;
+                else if (m_DeviceTree.SelectedNode.Tag == null) return;
+                else if (!(m_DeviceTree.SelectedNode.Tag is KeyValuePair<BacnetAddress, uint>)) return;
+                KeyValuePair<BacnetAddress, uint> entry = (KeyValuePair<BacnetAddress, uint>)m_DeviceTree.SelectedNode.Tag;
+                BacnetAddress adr = entry.Key;
+                BacnetClient comm;
+
+                if (m_DeviceTree.SelectedNode.Parent.Tag is BacnetClient)
+                    comm = (BacnetClient)m_DeviceTree.SelectedNode.Parent.Tag;
+                else
+                    comm = (BacnetClient)m_DeviceTree.SelectedNode.Parent.Parent.Tag;  // routed node
+
+                if (selected_node.Tag is BacnetObjectId)
+                {
+                    m_DataGrid.SelectedObject = null;   //clear
+
+                    BacnetObjectId object_id = (BacnetObjectId)selected_node.Tag;
+
+                    String NewObjectName = UpdateGrid(comm, adr, object_id);
+
+                    if (NewObjectName != null)
+                    {
+                        ChangeTreeNodePropertyName(selected_node, NewObjectName);// Update the object name if needed
+                        lock (DevicesObjectsName)
+                        {
+                            Tuple<String, BacnetObjectId> t = new Tuple<String, BacnetObjectId>(adr.FullHashString(), object_id);
+                            if (DevicesObjectsName.ContainsKey(t))
+                            {
+                                if (!DevicesObjectsName[t].Equals(NewObjectName))
+                                {
+                                    DevicesObjectsName.Remove(t);
+                                    DevicesObjectsName.Add(t, NewObjectName);
+                                    objectNamesChangedFlag = true;
+                                }
+                            }
+                            else
+                            {
+                                DevicesObjectsName.Add(t, NewObjectName);
+                                objectNamesChangedFlag = true;
+                            }
+                        }
+                    }
+
+                    _selectedNode = selected_node;
+                }
+            }
+            finally
+            {
+                this.Cursor = Cursors.Default;
+            }
+        }
+
+        private void UpdateGrid(Subscription subscription)
+        {
+            this.Cursor = Cursors.WaitCursor;
+            try
+            {
+                _selectedNode = null;
+                BacnetAddress adr = subscription.adr;
+                BacnetClient comm = subscription.comm;
+
+                m_DataGrid.SelectedObject = null;   //clear
+
+                BacnetObjectId object_id = subscription.object_id;
+
+                UpdateGrid(comm, adr, object_id);
+
                 _selectedNode = subscription;
 
             }

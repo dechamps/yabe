@@ -39,7 +39,7 @@
       <Value Profile="(Default)">38400</Value>
     </Setting>
     <Setting Name="DefaultSourceAddress" Type="System.Decimal" Scope="User">
-      <Value Profile="(Default)">128</Value>
+      <Value Profile="(Default)">-1</Value>
     </Setting>
     <Setting Name="DefaultMaxMaster" Type="System.Decimal" Scope="User">
       <Value Profile="(Default)">127</Value>
