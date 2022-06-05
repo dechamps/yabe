@@ -1131,9 +1131,10 @@ namespace Utilities
                  value is BACnetSetpointReference)
             {
 
-                BACnetSetpointReference spr = (BACnetSetpointReference)value;
+                BACnetObjectPropertyReference opr = ((BACnetSetpointReference)value).setpoint_reference;
 
-                return spr.setpoint_reference;
+                return opr.Object_Identifier +
+                       ":" + opr.Property_Identifier + (opr.Option_Property_Array_Index ? ":" + opr.Array_Index : "");
             }
             return base.ConvertTo(context, culture, value, destinationType);
         }
