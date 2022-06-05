@@ -4003,28 +4003,35 @@ namespace Yabe
                 if ((tn.ToolTipText == "")&&(tn.Tag!=null))
                 {
                     IList<BacnetValue> name;
-                    if (comm.ReadPropertyRequest(adr, (BacnetObjectId)tn.Tag, BacnetPropertyIds.PROP_OBJECT_NAME, out name) == true)
+                    try
                     {
-                        if (AsynchRequestId != this.AsynchRequestId) // Selected device is no more the good one
+                        if (comm.ReadPropertyRequest(adr, (BacnetObjectId)tn.Tag, BacnetPropertyIds.PROP_OBJECT_NAME, out name) == true)
                         {
-                            comm.Retries = _retries;
-                            return;
-                        }
-
-                        this.Invoke((MethodInvoker)delegate
-                        {
-                            if (AsynchRequestId != this.AsynchRequestId) return; // another test in the GUI thread
-
-                            ChangeTreeNodePropertyName(tn, name[0].Value.ToString());
-
-                            lock (DevicesObjectsName)
+                            if (AsynchRequestId != this.AsynchRequestId) // Selected device is no more the good one
                             {
-                                var t=new Tuple<String, BacnetObjectId>(adr.FullHashString(), (BacnetObjectId)tn.Tag);
-                                DevicesObjectsName.Remove(t); // sometimes the same object appears at several place (in Groups for instance).
-                                DevicesObjectsName.Add(t, name[0].Value.ToString());
-                                objectNamesChangedFlag = true;
+                                comm.Retries = _retries;
+                                return;
                             }
-                        });
+
+                            this.Invoke((MethodInvoker)delegate
+                            {
+                                if (AsynchRequestId != this.AsynchRequestId) return; // another test in the GUI thread
+
+                                ChangeTreeNodePropertyName(tn, name[0].Value.ToString());
+
+                                lock (DevicesObjectsName)
+                                {
+                                    var t = new Tuple<String, BacnetObjectId>(adr.FullHashString(), (BacnetObjectId)tn.Tag);
+                                    DevicesObjectsName.Remove(t); // sometimes the same object appears at several place (in Groups for instance).
+                                    DevicesObjectsName.Add(t, name[0].Value.ToString());
+                                    objectNamesChangedFlag = true;
+                                }
+                            });
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        Trace.TraceWarning("Failed to obtain object name for object " + tn.Tag + ": " + ex);
                     }
                 }
 
