@@ -10859,13 +10859,11 @@ namespace System.IO.BACnet.Serialize
             int min = buffer[offset + 1];
             int sec = buffer[offset + 2];
             int hundredths = buffer[offset + 3];
-            if (hour == 0xFF && min == 0xFF && sec == 0xFF && hundredths == 0xFF)
-                btime = new DateTime(1, 1, 1);
-            else
-            {
-                if (hundredths > 100) hundredths = 0;   // sometimes set to 255
-                btime = new DateTime(1, 1, 1, hour, min, sec, hundredths * 10);
-            }
+            if (hour > 24) hour = 0;
+            if (min > 60) min = 0;
+            if (sec > 60) sec = 0;
+            if (hundredths > 99) hundredths = 0;   // sometimes set to 255
+            btime = new DateTime(1, 1, 1, hour, min, sec, hundredths * 10);
             return 4;
         }
 
