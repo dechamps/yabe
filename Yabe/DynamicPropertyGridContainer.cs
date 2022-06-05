@@ -1190,7 +1190,7 @@ namespace Utilities
                 BACnetObjectPropertyReference opr = (BACnetObjectPropertyReference)value;
 
                 return opr.Object_Identifier +
-                       ":" + opr.Property_Identifier+":"+opr.Array_Index;
+                       ":" + opr.Property_Identifier+(opr.Option_Property_Array_Index ? ":"+opr.Array_Index : "");
             }
             return base.ConvertTo(context, culture, value, destinationType);
         }

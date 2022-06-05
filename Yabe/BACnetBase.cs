@@ -5954,6 +5954,10 @@ namespace System.IO.BACnet
             get { return property_identifier; }
             set { property_identifier = value; }
         }
+        public bool Option_Property_Array_Index
+        {
+            get { return option_property_array_index;  }
+        }
 
         public uint Array_Index
         {
