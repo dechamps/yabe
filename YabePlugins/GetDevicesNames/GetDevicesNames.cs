@@ -103,6 +103,7 @@ namespace GetDevicesNames // namespace should have the same name as the dll file
                                 yabeFrm.DevicesObjectsName.Remove(t);
                                 yabeFrm.DevicesObjectsName.Add(t, values[0].ToString());
                             }
+                        }
                     }
                     catch { }
 
