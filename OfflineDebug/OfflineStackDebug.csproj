@@ -35,12 +35,12 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Microsoft.CSharp" />
-    <Reference Include="PacketDotNet">
+    <!-- <Reference Include="PacketDotNet">
       <HintPath>..\Yabe\Resources\EmbeddedDll\PacketDotNet.dll</HintPath>
     </Reference>
     <Reference Include="SharpPcap">
       <HintPath>..\Yabe\Resources\EmbeddedDll\SharpPcap.dll</HintPath>
-    </Reference>
+    </Reference> -->
     <Reference Include="System" />
     <Reference Include="System.Core" />
   </ItemGroup>

@@ -76,7 +76,7 @@ namespace BasicReadWrite
             // Or Bacnet on IPV6, default interface
             // bacnet_client = new BacnetClient(new BacnetIpV6UdpProtocolTransport(0xBAC0));
 
-            // If BacnetTransportSerial.cs is added to this project one can use for instance :
+            // If BACnetTransportSerial.cs is added to this project one can use for instance :
             // Bacnet Mstp on COM4 à 38400 bps, own master id 8
             // m_bacnet_client = new BacnetClient(new BacnetMstpProtocolTransport("COM4", 38400, 8);
 

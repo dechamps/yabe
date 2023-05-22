@@ -17,8 +17,8 @@
     <Compile Include="..\Yabe\BACnetTransport.cs">
       <Link>BACnetTransport.cs</Link>
     </Compile>
-    <Compile Include="..\Yabe\BacnetTransportSerial.cs">
-      <Link>BacnetTransportSerial.cs</Link>
+    <Compile Include="..\Yabe\BACnetTransportSerial.cs">
+      <Link>BACnetTransportSerial.cs</Link>
     </Compile>
   </ItemGroup>
   <ItemGroup>
