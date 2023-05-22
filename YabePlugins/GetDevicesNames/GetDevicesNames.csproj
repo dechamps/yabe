@@ -32,4 +32,7 @@
     </PackageReference>
     <PackageReference Include="Microsoft.Windows.Compatibility" Version="7.0.1" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\Yabe\Yabe.csproj" />
+  </ItemGroup>
 </Project>
