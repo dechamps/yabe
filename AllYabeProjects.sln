@@ -6,6 +6,9 @@ MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Mstp.BacnetCapture", "Mstp.BacnetCapture\Mstp.BacnetCapture.csproj", "{EDBEE09C-1C7C-4110-91EF-7DE206404553}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Yabe", "Yabe\Yabe.csproj", "{EE493B17-8185-406C-881F-1144092F01CB}"
+	ProjectSection(ProjectDependencies) = postProject
+		{66832876-01FC-4B7C-8D92-54195773FABF} = {66832876-01FC-4B7C-8D92-54195773FABF}
+	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DemoServer", "DemoServer\DemoServer.csproj", "{ACF2683C-BDA5-445F-BF9D-196D133D2460}"
 EndProject
