@@ -2744,21 +2744,21 @@ namespace System.IO.BACnet
     public struct BACnetScale : ASN1.IASN1encode
     {
         private object value;
-        private choicetype type;
+        private ChoiceType type;
 
-        public enum choicetype
+        public enum ChoiceType
         {
             REAL = 0,
             INTEGER = 1
         }
 
-        public BACnetScale(choicetype Type, object Value)
+        public BACnetScale(ChoiceType Type, object Value)
         {
             type = Type;
             value = Value;
         }
 
-        public choicetype Type
+        public ChoiceType Type
         {
             get
             {
@@ -2769,13 +2769,13 @@ namespace System.IO.BACnet
 
                 switch(value)
                 {
-                    case choicetype.REAL:
+                    case ChoiceType.REAL:
                         if (this.value == null)
                             this.value = (float)0;
                         if (this.value.GetType() != typeof(float))
                             this.value = (float)Convert.ChangeType(this.value, typeof(float));
                         break;
-                    case choicetype.INTEGER:
+                    case ChoiceType.INTEGER:
                         if (this.value == null)
                             this.value = (int)0;
                         if (this.value.GetType() != typeof(int))
@@ -2793,9 +2793,9 @@ namespace System.IO.BACnet
         {
             get
             {
-                if (type == choicetype.REAL)
+                if (type == ChoiceType.REAL)
                     return (float)value;
-                if (type == choicetype.INTEGER)
+                if (type == ChoiceType.INTEGER)
                     return (int)value;
                 else
                     throw new NotSupportedException();
@@ -2828,7 +2828,7 @@ namespace System.IO.BACnet
                 float v;
                 len += ASN1.decode_real_safe(buffer, offset + len, len_value_type, out v);
                 this.value = v;
-                type = choicetype.REAL;
+                type = ChoiceType.REAL;
 
 
             }
@@ -2838,7 +2838,7 @@ namespace System.IO.BACnet
                 int v;
                 len += ASN1.decode_signed(buffer, offset + len, len_value_type, out v);
                 this.value = v;
-                type = choicetype.INTEGER;
+                type = ChoiceType.INTEGER;
 
             }
             else return len - 1;
@@ -3634,25 +3634,25 @@ namespace System.IO.BACnet
 
     public struct BACnetAccessRule : ASN1.IASN1encode //C. Günther
     {
-        private timerangerspecifier time_range_specifier;
+        private TimeRangerSpecifier time_range_specifier;
         private BacnetDeviceObjectPropertyReference time_range;
-        private locationspecifier location_specifier;
+        private LocationSpecifier location_specifier;
         private BacnetDeviceObjectReference location;
         private bool enable;
 
-        public enum timerangerspecifier
+        public enum TimeRangerSpecifier
         {
             specified =0,
             always = 1
         }
 
-        public enum locationspecifier
+        public enum LocationSpecifier
         {
             specified =0,
             all =1
         }
 
-        public timerangerspecifier Time_Range_Specifier
+        public TimeRangerSpecifier Time_Range_Specifier
         {
             get { return time_range_specifier; }
             set { time_range_specifier = value; }
@@ -3664,7 +3664,7 @@ namespace System.IO.BACnet
             set { time_range = value; }
         }
 
-        public locationspecifier Location_Specifier
+        public LocationSpecifier Location_Specifier
         {
             get { return location_specifier; }
             set { location_specifier = value; }
@@ -3685,14 +3685,14 @@ namespace System.IO.BACnet
         public void ASN1encode(EncodeBuffer buffer)
         {
             ASN1.encode_context_enumerated(buffer, 0, Convert.ToUInt32(time_range_specifier));
-            if(time_range_specifier == timerangerspecifier.specified)
+            if(time_range_specifier == TimeRangerSpecifier.specified)
             {
                 ASN1.encode_opening_tag(buffer, 1);
                 ASN1.bacapp_encode_device_obj_property_ref(buffer, time_range);
                 ASN1.encode_closing_tag(buffer, 1);
             }
             ASN1.encode_context_enumerated(buffer, 2, Convert.ToUInt32(location_specifier));
-            if (time_range_specifier == timerangerspecifier.specified)
+            if (time_range_specifier == TimeRangerSpecifier.specified)
             {
                 ASN1.encode_opening_tag(buffer, 3);
                 location.ASN1encode(buffer);
@@ -3712,7 +3712,7 @@ namespace System.IO.BACnet
             {
                 uint u_val;
                 len += ASN1.decode_enumerated(buffer, offset + len, len_value_type, out u_val);
-                time_range_specifier = (timerangerspecifier)u_val;
+                time_range_specifier = (TimeRangerSpecifier)u_val;
 
             }
             else return len - 1;
@@ -3734,7 +3734,7 @@ namespace System.IO.BACnet
             {
                 uint u_val;
                 len += ASN1.decode_enumerated(buffer, offset + len, len_value_type, out u_val);
-                location_specifier = (locationspecifier)u_val;
+                location_specifier = (LocationSpecifier)u_val;
             }
             else return len - 1;
             if (location_specifier == 0) //specified (1 = all)
@@ -5012,7 +5012,7 @@ namespace System.IO.BACnet
         private DateTime timestamp;
         private uint present_value;
         private uint accumulated_value;
-        private status accumulator_status;
+        private MyBacnetStatus accumulator_status;
 
         public DateTime Timestamp
         {
@@ -5032,13 +5032,13 @@ namespace System.IO.BACnet
             set { accumulated_value = value; }
         }
 
-        public status Accumulator_Status
+        public MyBacnetStatus Accumulator_Status
         {
             get { return accumulator_status; }
             set { accumulator_status = value; }
         }
 
-        public enum status
+        public enum MyBacnetStatus
         {
             NORMAL = 0,
             STARTING = 1,
@@ -5047,7 +5047,7 @@ namespace System.IO.BACnet
             FAILED = 4
         }
 
-        public BACnetAccumulatorRecord(DateTime Timestamp, uint Present_Value, uint Accumulated_Value, status Accumulator_Status)
+        public BACnetAccumulatorRecord(DateTime Timestamp, uint Present_Value, uint Accumulated_Value, MyBacnetStatus Accumulator_Status)
         {
             timestamp = Timestamp;
             present_value = Present_Value;
@@ -5104,7 +5104,7 @@ namespace System.IO.BACnet
             {
                 uint u_val;
                 len += ASN1.decode_enumerated(buffer, offset + len, len_value_type, out u_val);
-                accumulator_status = (status)u_val;
+                accumulator_status = (MyBacnetStatus)u_val;
 
             }
             else
@@ -5570,7 +5570,7 @@ namespace System.IO.BACnet
             return ret;
         }
 
-        public struct value
+        public struct MyBacnetValue
         {
             public BacnetPropertyIds property_identifier;
             public uint property_array_index;
@@ -5588,12 +5588,12 @@ namespace System.IO.BACnet
         public struct cov_notification
         {
             public BacnetObjectId monitored_object_identifier;
-            public List<value> list_of_values;
+            public List<MyBacnetValue> list_of_values;
 
             public override string ToString()
             {
                 string ret = "monitored object :" + monitored_object_identifier.type;
-                foreach (value v in list_of_values)
+                foreach (MyBacnetValue v in list_of_values)
                 {
                     ret = ret + v.ToString();
                 }
@@ -5617,7 +5617,7 @@ namespace System.IO.BACnet
 
                 ASN1.encode_context_object_id(buffer, 0, cn.monitored_object_identifier.type, (uint)cn.monitored_object_identifier.instance);
                 ASN1.encode_opening_tag(buffer, 1);
-                foreach (value v in cn.list_of_values)
+                foreach (MyBacnetValue v in cn.list_of_values)
                 {
 
                     ASN1.encode_context_enumerated(buffer, 0, (uint)v.property_identifier);
@@ -5684,11 +5684,11 @@ namespace System.IO.BACnet
                     if (ASN1.decode_is_opening_tag_number(buffer, offset + len, 1))
                     {
                         len++;
-                        List<value> vl = new List<value>();
+                        List<MyBacnetValue> vl = new List<MyBacnetValue>();
 
                         while (!ASN1.decode_is_closing_tag_number(buffer, offset + len, 1))
                         {
-                            value v = new value();
+                            MyBacnetValue v = new MyBacnetValue();
 
                             len += ASN1.decode_tag_number_and_value(buffer, offset + len, out tag, out len_value_type);
                             if (tag == 0)
@@ -6242,7 +6242,7 @@ namespace System.IO.BACnet
 
         public struct ChangeOfValue
         {
-            public enum covtype
+            public enum CovType
             {
                 bitmask = 0,
                 referenced_property_increment = 1
@@ -6251,7 +6251,7 @@ namespace System.IO.BACnet
 
             public uint time_delay;
 
-            public covtype type;
+            public CovType type;
 
             public object covcriteria;
 
@@ -6702,7 +6702,7 @@ namespace System.IO.BACnet
 
                     if (tag == 1)
                     {
-                        cov.type = ChangeOfValue.covtype.referenced_property_increment;
+                        cov.type = ChangeOfValue.CovType.referenced_property_increment;
                         len += ASN1.decode_real(buffer, offset + len, out v);
                         cov.covcriteria = v;
 
@@ -6710,7 +6710,7 @@ namespace System.IO.BACnet
 
                     if (tag == 0)
                     {
-                        cov.type = ChangeOfValue.covtype.bitmask;
+                        cov.type = ChangeOfValue.CovType.bitmask;
                         BacnetBitString bst;
                         len += ASN1.decode_bitstring(buffer, offset + len, len_value_type, out bst);
                         cov.covcriteria = bst;

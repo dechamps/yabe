@@ -32,12 +32,13 @@ using System.IO;
 using System.Xml;
 using System.Threading;
 using System.ServiceProcess;
-using System.Configuration.Install;
+//using System.Configuration.Install;
 using Microsoft.Win32;
 using BaCSharp;
 using AnotherStorageImplementation;
 using System.IO.BACnet;
 using System.Globalization;
+using System.Runtime.InteropServices;
 
 namespace Weather2_to_Bacnet
 {
@@ -55,13 +56,26 @@ namespace Weather2_to_Bacnet
         CharacterString Windsdir, WeatherDescr;
         BacnetDateTime SunSet, SunRise, Updatetime, NextUpdatetime;
 
-        // An alternative is to embbed data into code, or to use another way (configuration file, ...)
-        string BacnetDeviceId = (string)Registry.GetValue(@"HKEY_LOCAL_MACHINE\SOFTWARE\Weather2_to_Bacnet", "BacnetDeviceId", null);
-        string AppId = (string)Registry.GetValue(@"HKEY_LOCAL_MACHINE\SOFTWARE\Weather2_to_Bacnet", "AppId", null);
-        string UserAccessKey = (string)Registry.GetValue(@"HKEY_LOCAL_MACHINE\SOFTWARE\Weather2_to_Bacnet", "UserAccessKey", null);
-        string Latitude = (string)Registry.GetValue(@"HKEY_LOCAL_MACHINE\SOFTWARE\Weather2_to_Bacnet", "Latitude", null);
-        string Longitude = (string)Registry.GetValue(@"HKEY_LOCAL_MACHINE\SOFTWARE\Weather2_to_Bacnet", "Longitude", null);
-        string Lang = (string)Registry.GetValue(@"HKEY_LOCAL_MACHINE\SOFTWARE\Weather2_to_Bacnet", "Lang", null);
+        string BacnetDeviceId;
+        string AppId;
+        string UserAccessKey;
+        string Latitude;
+        string Longitude;
+        string Lang;
+
+        public MyService()
+        {
+            // An alternative is to embbed data into code, or to use another way (configuration file, ...)
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                BacnetDeviceId = (string)Registry.GetValue(@"HKEY_LOCAL_MACHINE\SOFTWARE\Weather2_to_Bacnet", "BacnetDeviceId", null);
+                AppId = (string)Registry.GetValue(@"HKEY_LOCAL_MACHINE\SOFTWARE\Weather2_to_Bacnet", "AppId", null);
+                UserAccessKey = (string)Registry.GetValue(@"HKEY_LOCAL_MACHINE\SOFTWARE\Weather2_to_Bacnet", "UserAccessKey", null);
+                Latitude = (string)Registry.GetValue(@"HKEY_LOCAL_MACHINE\SOFTWARE\Weather2_to_Bacnet", "Latitude", null);
+                Longitude = (string)Registry.GetValue(@"HKEY_LOCAL_MACHINE\SOFTWARE\Weather2_to_Bacnet", "Longitude", null);
+                Lang = (string)Registry.GetValue(@"HKEY_LOCAL_MACHINE\SOFTWARE\Weather2_to_Bacnet", "Lang", null);
+            }
+        }
 
         public bool RunAsConsoleApp()
         {
@@ -81,7 +95,7 @@ namespace Weather2_to_Bacnet
 
                 string Url = "http://api.weatherunlocked.com/api/current/" + Lat + "," + Long + "?app_id=" + AppId + "&app_key=" + UserAccessKey+"&lang="+Lg+"";
 
-                HttpWebRequest req = (HttpWebRequest)HttpWebRequest.Create(Url);
+                HttpWebRequest req = (HttpWebRequest)WebRequest.Create(Url);
                 req.Accept = "text/xml";
                 WebResponse resp = req.GetResponse();
                 
@@ -329,6 +343,7 @@ namespace Weather2_to_Bacnet
         }
 
         Thread m_thread;
+
         protected override void OnStart(string[] args)
         {
             m_thread = new Thread(WorkingLoop);
@@ -373,24 +388,24 @@ namespace Weather2_to_Bacnet
         }
     }
 
-    [System.ComponentModel.RunInstaller(true)]
-    public class MyServiceInstaller : System.Configuration.Install.Installer
-    {
-        public MyServiceInstaller()
-        {
-            ServiceProcessInstaller process = new ServiceProcessInstaller();
+    //[System.ComponentModel.RunInstaller(true)]
+    //public class MyServiceInstaller : Installer
+    //{
+    //    public MyServiceInstaller()
+    //    {
+    //        ServiceProcessInstaller process = new System.Configuration.Install.ServiceProcessInstaller();
 
-            process.Account = ServiceAccount.LocalSystem;
+    //        process.Account = ServiceAccount.LocalSystem;
 
-            ServiceInstaller serviceAdmin = new ServiceInstaller();
+    //        ServiceInstaller serviceAdmin = new ServiceInstaller();
 
-            serviceAdmin.StartType = ServiceStartMode.Automatic;
-            serviceAdmin.ServiceName = "WeatherBacnet";
-            serviceAdmin.DisplayName = "Weather2 to Bacnet";
-            serviceAdmin.Description = "Bridge myWeather2 to Bacnet";
+    //        serviceAdmin.StartType = ServiceStartMode.Automatic;
+    //        serviceAdmin.ServiceName = "WeatherBacnet";
+    //        serviceAdmin.DisplayName = "Weather2 to Bacnet";
+    //        serviceAdmin.Description = "Bridge myWeather2 to Bacnet";
 
-            Installers.Add(process);
-            Installers.Add(serviceAdmin);
-        }
-    }
+    //        Installers.Add(process);
+    //        Installers.Add(serviceAdmin);
+    //    }
+    //}
 }

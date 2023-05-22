@@ -1023,15 +1023,15 @@ namespace Utilities
                 try
                 {
                     
-                    BACnetScale.choicetype ct;
+                    BACnetScale.ChoiceType ct;
                     string[] s = (value as String).Split(':');
                     Enum.TryParse(s[0], out ct);
                     
                     switch (ct)
                     {
-                        case BACnetScale.choicetype.REAL:
+                        case BACnetScale.ChoiceType.REAL:
                             return new BACnetScale(ct, Convert.ToSingle(s[1]));
-                        case BACnetScale.choicetype.INTEGER:
+                        case BACnetScale.ChoiceType.INTEGER:
                             return new BACnetScale(ct, Convert.ToInt32(s[1]));
                         default:
                             throw new NotSupportedException();

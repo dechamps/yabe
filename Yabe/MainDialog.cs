@@ -567,7 +567,11 @@ namespace Yabe
                             // Try to open the current (if exist) object Id<-> object name mapping file
                             Stream stream = File.Open(fileTotal, FileMode.Open);
                             BinaryFormatter bf = new System.Runtime.Serialization.Formatters.Binary.BinaryFormatter();
+
+#pragma warning disable SYSLIB0011
                             var d = (Dictionary<Tuple<String, BacnetObjectId>, String>)bf.Deserialize(stream);
+#pragma warning restore SYSLIB0011
+
                             stream.Close();
 
                             if (d != null)
@@ -4051,7 +4055,11 @@ namespace Yabe
             {
                 Stream stream = File.Open(filename, FileMode.Open);
                 BinaryFormatter bf = new BinaryFormatter();
+
+#pragma warning disable SYSLIB0011
                 var d = (Dictionary<Tuple<String, BacnetObjectId>, String>)bf.Deserialize(stream);
+#pragma warning restore SYSLIB0011
+
                 stream.Close();
 
                 if (d != null)
@@ -4081,7 +4089,11 @@ namespace Yabe
             {
                 Stream stream = File.Open(filename, FileMode.Create);
                 BinaryFormatter bf = new BinaryFormatter();
+
+#pragma warning disable SYSLIB0011
                 bf.Serialize(stream, DevicesObjectsName);
+#pragma warning restore SYSLIB0011
+
                 stream.Close();
                 Trace.TraceInformation("Saved object names to \"" + filename + "\".");
             }
@@ -4507,7 +4519,11 @@ namespace Yabe
                 {
                     Stream stream = File.Open(fileTotal, FileMode.Create);
                     BinaryFormatter bf = new BinaryFormatter();
+
+#pragma warning disable SYSLIB0011
                     bf.Serialize(stream, DevicesObjectsName);
+#pragma warning restore SYSLIB0011
+
                     stream.Close();
                     objectNamesChangedFlag = false;
                     _saveFaultCount = 0;
