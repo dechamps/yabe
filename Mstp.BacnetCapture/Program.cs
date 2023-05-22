@@ -45,6 +45,7 @@ namespace Mstp.BacnetCapture
 
             //Thread.CurrentThread.CurrentCulture = new System.Globalization.CultureInfo("en-US");
             Application.EnableVisualStyles();
+            Application.SetHighDpiMode(HighDpiMode.SystemAware);
             Application.SetCompatibleTextRenderingDefault(false);
             Application.Run(new BacnetCapture());
         }

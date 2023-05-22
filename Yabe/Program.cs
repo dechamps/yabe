@@ -71,6 +71,7 @@ namespace Yabe
         static void Run()
         {
             Application.EnableVisualStyles();
+            Application.SetHighDpiMode(HighDpiMode.SystemAware);
             Application.SetCompatibleTextRenderingDefault(false);
             Application.Run(new YabeMainDialog());
         }

@@ -35,6 +35,7 @@
             // 
             // treeView1
             // 
+            this.treeView1.Font = new System.Drawing.Font("Segoe UI", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
             this.treeView1.Location = new System.Drawing.Point(16, 32);
             this.treeView1.Name = "treeView1";
             this.treeView1.Size = new System.Drawing.Size(255, 266);
@@ -43,9 +44,10 @@
             // Devicename
             // 
             this.Devicename.AutoSize = true;
+            this.Devicename.Font = new System.Drawing.Font("Segoe UI", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
             this.Devicename.Location = new System.Drawing.Point(16, 13);
             this.Devicename.Name = "Devicename";
-            this.Devicename.Size = new System.Drawing.Size(35, 13);
+            this.Devicename.Size = new System.Drawing.Size(38, 13);
             this.Devicename.TabIndex = 1;
             this.Devicename.Text = "label1";
             // 
@@ -55,7 +57,7 @@
             this.EmptyList.BackColor = System.Drawing.SystemColors.Window;
             this.EmptyList.Location = new System.Drawing.Point(86, 148);
             this.EmptyList.Name = "EmptyList";
-            this.EmptyList.Size = new System.Drawing.Size(109, 13);
+            this.EmptyList.Size = new System.Drawing.Size(119, 13);
             this.EmptyList.TabIndex = 2;
             this.EmptyList.Text = "All Reliabilities are OK";
             this.EmptyList.Visible = false;
@@ -68,6 +70,7 @@
             this.Controls.Add(this.EmptyList);
             this.Controls.Add(this.Devicename);
             this.Controls.Add(this.treeView1);
+            this.Font = new System.Drawing.Font("Segoe UI", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
             this.MaximizeBox = false;
             this.MinimizeBox = false;
