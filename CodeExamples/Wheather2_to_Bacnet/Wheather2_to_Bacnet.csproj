@@ -10,7 +10,6 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System.Configuration.Install" />
-    <Reference Include="System.ServiceProcess" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="..\..\Yabe\BACnetBase.cs">
